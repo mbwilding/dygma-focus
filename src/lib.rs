@@ -56,7 +56,7 @@ impl Focus {
             .flow_control(serialport::FlowControl::None)
             .parity(serialport::Parity::None)
             .stop_bits(serialport::StopBits::One)
-            .timeout(Duration::from_millis(10));
+            .timeout(Duration::from_secs(5));
 
         let port = port_settings.open().map_err(|e| {
             let err_msg = format!("Failed to open serial port: {} ({:?})", &port, e);
