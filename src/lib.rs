@@ -1,5 +1,4 @@
 mod devices;
-mod layer;
 
 use crate::devices::Device;
 use anyhow::{anyhow, Result};
@@ -83,5 +82,9 @@ impl Focus {
         } else {
             Err(anyhow!("Serial port is not open"))
         }
+    }
+
+    pub fn layer_move_to(&mut self, layer: u8) -> Result<()> {
+        self.command(&format!("layer.moveTo {}", layer))
     }
 }
