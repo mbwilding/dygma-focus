@@ -1,4 +1,5 @@
 mod devices;
+mod layer;
 
 use crate::devices::Device;
 use anyhow::{anyhow, Result};
@@ -41,16 +42,16 @@ impl Focus {
         Ok(found_devices)
     }
 
-    pub fn open_single(&mut self) -> Result<()> {
-        self.open_specific(self.find()?.first().ok_or_else(|| {
+    pub fn open_first(&mut self) -> Result<()> {
+        self.open_via_device(self.find()?.first().ok_or_else(|| {
             let err_msg = "No supported devices found";
             error!("{}", err_msg);
             anyhow!(err_msg)
         })?)
     }
 
-    pub fn open_specific(&mut self, device: &Device) -> Result<()> {
-        let port_settings = serialport::new(&device.port, 115_200)
+    pub fn open_via_port(&mut self, port: &str) -> Result<()> {
+        let port_settings = serialport::new(port, 115_200)
             .data_bits(serialport::DataBits::Eight)
             .flow_control(serialport::FlowControl::None)
             .parity(serialport::Parity::None)
@@ -58,7 +59,7 @@ impl Focus {
             .timeout(Duration::from_millis(10));
 
         let port = port_settings.open().map_err(|e| {
-            let err_msg = format!("Failed to open serial port: {} ({:?})", &device.port, e);
+            let err_msg = format!("Failed to open serial port: {} ({:?})", &port, e);
             error!("{}", err_msg);
             anyhow!(err_msg)
         })?;
@@ -66,6 +67,10 @@ impl Focus {
         self.port = Some(port);
 
         Ok(())
+    }
+
+    pub fn open_via_device(&mut self, device: &Device) -> Result<()> {
+        self.open_via_port(&device.port)
     }
 
     pub fn command(&mut self, command: &str) -> Result<()> {
