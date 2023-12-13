@@ -73,9 +73,9 @@ impl Focus {
         self.open_via_port(&device.port)
     }
 
-    pub fn command_no_response(&mut self, command: &str) -> Result<()> {
+    pub fn command(&mut self, command: &str) -> Result<()> {
         if let Some(ref mut port) = self.port {
-            port.write_all(command.as_bytes())?;
+            port.write_all(format!("{}\n", command).as_bytes())?;
 
             Ok(())
         } else {
@@ -83,35 +83,15 @@ impl Focus {
         }
     }
 
-    pub fn command_response(&mut self, command: &str) -> Result<String> {
-        if let Some(ref mut port) = self.port {
-            let mut buffer: Vec<u8> = vec![0; 1000];
-
-            match port.read(buffer.as_mut_slice()) {
-                Ok(_) => {
-                    port.write_all(command.as_bytes())?;
-                }
-                Err(ref e) if e.kind() == std::io::ErrorKind::TimedOut => (),
-                Err(e) => error!("{:?}", e),
-            }
-
-            let response = String::from_utf8_lossy(&buffer);
-
-            Ok(response.trim_end().to_string())
-        } else {
-            Err(anyhow!("Serial port is not open"))
-        }
-    }
-
-    pub fn version(&mut self) -> Result<String> {
-        self.command_response("version")
-    }
+    //pub fn version(&mut self) -> Result<String> {
+    //    self.command_response("version")
+    //}
 
     pub fn layer_move_to(&mut self, layer: u8) -> Result<()> {
-        self.command_no_response(&format!("layer.moveTo {}", layer))
+        self.command(&format!("layer.moveTo {}", layer))
     }
 
-    pub fn layer_is_active(&mut self) -> Result<String> {
-        self.command_response("layer.isActive")
-    }
+    //pub fn layer_is_active(&mut self) -> Result<String> {
+    //    self.command_response("layer.isActive")
+    //}
 }
