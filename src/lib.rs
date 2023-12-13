@@ -97,7 +97,7 @@ impl Focus {
 
             let response = String::from_utf8(buffer)?;
 
-            Ok(response)
+            Ok(response.trim_end().to_string())
         } else {
             Err(anyhow!("Serial port is not open"))
         }
