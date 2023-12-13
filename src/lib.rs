@@ -75,7 +75,7 @@ impl Focus {
 
     pub fn command_no_response(&mut self, command: &str) -> Result<()> {
         if let Some(ref mut port) = self.port {
-            port.write_all(format!("{}\n", command).as_bytes())?;
+            port.write_all(command.as_bytes())?;
 
             Ok(())
         } else {
@@ -89,7 +89,7 @@ impl Focus {
 
             match port.read(buffer.as_mut_slice()) {
                 Ok(_) => {
-                    port.write_all(format!("{}\n", command).as_bytes())?;
+                    port.write_all(command.as_bytes())?;
                 }
                 Err(ref e) if e.kind() == std::io::ErrorKind::TimedOut => (),
                 Err(e) => error!("{:?}", e),
@@ -109,5 +109,9 @@ impl Focus {
 
     pub fn layer_move_to(&mut self, layer: u8) -> Result<()> {
         self.command_no_response(&format!("layer.moveTo {}", layer))
+    }
+
+    pub fn layer_is_active(&mut self) -> Result<String> {
+        self.command_response("layer.isActive")
     }
 }
