@@ -18,7 +18,7 @@ impl Default for Focus {
 }
 
 impl Focus {
-    fn find(&self) -> Result<Vec<Device>> {
+    pub fn find(&self) -> Result<Vec<Device>> {
         let ports = serialport::available_ports()?;
         debug!("Available serial ports: {:?}", ports);
 
