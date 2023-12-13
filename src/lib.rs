@@ -4,6 +4,7 @@ use crate::devices::Device;
 use anyhow::{anyhow, Result};
 use devices::DEVICES;
 use serialport::{SerialPort, SerialPortType};
+use std::io::Read;
 use std::time::Duration;
 use tracing::{debug, error};
 
@@ -72,11 +73,17 @@ impl Focus {
         self.open_via_port(&device.port)
     }
 
-    pub fn command(&mut self, command: &str) -> Result<()> {
+    fn write_to_port(command: &str, port: &mut Box<dyn SerialPort>) -> Result<()> {
+        port.write_all(command.as_bytes())?;
+        port.write_all(b"\n")?;
+        port.flush()?;
+
+        Ok(())
+    }
+
+    pub fn command_no_response(&mut self, command: &str) -> Result<()> {
         if let Some(ref mut port) = self.port {
-            port.write_all(command.as_bytes())?;
-            port.write_all(b"\n")?;
-            port.flush()?;
+            Self::write_to_port(command, port)?;
 
             Ok(())
         } else {
@@ -84,7 +91,26 @@ impl Focus {
         }
     }
 
+    pub fn command_response(&mut self, command: &str) -> Result<String> {
+        if let Some(ref mut port) = self.port {
+            Self::write_to_port(command, port)?;
+
+            let mut response = String::new();
+            let bytes_read = port.read_to_string(&mut response)?;
+
+            debug!("Read {} bytes: {}", bytes_read, response);
+
+            Ok(response)
+        } else {
+            Err(anyhow!("Serial port is not open"))
+        }
+    }
+
+    pub fn version(&mut self) -> Result<String> {
+        self.command_response("version")
+    }
+
     pub fn layer_move_to(&mut self, layer: u8) -> Result<()> {
-        self.command(&format!("layer.moveTo {}", layer))
+        self.command_no_response(&format!("layer.moveTo {}", layer))
     }
 }
