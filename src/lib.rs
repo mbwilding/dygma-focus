@@ -95,7 +95,7 @@ impl Focus {
                 Err(e) => error!("{:?}", e),
             }
 
-            let response = String::from_utf8(buffer)?;
+            let response = String::from_utf8_lossy(&buffer);
 
             Ok(response.trim_end().to_string())
         } else {
