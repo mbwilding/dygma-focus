@@ -11,6 +11,12 @@ pub struct Focus {
     port: Option<Box<dyn SerialPort>>,
 }
 
+impl Default for Focus {
+    fn default() -> Self {
+        Focus { port: None }
+    }
+}
+
 impl Focus {
     fn find(&self) -> Result<Vec<Device>> {
         let ports = serialport::available_ports()?;
