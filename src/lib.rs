@@ -73,17 +73,9 @@ impl Focus {
         self.open_via_port(&device.port)
     }
 
-    fn write_to_port(command: &str, port: &mut Box<dyn SerialPort>) -> Result<()> {
-        port.write_all(command.as_bytes())?;
-        port.write_all(b"\n")?;
-        port.flush()?;
-
-        Ok(())
-    }
-
     pub fn command_no_response(&mut self, command: &str) -> Result<()> {
         if let Some(ref mut port) = self.port {
-            Self::write_to_port(command, port)?;
+            port.write_all(format!("{}\n", command).as_bytes())?;
 
             Ok(())
         } else {
@@ -93,12 +85,17 @@ impl Focus {
 
     pub fn command_response(&mut self, command: &str) -> Result<String> {
         if let Some(ref mut port) = self.port {
-            Self::write_to_port(command, port)?;
+            let mut buffer: Vec<u8> = vec![0; 1000];
 
-            let mut response = String::new();
-            let bytes_read = port.read_to_string(&mut response)?;
+            match port.read(buffer.as_mut_slice()) {
+                Ok(_) => {
+                    port.write_all(format!("{}\n", command).as_bytes())?;
+                }
+                Err(ref e) if e.kind() == std::io::ErrorKind::TimedOut => (),
+                Err(e) => error!("{:?}", e),
+            }
 
-            debug!("Read {} bytes: {}", bytes_read, response);
+            let response = String::from_utf8(buffer)?;
 
             Ok(response)
         } else {
