@@ -22,7 +22,7 @@ pub const DEVICES: [SupportedDevice; 4] = [
     SupportedDevice::new("Raise ISO", 0x1209, 0x2201),
 ];
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Device {
     pub name: &'static str,
     pub port: String,

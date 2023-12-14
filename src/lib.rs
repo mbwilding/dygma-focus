@@ -1,26 +1,28 @@
 mod devices;
 
 use crate::devices::Device;
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, bail, Result};
 use devices::DEVICES;
 use serialport::{SerialPort, SerialPortType};
-use std::io::Read;
 use std::time::Duration;
 use tracing::{debug, error};
 
+#[derive(Default)]
 pub struct Focus {
     port: Option<Box<dyn SerialPort>>,
 }
 
-impl Default for Focus {
-    fn default() -> Self {
-        Focus { port: None }
-    }
-}
-
 impl Focus {
-    pub fn find(&self) -> Result<Vec<Device>> {
-        let ports = serialport::available_ports()?;
+    pub fn find_all(&self) -> Result<Vec<Device>> {
+        let ports = match serialport::available_ports() {
+            Ok(ports) => ports,
+            Err(e) => {
+                let err_msg = format!("Failed to enumerate serial ports: {:?}", e);
+                error!("{}", err_msg);
+                bail!(err_msg)
+            }
+        };
+
         debug!("Available serial ports: {:?}", ports);
 
         let found_devices: Vec<Device> = ports
@@ -42,8 +44,27 @@ impl Focus {
         Ok(found_devices)
     }
 
+    pub fn find_first(&self) -> Result<Device> {
+        let devices = match self.find_all() {
+            Ok(devices) => devices,
+            Err(e) => {
+                let err_msg = format!("No device found: {:?}", e);
+                error!("{}", err_msg);
+                bail!(err_msg)
+            }
+        };
+
+        let test = devices.first().ok_or_else(|| {
+            let err_msg = "No supported devices found";
+            error!("{}", err_msg);
+            anyhow!(err_msg)
+        })?;
+
+        Ok(test.clone())
+    }
+
     pub fn open_first(&mut self) -> Result<()> {
-        self.open_via_device(self.find()?.first().ok_or_else(|| {
+        self.open_via_device(self.find_all()?.first().ok_or_else(|| {
             let err_msg = "No supported devices found";
             error!("{}", err_msg);
             anyhow!(err_msg)
