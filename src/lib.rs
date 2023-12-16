@@ -54,13 +54,13 @@ impl Focus {
             }
         };
 
-        let test = devices.first().ok_or_else(|| {
+        let device = devices.first().ok_or_else(|| {
             let err_msg = "No supported devices found";
             error!("{}", err_msg);
             anyhow!(err_msg)
         })?;
 
-        Ok(test.clone())
+        Ok(device.clone())
     }
 
     pub fn open_first(&mut self) -> Result<()> {
