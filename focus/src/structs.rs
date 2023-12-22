@@ -1,4 +1,4 @@
-use anyhow::Error;
+use anyhow::{Result, Error, bail};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
@@ -12,7 +12,7 @@ pub struct Color {
 impl FromStr for Color {
     type Err = Error;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         let parts: Vec<u8> = s
             .split_whitespace()
             .map(|part| part.parse::<u8>())
@@ -24,7 +24,7 @@ impl FromStr for Color {
                 b: parts[2],
             })
         } else {
-            Err(Error::msg("Invalid color format"))
+            bail!("Invalid color format");
         }
     }
 }

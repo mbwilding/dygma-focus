@@ -1,0 +1,10 @@
+[package]
+name = "dygma_focus_test"
+version = "0.1.0"
+edition = "2021"
+authors = ["Matthew Wilding <mbwilding@gmail.com>"]
+
+[dependencies]
+anyhow = "1.0"
+dygma_focus = { path = "../focus" }
+tracing-subscriber = "0.3"

@@ -1,7 +1,9 @@
 pub mod devices;
+pub mod enums;
 pub mod structs;
 
 use crate::devices::Device;
+use crate::enums::LedMode;
 use crate::structs::Color;
 use anyhow::{anyhow, bail, Result};
 use devices::DEVICES;
@@ -128,7 +130,6 @@ impl Focus {
                         buffer.truncate(prev_len + size);
 
                         if buffer.ends_with(eof_marker) {
-                            buffer.truncate(buffer.len() - eof_marker.len());
                             break;
                         }
                     }
@@ -137,14 +138,23 @@ impl Focus {
                 }
             }
 
+            while let Some(pos) = buffer
+                .windows(eof_marker.len())
+                .position(|window| window == eof_marker)
+            {
+                buffer.drain(pos..pos + eof_marker.len());
+            }
+
             let start = buffer
                 .iter()
                 .position(|&b| !b.is_ascii_whitespace())
                 .unwrap_or(0);
+
             let end = buffer
                 .iter()
                 .rposition(|&b| !b.is_ascii_whitespace())
                 .map_or(0, |p| p + 1);
+
             let trimmed_buffer = &buffer[start..end];
 
             let response = String::from_utf8(trimmed_buffer.to_vec())
@@ -333,6 +343,17 @@ impl Focus {
     /// Sets the color of all the LEDs.
     pub fn led_all_set(&mut self, color: Color) -> Result<()> {
         self.command(&format!("led.setAll {} {} {}", color.r, color.g, color.b,))
+    }
+
+    pub fn led_mode_get(&mut self) -> Result<LedMode> {
+        let response = self.command_response_string("led.mode")?;
+        response
+            .parse()
+            .map_err(|e| anyhow!("Failed to parse response: {:?}", e))
+    }
+
+    pub fn led_mode_set(&mut self, mode: LedMode) -> Result<()> {
+        self.command(&format!("led.mode {}", mode.value()))
     }
 
     /// Gets all of the available commands.
