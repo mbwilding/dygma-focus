@@ -1,5 +1,4 @@
 use anyhow::Result;
-use dygma_focus::enums::*;
 use tracing_subscriber::filter::LevelFilter;
 
 fn main() -> Result<()> {
@@ -62,8 +61,18 @@ fn main() -> Result<()> {
 
     // println!("{:#?}", &focus.layer_state()?);
 
-    focus.led_mode_set(LedMode::Standard)?;
-    println!("{:?}", &focus.led_mode_get()?);
+    // focus.led_mode_set(LedMode::PerLayer)?;
+    // println!("{:?}", &focus.led_mode_get()?);
+
+    // println!("{:?}", &focus.led_brightness_get()?); // 153
+    // focus.led_brightness_set(153)?;
+
+    // println!("{:?}", &focus.led_brightness_underglow_get()?); // 255
+    // focus.led_brightness_underglow_set(153)?;
+
+    // println!("{}", &focus.led_theme_get()?);
+
+    // println!("{}", &focus.palette_get()?);
 
     Ok(())
 }

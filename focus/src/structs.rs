@@ -1,4 +1,4 @@
-use anyhow::{Result, Error, bail};
+use anyhow::{bail, Error, Result};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 

@@ -3,10 +3,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, StrEnum)]
 pub enum LedMode {
-    Standard,
-    Rainbow,
-    Cycle,
-    HeatMap,
+    PerLayer,
+    RainbowWave,
+    RainbowSingle,
+    Stalker,
     Red,
     Green,
     Blue,

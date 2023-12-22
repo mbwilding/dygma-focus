@@ -345,6 +345,7 @@ impl Focus {
         self.command(&format!("led.setAll {} {} {}", color.r, color.g, color.b,))
     }
 
+    /// Gets the LED mode.
     pub fn led_mode_get(&mut self) -> Result<LedMode> {
         let response = self.command_response_string("led.mode")?;
         response
@@ -352,8 +353,55 @@ impl Focus {
             .map_err(|e| anyhow!("Failed to parse response: {:?}", e))
     }
 
+    /// Sets the LED mode.
     pub fn led_mode_set(&mut self, mode: LedMode) -> Result<()> {
         self.command(&format!("led.mode {}", mode.value()))
+    }
+
+    /// Gets the LED brightness.
+    pub fn led_brightness_get(&mut self) -> Result<u8> {
+        let response = self.command_response_string("led.brightness")?;
+        response
+            .parse()
+            .map_err(|e| anyhow!("Failed to parse response: {:?}", e))
+    }
+
+    /// Sets the LED brightness.
+    pub fn led_brightness_set(&mut self, brightness: u8) -> Result<()> {
+        self.command(&format!("led.brightness {}", brightness))
+    }
+
+    /// Gets the underglow LED brightness.
+    pub fn led_brightness_underglow_get(&mut self) -> Result<u8> {
+        let response = self.command_response_string("led.brightnessUG")?;
+        response
+            .parse()
+            .map_err(|e| anyhow!("Failed to parse response: {:?}", e))
+    }
+
+    /// Sets the underglow LED brightness.
+    pub fn led_brightness_underglow_set(&mut self, brightness: u8) -> Result<()> {
+        self.command(&format!("led.brightnessUG {}", brightness))
+    }
+
+    /// Gets the LED theme.
+    pub fn led_theme_get(&mut self) -> Result<String> {
+        self.command_response_string("led.theme")
+    }
+
+    /// Sets the LED theme.
+    pub fn led_theme_set(&mut self, data: &str) -> Result<()> {
+        self.command(&format!("led.theme {}", data))
+    }
+
+    /// Gets the palette. The color palette is used by the color map to establish each color that can be assigned to the keyboard.
+    pub fn palette_get(&mut self) -> Result<String> {
+        self.command_response_string("palette")
+    }
+
+    /// Sets the palette. The color palette is used by the color map to establish each color that can be assigned to the keyboard.
+    pub fn palette_set(&mut self, data: &str) -> Result<()> {
+        self.command(&format!("palette {}", data))
     }
 
     /// Gets all of the available commands.
