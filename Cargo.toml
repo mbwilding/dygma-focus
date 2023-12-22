@@ -1,3 +1,15 @@
+[package]
+name = "dygma_focus_api"
+version = "0.1.0"
+authors = ["Matthew Wilding <mbwilding@gmail.com>"]
+description = "Dygma Focus API, for use with Dygma keyboards"
+edition = "2021"
+license-file = "LICENSE"
+
+[lib]
+name = "dygma_focus"
+path = "dygma_focus/src/lib.rs"
+
 [workspace]
 resolver = "2"
 members = [

@@ -3,7 +3,6 @@ name = "dygma_focus"
 version = "0.1.0"
 edition = "2021"
 description = "Dygma Focus API, for use with Dygma keyboards"
-license = "MIT"
 license-file = "LICENSE"
 authors = ["Matthew Wilding <mbwilding@gmail.com>"]
 
