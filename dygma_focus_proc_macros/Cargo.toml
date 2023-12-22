@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Matthew Wilding <mbwilding@gmail.com>"]
 description = "Dygma Focus proc macros"
 edition = "2021"
-license-file = "LICENSE"
+license-file = "../LICENSE"
 
 [lib]
 proc-macro = true
