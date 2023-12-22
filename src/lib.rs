@@ -9,7 +9,7 @@ use serialport::{SerialPort, SerialPortType};
 use std::collections::HashMap;
 use std::io::{Read, Write};
 use std::time::Duration;
-use tracing::{debug, error};
+use tracing::{debug, error, trace};
 
 #[derive(Default)]
 pub struct Focus {
@@ -101,7 +101,8 @@ impl Focus {
     }
 
     fn command(&mut self, command: &str) -> Result<()> {
-        println!("Command: {}", command);
+        trace!("Command TX: {}", command);
+
         if let Some(ref mut port) = self.port {
             port.write_all(format!("{}\n", command).as_bytes())?;
 
@@ -146,8 +147,12 @@ impl Focus {
                 .map_or(0, |p| p + 1);
             let trimmed_buffer = &buffer[start..end];
 
-            String::from_utf8(trimmed_buffer.to_vec())
-                .map_err(|e| anyhow!("Failed to convert response to UTF-8 string: {:?}", e))
+            let response = String::from_utf8(trimmed_buffer.to_vec())
+                .map_err(|e| anyhow!("Failed to convert response to UTF-8 string: {:?}", e))?;
+
+            trace!("Command RX: {}", response);
+
+            Ok(response)
         } else {
             Err(anyhow!("Serial port is not open"))
         }
