@@ -4,7 +4,7 @@ pub mod prelude;
 pub mod structs;
 
 use crate::devices::Device;
-use crate::enums::LedMode;
+use crate::enums::{LedMode, WirelessPowerMode};
 use crate::structs::Color;
 use anyhow::{anyhow, bail, Result};
 use devices::DEVICES;
@@ -533,13 +533,75 @@ impl Focus {
         self.command_response_vec_string("help")
     }
 
-    // TODO mouse.speed
-    // TODO mouse.speedDelay
-    // TODO mouse.accelSpeed
-    // TODO mouse.accelDelay
-    // TODO mouse.wheelSpeed
-    // TODO mouse.wheelDelay
-    // TODO mouse.speedLimit
+    /// Gets the virtual mouse speed.
+    pub fn mouse_speed_get(&mut self) -> Result<i8> {
+        self.command_response_value("mouse.speed")
+    }
+
+    /// Sets the virtual mouse speed.
+    pub fn mouse_speed_set(&mut self, speed: i8) -> Result<()> {
+        self.command(&format!("mouse.speed {}", speed))
+    }
+
+    /// Gets the virtual mouse delay.
+    pub fn mouse_delay_get(&mut self) -> Result<i8> {
+        self.command_response_value("mouse.speedDelay")
+    }
+
+    /// Sets the virtual mouse delay.
+    pub fn mouse_delay_set(&mut self, delay: i8) -> Result<()> {
+        self.command(&format!("mouse.speedDelay {}", delay))
+    }
+
+    /// Gets the virtual mouse acceleration speed.
+    pub fn mouse_acceleration_speed_get(&mut self) -> Result<u8> {
+        self.command_response_value("mouse.accelSpeed")
+    }
+
+    /// Sets the virtual mouse acceleration speed.
+    pub fn mouse_acceleration_speed_set(&mut self, speed: u8) -> Result<()> {
+        self.command(&format!("mouse.accelSpeed {}", speed))
+    }
+
+    /// Gets the virtual mouse acceleration delay.
+    pub fn mouse_acceleration_delay_get(&mut self) -> Result<i8> {
+        self.command_response_value("mouse.accelDelay")
+    }
+
+    /// Sets the virtual mouse acceleration delay.
+    pub fn mouse_acceleration_delay_set(&mut self, delay: i8) -> Result<()> {
+        self.command(&format!("mouse.accelDelay {}", delay))
+    }
+
+    /// Gets the virtual mouse wheel speed.
+    pub fn mouse_wheel_speed_get(&mut self) -> Result<i8> {
+        self.command_response_value("mouse.wheelSpeed")
+    }
+
+    /// Sets the virtual mouse wheel speed.
+    pub fn mouse_wheel_speed_set(&mut self, speed: i8) -> Result<()> {
+        self.command(&format!("mouse.wheelSpeed {}", speed))
+    }
+
+    /// Gets the virtual mouse wheel delay.
+    pub fn mouse_wheel_delay_get(&mut self) -> Result<i8> {
+        self.command_response_value("mouse.wheelDelay")
+    }
+
+    /// Sets the virtual mouse wheel delay.
+    pub fn mouse_wheel_delay_set(&mut self, delay: i8) -> Result<()> {
+        self.command(&format!("mouse.wheelDelay {}", delay))
+    }
+
+    /// Gets the virtual mouse speed limit.
+    pub fn mouse_speed_limit_get(&mut self) -> Result<u8> {
+        self.command_response_value("mouse.speedLimit")
+    }
+
+    /// Sets the virtual mouse speed limit.
+    pub fn mouse_speed_limit_set(&mut self, limit: u8) -> Result<()> {
+        self.command(&format!("mouse.speedLimit {}", limit))
+    }
 
     /// Activate a certain layer remotely just by sending its order number. The layer number will start by 0 to address the first one and will end with 9 if we suppose a 10 layer list to address the last one. This does not affect the memory usage as the value is stored in RAM. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#layeractivate
     pub fn layer_activate(&mut self, layer: u8) -> Result<()> {
@@ -600,14 +662,17 @@ impl Focus {
         self.command(&format!("wireless.battery.savingMode {}", state as u8))
     }
 
-    /// Gets the RF power level. Undocumented.
-    pub fn wireless_rf_power_get(&mut self) -> Result<u8> {
+    /// Gets the RF power level.
+    pub fn wireless_rf_power_get(&mut self) -> Result<WirelessPowerMode> {
         self.command_response_value("wireless.rf.power")
     }
 
-    /// Sets the RF power level. Undocumented.
-    pub fn wireless_rf_power_set(&mut self, power: u8) -> Result<()> {
-        self.command(&format!("wireless.rf.power {}", power))
+    /// Sets the RF power level.
+    pub fn wireless_rf_power_set(&mut self, wireless_power_mode: WirelessPowerMode) -> Result<()> {
+        self.command(&format!(
+            "wireless.rf.power {}",
+            wireless_power_mode.value()
+        ))
     }
 
     /// Gets the RF channel hop state. Undocumented.

@@ -15,3 +15,10 @@ pub enum LedMode {
     GreenInner,
     Bluetooth,
 }
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, StrEnum)]
+pub enum WirelessPowerMode {
+    Low,
+    Medium,
+    High,
+}

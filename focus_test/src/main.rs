@@ -42,12 +42,35 @@ fn main() -> Result<()> {
         &focus.wireless_battery_saving_mode_get()?
     );
 
-    println!("Wireless RF Power: {}", &focus.wireless_rf_power_get()?);
+    println!("Wireless RF Power: {:?}", &focus.wireless_rf_power_get()?);
 
     println!(
         "Wireless RF Channel Hop: {}",
         &focus.wireless_rf_channel_hop_get()?
     );
+
+    println!("Mouse Speed: {}", focus.mouse_speed_get()?);
+
+    println!("Mouse Delay: {}", focus.mouse_delay_get()?);
+
+    println!(
+        "Mouse Acceleration Speed: {}",
+        focus.mouse_acceleration_speed_get()?
+    );
+
+    println!(
+        "Mouse Acceleration Delay: {}",
+        focus.mouse_acceleration_delay_get()?
+    );
+
+    println!("Mouse Wheel Speed: {}", focus.mouse_wheel_speed_get()?);
+
+    println!(
+        "Mouse Wheel Speed Delay: {}",
+        focus.mouse_wheel_delay_get()?
+    );
+
+    println!("Mouse Speed Limit: {}", focus.mouse_speed_limit_get()?);
 
     Ok(())
 }
