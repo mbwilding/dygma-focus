@@ -1,8 +1,10 @@
 [package]
 name = "dygma_focus_proc_macros"
 version = "0.1.0"
-edition = "2021"
 authors = ["Matthew Wilding <mbwilding@gmail.com>"]
+description = "Dygma Focus proc macros"
+edition = "2021"
+license-file = "LICENSE"
 
 [lib]
 proc-macro = true
