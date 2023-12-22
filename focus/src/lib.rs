@@ -562,7 +562,7 @@ impl Focus {
     }
 
     /// Gets the state of the layers, array index is -1 to what you see in Bazecor.
-    pub fn layer_state(&mut self) -> Result<Vec<bool>> {
+    pub fn layer_state_get(&mut self) -> Result<Vec<bool>> {
         let response = self.command_response_string("layer.state")?;
         let parts = response.split_whitespace().collect::<Vec<&str>>();
         let nums = parts.iter().map(|&part| part == "1").collect();
