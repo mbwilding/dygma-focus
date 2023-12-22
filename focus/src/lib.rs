@@ -180,6 +180,11 @@ impl Focus {
             .map_err(|e| anyhow!("Failed to parse response: {:?}", e))
     }
 
+    fn command_response_bool(&mut self, command: &str) -> Result<bool> {
+        let response = self.command_response_string(command)?;
+        Ok(response == "1")
+    }
+
     fn command_response_vec_string(&mut self, command: &str) -> Result<Vec<String>> {
         Ok(self
             .command_response_string(command)?
@@ -215,17 +220,12 @@ impl Focus {
 
     /// Returns true or false depending on the user setting of hiding the default layers or not, it does not allow you to increment the number of available layers by start using the default ones, they are there so you can store a backup for two layers in your keyboard. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#keymaponlycustom
     pub fn keymap_only_custom_get(&mut self) -> Result<bool> {
-        self.command_response_string("keymap.onlyCustom")
-            .map(|response| response == "1")
+        self.command_response_bool("keymap.onlyCustom")
     }
 
     /// Sets the user setting of hiding the default layers or not, it does not allow you to increment the number of available layers by start using the default ones, they are there so you can store a backup for two layers in your keyboard. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#keymaponlycustom
     pub fn keymap_only_custom_set(&mut self, state: bool) -> Result<()> {
-        let value = match state {
-            true => 1,
-            false => 0,
-        };
-        self.command(&format!("keymap.onlyCustom {}", value))
+        self.command(&format!("keymap.onlyCustom {}", state as u8))
     }
 
     /// Returns the default layer the keyboard will boot with. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#settingsdefaultlayer
@@ -570,11 +570,32 @@ impl Focus {
         Ok(nums)
     }
 
-    // TODO wireless.battery.left.level
-    // TODO wireless.battery.right.level
-    // TODO wireless.battery.left.status
-    // TODO wireless.battery.right.status
-    // TODO wireless.battery.savingMode
+    /// Gets the battery level of the left keyboard.
+    pub fn wireless_battery_level_left_get(&mut self) -> Result<u8> {
+        self.command_response_value("wireless.battery.left.level")
+    }
+
+    /// Gets the battery level of the right keyboard.
+    pub fn wireless_battery_level_right_get(&mut self) -> Result<u8> {
+        self.command_response_value("wireless.battery.right.level")
+    }
+
+    pub fn wireless_battery_status_left_get(&mut self) -> Result<u8> {
+        self.command_response_value("wireless.battery.left.status")
+    }
+
+    pub fn wireless_battery_status_right_get(&mut self) -> Result<u8> {
+        self.command_response_value("wireless.battery.right.status")
+    }
+
+    pub fn wireless_battery_saving_mode_get(&mut self) -> Result<bool> {
+        self.command_response_bool("wireless.battery.savingMode")
+    }
+
+    pub fn wireless_battery_saving_mode_set(&mut self, state: bool) -> Result<()> {
+        self.command(&format!("wireless.battery.savingMode {}", state as u8))
+    }
+
     // TODO wireless.rf.power
     // TODO wireless.rf.channelHop
     // TODO wireless.rf.syncPairing

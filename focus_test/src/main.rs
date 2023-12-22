@@ -17,5 +17,30 @@ fn main() -> Result<()> {
 
     focus.led_mode_set(LedMode::PerLayer)?;
 
+    println!(
+        "Battery Level Left: {}",
+        &focus.wireless_battery_level_left_get()?
+    );
+
+    println!(
+        "Battery Level Right: {}",
+        &focus.wireless_battery_level_right_get()?
+    );
+
+    println!(
+        "Battery Left Status: {}",
+        &focus.wireless_battery_status_left_get()?
+    );
+
+    println!(
+        "Battery Right Status: {}",
+        &focus.wireless_battery_status_right_get()?
+    );
+
+    println!(
+        "Battery Saving Mode: {}",
+        &focus.wireless_battery_saving_mode_get()?
+    );
+
     Ok(())
 }
