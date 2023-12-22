@@ -1,2 +1,1 @@
-# dygma-focus-api-rs
-Dygma Focus API in Rust
+# Dygma Focus API (Rust)

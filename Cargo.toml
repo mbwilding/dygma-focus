@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-    "focus",
-    "custom_macros",
-    "focus_test",
+    "dygma_focus",
+    "dygma_focus_proc_macros",
+    "dygma_focus_test",
 ]
