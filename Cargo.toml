@@ -6,5 +6,6 @@ authors = ["Matthew Wilding <mbwilding@gmail.com>"]
 
 [dependencies]
 anyhow = "1.0"
+serde = { version = "1.0", default-features = false, features = ["derive"] }
 serialport = "4.3"
 tracing = "0.1"
