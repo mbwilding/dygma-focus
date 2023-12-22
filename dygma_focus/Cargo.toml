@@ -6,7 +6,7 @@ authors = ["Matthew Wilding <mbwilding@gmail.com>"]
 
 [dependencies]
 anyhow = "1.0"
-dygma_focus_proc_macros = { path = "../dygma_focus_proc_macros" }
+dygma_focus_proc_macros = { version = "0.1.0", path = "../dygma_focus_proc_macros" }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 serialport = "4.3"
 tracing = "0.1"
