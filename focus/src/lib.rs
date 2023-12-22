@@ -5,9 +5,7 @@ pub mod enums;
 pub mod prelude;
 pub mod structs;
 
-use crate::devices::Device;
-use crate::enums::{LedMode, WirelessPowerMode};
-use crate::structs::Color;
+use crate::prelude::*;
 use anyhow::{anyhow, bail, Result};
 use devices::DEVICES;
 use serialport::{SerialPort, SerialPortType};

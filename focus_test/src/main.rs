@@ -1,5 +1,4 @@
 use anyhow::Result;
-use dygma_focus::prelude::*;
 use tracing_subscriber::filter::LevelFilter;
 
 fn main() -> Result<()> {
