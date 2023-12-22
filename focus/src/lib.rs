@@ -476,8 +476,28 @@ impl Focus {
         self.command(&format!("colormap.map {}", data))
     }
 
-    // TODO idleleds.true_sleep
-    // TODO idleleds.true_sleep_time
+    /// Gets the idle LED true sleep state.
+    pub fn led_idle_true_sleep_get(&mut self) -> Result<bool> {
+        self.command_response_bool("idleleds.true_sleep")
+    }
+
+    /// Sets the idle LED true sleep state.
+    pub fn led_idle_true_sleep_set(&mut self, state: bool) -> Result<()> {
+        self.command(&format!("idleleds.true_sleep {}", state as u8))
+    }
+
+    /// Gets the idle LED true sleep time in seconds.
+    pub fn led_idle_true_sleep_time_get(&mut self) -> Result<u16> {
+        self.command_response_value("idleleds.true_sleep_time")
+    }
+
+    /// Sets the idle LED true sleep time in seconds.
+    pub fn led_idle_true_sleep_time_set(&mut self, seconds: u16) -> Result<()> {
+        if seconds > 65_000 {
+            bail!("Seconds must be 65000 or below: {}", seconds);
+        }
+        self.command(&format!("idleleds.true_sleep_time {}", seconds))
+    }
 
     /// Gets the idle LED time limit in seconds. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstime_limit
     pub fn led_idle_time_limit_get(&mut self) -> Result<u16> {
@@ -526,7 +546,10 @@ impl Focus {
         self.command(&format!("macros.trigger {}", macro_id))
     }
 
-    // TODO macros.memory
+    /// Gets the macros memory size in bytes.
+    pub fn macros_memory_get(&mut self) -> Result<u16> {
+        self.command_response_value("macros.memory")
+    }
 
     /// Gets all the available commands in the current version of the serial protocol. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#help
     pub fn help_get(&mut self) -> Result<Vec<String>> {
@@ -623,7 +646,7 @@ impl Focus {
         self.command(&format!("layer.moveTo {}", layer))
     }
 
-    /// Gets the state of the layers, array index is -1 to what you see in Bazecor.
+    /// Gets the status for up to 32 layers. It will return a Vec of bools with the state of each layer with the respective index. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#layerstate
     pub fn layer_state_get(&mut self) -> Result<Vec<bool>> {
         let response = self.command_response_string("layer.state")?;
         let parts = response.split_whitespace().collect::<Vec<&str>>();

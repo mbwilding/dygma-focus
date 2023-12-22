@@ -12,10 +12,9 @@ fn main() -> Result<()> {
     let mut focus = dygma_focus::Focus::default();
     focus.device_open_first()?;
 
-    // println!("{:#?}", &focus.help_get()?);
-    // println!("{:#?}", &focus.led_mode_get()?);
+    println!("{:#?}", &focus.help_get()?);
 
-    focus.led_mode_set(LedMode::PerLayer)?;
+    println!("{:#?}", &focus.led_mode_get()?);
 
     println!(
         "Battery Level Left: {}",
@@ -71,6 +70,15 @@ fn main() -> Result<()> {
     );
 
     println!("Mouse Speed Limit: {}", focus.mouse_speed_limit_get()?);
+
+    println!("Macros Memory: {}", focus.macros_memory_get()?);
+
+    println!("Idle LED True Sleep: {}", focus.led_idle_true_sleep_get()?);
+
+    println!(
+        "Idle LED True Sleep Time: {}",
+        focus.led_idle_true_sleep_time_get()?
+    );
 
     Ok(())
 }
