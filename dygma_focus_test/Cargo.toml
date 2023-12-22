@@ -6,5 +6,5 @@ authors = ["Matthew Wilding <mbwilding@gmail.com>"]
 
 [dependencies]
 anyhow = "1.0"
-dygma_focus = { path = "../dygma_focus" }
+dygma_focus = { version = "0.1.0", path = "../dygma_focus" }
 tracing-subscriber = "0.3"
