@@ -1,5 +1,6 @@
 pub mod devices;
 pub mod enums;
+pub mod prelude;
 pub mod structs;
 
 use crate::devices::Device;
@@ -19,7 +20,7 @@ pub struct Focus {
 }
 
 impl Focus {
-    pub fn find_all(&self) -> Result<Vec<Device>> {
+    pub fn device_find_all(&self) -> Result<Vec<Device>> {
         let ports = match serialport::available_ports() {
             Ok(ports) => ports,
             Err(e) => {
@@ -50,8 +51,8 @@ impl Focus {
         Ok(found_devices)
     }
 
-    pub fn find_first(&self) -> Result<Device> {
-        let devices = match self.find_all() {
+    pub fn device_find_first(&self) -> Result<Device> {
+        let devices = match self.device_find_all() {
             Ok(devices) => devices,
             Err(e) => {
                 let err_msg = format!("No device found: {:?}", e);
@@ -69,15 +70,15 @@ impl Focus {
         Ok(device.clone())
     }
 
-    pub fn open_first(&mut self) -> Result<()> {
-        self.open_via_device(self.find_all()?.first().ok_or_else(|| {
+    pub fn device_open_first(&mut self) -> Result<()> {
+        self.device_open_via_device(self.device_find_all()?.first().ok_or_else(|| {
             let err_msg = "No supported devices found";
             error!("{}", err_msg);
             anyhow!(err_msg)
         })?)
     }
 
-    pub fn open_via_port(&mut self, port: &str) -> Result<()> {
+    pub fn device_open_via_port(&mut self, port: &str) -> Result<()> {
         let port_settings = serialport::new(port, 115_200)
             .data_bits(serialport::DataBits::Eight)
             .flow_control(serialport::FlowControl::None)
@@ -98,8 +99,8 @@ impl Focus {
         Ok(())
     }
 
-    pub fn open_via_device(&mut self, device: &Device) -> Result<()> {
-        self.open_via_port(&device.port)
+    pub fn device_open_via_device(&mut self, device: &Device) -> Result<()> {
+        self.device_open_via_port(&device.port)
     }
 
     fn command(&mut self, command: &str) -> Result<()> {
@@ -415,9 +416,35 @@ impl Focus {
         self.command(&format!("led.brightnessUG {}", brightness))
     }
 
-    // TODO led.brightness.wireless
-    // TODO led.brightnessUG.wireless
-    // TODO led.fade
+    /// Gets the wireless LED brightness. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightness
+    pub fn led_brightness_wireless_get(&mut self) -> Result<u8> {
+        self.command_response_value("led.brightness.wireless")
+    }
+
+    /// Sets the wireless LED brightness. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightness
+    pub fn led_brightness_wireless_set(&mut self, brightness: u8) -> Result<()> {
+        self.command(&format!("led.brightness.wireless {}", brightness))
+    }
+
+    /// Gets the wireless underglow LED brightness. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
+    pub fn led_brightness_underglow_wireless_get(&mut self) -> Result<u8> {
+        self.command_response_value("led.brightnessUG.wireless")
+    }
+
+    /// Sets the wireless underglow LED brightness. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
+    pub fn led_brightness_underglow_wireless_set(&mut self, brightness: u8) -> Result<()> {
+        self.command(&format!("led.brightnessUG.wireless {}", brightness))
+    }
+
+    /// Gets the LED fade. Undocumented.
+    pub fn led_fade_get(&mut self) -> Result<u16> {
+        self.command_response_value("led.fade")
+    }
+
+    /// Sets the LED fade. Undocumented.
+    pub fn led_fade_set(&mut self, fade: u16) -> Result<()> {
+        self.command(&format!("led.fade {}", fade))
+    }
 
     /// Gets the LED theme. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledtheme
     pub fn led_theme_get(&mut self) -> Result<String> {
@@ -449,25 +476,37 @@ impl Focus {
         self.command(&format!("colormap.map {}", data))
     }
 
-    ////// TODO idleleds
+    // TODO idleleds.true_sleep
+    // TODO idleleds.true_sleep_time
 
-    /// Gets the idle LED time in seconds. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstime_limit
-    pub fn led_idle_get(&mut self) -> Result<u16> {
+    /// Gets the idle LED time limit in seconds. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstime_limit
+    pub fn led_idle_time_limit_get(&mut self) -> Result<u16> {
         self.command_response_value("idleleds.time_limit")
     }
 
-    /// Sets the idle LED time in seconds. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstime_limit
-    pub fn led_idle_set(&mut self, seconds: u16) -> Result<()> {
+    /// Sets the idle LED time limit in seconds. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstime_limit
+    pub fn led_idle_time_limit_set(&mut self, seconds: u16) -> Result<()> {
         if seconds > 65_000 {
             bail!("Seconds must be 65000 or below: {}", seconds);
         }
         self.command(&format!("idleleds.time_limit {}", seconds))
     }
 
+    // TODO idleleds.wireless
+
     /// Gets the keyboard model name. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#hardwareversion
     pub fn hardware_version_get(&mut self) -> Result<String> {
         self.command_response_string("hardware.version")
     }
+
+    // TODO hardware.side_power https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#hardwareside_power
+    // TODO hardware.side_ver https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#hardwareside_ver
+    // TODO hardware.keyscanInterval
+    // TODO hardware.firmware https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#hardwarefirmware
+    // TODO hardware.chip_id
+    // TODO hardware.chip_info
+    // TODO qukeys.holdTimeout
+    // TODO qukeys.overlapThreshold
 
     /// Gets the macros map. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#macrosmap
     pub fn macros_map_get(&mut self) -> Result<String> {
@@ -487,10 +526,20 @@ impl Focus {
         self.command(&format!("macros.trigger {}", macro_id))
     }
 
+    // TODO macros.memory
+
     /// Gets all the available commands in the current version of the serial protocol. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#help
     pub fn help_get(&mut self) -> Result<Vec<String>> {
         self.command_response_vec_string("help")
     }
+
+    // TODO mouse.speed
+    // TODO mouse.speedDelay
+    // TODO mouse.accelSpeed
+    // TODO mouse.accelDelay
+    // TODO mouse.wheelSpeed
+    // TODO mouse.wheelDelay
+    // TODO mouse.speedLimit
 
     /// Activate a certain layer remotely just by sending its order number. The layer number will start by 0 to address the first one and will end with 9 if we suppose a 10 layer list to address the last one. This does not affect the memory usage as the value is stored in RAM. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#layeractivate
     pub fn layer_activate(&mut self, layer: u8) -> Result<()> {
@@ -520,4 +569,13 @@ impl Focus {
 
         Ok(nums)
     }
+
+    // TODO wireless.battery.left.level
+    // TODO wireless.battery.right.level
+    // TODO wireless.battery.left.status
+    // TODO wireless.battery.right.status
+    // TODO wireless.battery.savingMode
+    // TODO wireless.rf.power
+    // TODO wireless.rf.channelHop
+    // TODO wireless.rf.syncPairing
 }

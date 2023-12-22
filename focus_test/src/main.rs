@@ -1,4 +1,5 @@
 use anyhow::Result;
+use dygma_focus::prelude::*;
 use tracing_subscriber::filter::LevelFilter;
 
 fn main() -> Result<()> {
@@ -9,10 +10,12 @@ fn main() -> Result<()> {
         .init();
 
     let mut focus = dygma_focus::Focus::default();
-    focus.open_first()?;
+    focus.device_open_first()?;
 
     // println!("{:#?}", &focus.help_get()?);
     // println!("{:#?}", &focus.led_mode_get()?);
+
+    focus.led_mode_set(LedMode::PerLayer)?;
 
     Ok(())
 }
