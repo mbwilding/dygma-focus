@@ -273,18 +273,18 @@ impl Focus {
         self.command_response_string("eeprom.free")
     }
 
-    // upgrade.start
-    // upgrade.neuron
-    // upgrade.end
-    // upgrade.keyscanner.isConnected,
-    // upgrade.keyscanner.isBootloader,
-    // upgrade.keyscanner.begin,
-    // upgrade.keyscanner.isReady,
-    // upgrade.keyscanner.getInfo,
-    // upgrade.keyscanner.sendWrite,
-    // upgrade.keyscanner.validate,
-    // upgrade.keyscanner.finish,
-    // upgrade.keyscanner.sendStart,
+    // TODO upgrade.start
+    // TODO upgrade.neuron
+    // TODO upgrade.end
+    // TODO upgrade.keyscanner.isConnected
+    // TODO upgrade.keyscanner.isBootloader
+    // TODO upgrade.keyscanner.begin
+    // TODO upgrade.keyscanner.isReady
+    // TODO upgrade.keyscanner.getInfo
+    // TODO upgrade.keyscanner.sendWrite
+    // TODO upgrade.keyscanner.validate
+    // TODO upgrade.keyscanner.finish
+    // TODO upgrade.keyscanner.sendStart
 
     /// Gets the super keys map. This command reads the super keys map, each action in a super key is represented by a key code number that encodes the action, for example if you use the number 44, you are encoding space, etc... to know more about keycodes and to find the right one for your actions, check the key map database. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysmap
     pub fn super_keys_map_get(&mut self) -> Result<String> {
