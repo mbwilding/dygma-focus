@@ -1,4 +1,4 @@
-use custom_macros::*;
+use dygma_focus_proc_macros::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, StrEnum)]
