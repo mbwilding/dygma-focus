@@ -42,5 +42,12 @@ fn main() -> Result<()> {
         &focus.wireless_battery_saving_mode_get()?
     );
 
+    println!("Wireless RF Power: {}", &focus.wireless_rf_power_get()?);
+
+    println!(
+        "Wireless RF Channel Hop: {}",
+        &focus.wireless_rf_channel_hop_get()?
+    );
+
     Ok(())
 }

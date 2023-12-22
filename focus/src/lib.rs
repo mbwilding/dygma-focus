@@ -570,33 +570,58 @@ impl Focus {
         Ok(nums)
     }
 
-    /// Gets the battery level of the left keyboard.
+    /// Gets the battery level of the left keyboard as a percentage.
     pub fn wireless_battery_level_left_get(&mut self) -> Result<u8> {
         self.command_response_value("wireless.battery.left.level")
     }
 
-    /// Gets the battery level of the right keyboard.
+    /// Gets the battery level of the right keyboard as a percentage.
     pub fn wireless_battery_level_right_get(&mut self) -> Result<u8> {
         self.command_response_value("wireless.battery.right.level")
     }
 
+    /// Gets the battery status of the left keyboard. Undocumented.
     pub fn wireless_battery_status_left_get(&mut self) -> Result<u8> {
         self.command_response_value("wireless.battery.left.status")
     }
 
+    /// Gets the battery status of the right keyboard. Undocumented.
     pub fn wireless_battery_status_right_get(&mut self) -> Result<u8> {
         self.command_response_value("wireless.battery.right.status")
     }
 
+    /// Gets the battery saving mode state.
     pub fn wireless_battery_saving_mode_get(&mut self) -> Result<bool> {
         self.command_response_bool("wireless.battery.savingMode")
     }
 
+    /// Sets the battery saving mode state.
     pub fn wireless_battery_saving_mode_set(&mut self, state: bool) -> Result<()> {
         self.command(&format!("wireless.battery.savingMode {}", state as u8))
     }
 
-    // TODO wireless.rf.power
-    // TODO wireless.rf.channelHop
-    // TODO wireless.rf.syncPairing
+    /// Gets the RF power level. Undocumented.
+    pub fn wireless_rf_power_get(&mut self) -> Result<u8> {
+        self.command_response_value("wireless.rf.power")
+    }
+
+    /// Sets the RF power level. Undocumented.
+    pub fn wireless_rf_power_set(&mut self, power: u8) -> Result<()> {
+        self.command(&format!("wireless.rf.power {}", power))
+    }
+
+    /// Gets the RF channel hop state. Undocumented.
+    pub fn wireless_rf_channel_hop_get(&mut self) -> Result<bool> {
+        self.command_response_bool("wireless.rf.channelHop")
+    }
+
+    /// Sets the RF channel hop state. Undocumented.
+    pub fn wireless_rf_channel_hop_set(&mut self, state: bool) -> Result<()> {
+        self.command(&format!("wireless.rf.channelHop {}", state as u8))
+    }
+
+    /// Gets the sync pairing state. Undocumented.
+    pub fn wireless_rf_sync_pairing_get(&mut self) -> Result<bool> {
+        self.command_response_bool("wireless.rf.syncPairing")
+    }
 }
