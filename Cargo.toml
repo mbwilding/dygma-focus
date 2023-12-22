@@ -3,5 +3,4 @@ resolver = "2"
 members = [
     "dygma_focus",
     "dygma_focus_proc_macros",
-    "dygma_focus_test",
 ]

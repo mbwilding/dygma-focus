@@ -2,9 +2,9 @@
 name = "dygma_focus"
 version = "0.1.0"
 edition = "2021"
+authors = ["Matthew Wilding <mbwilding@gmail.com>"]
 description = "Dygma Focus API, for use with Dygma keyboards"
 license-file = "../LICENSE"
-authors = ["Matthew Wilding <mbwilding@gmail.com>"]
 
 [dependencies]
 anyhow = "1.0"
