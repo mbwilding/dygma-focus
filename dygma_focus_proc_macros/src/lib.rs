@@ -10,7 +10,7 @@ pub fn from_str_enum(input: TokenStream) -> TokenStream {
     let name = input.ident;
     let variants = match input.data {
         Data::Enum(DataEnum { variants, .. }) => variants,
-        _ => panic!("#[derive(FromStrEnum)] is only defined for enums"),
+        _ => panic!("#[derive(StrEnum)] is only defined for enums"),
     };
 
     let match_arms = variants.iter().enumerate().map(|(index, variant)| {
