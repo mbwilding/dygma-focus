@@ -15,7 +15,7 @@ use tracing::{debug, error, trace};
 
 #[derive(Default)]
 pub struct Focus {
-    port_mutex: Option<Box<dyn SerialPort>>,
+    port: Option<Box<dyn SerialPort>>,
 }
 
 impl Focus {
@@ -97,7 +97,7 @@ impl Focus {
 
         port.write_data_terminal_ready(true)?;
 
-        self.port_mutex = Some(port);
+        self.port = Some(port);
 
         Ok(())
     }
@@ -111,7 +111,7 @@ impl Focus {
     fn command(&mut self, command: &str) -> Result<()> {
         trace!("Command TX: {}", command);
 
-        if let Some(ref mut port) = self.port_mutex {
+        if let Some(ref mut port) = self.port {
             port.write_all(format!("{}\n", command).as_bytes())?;
 
             Ok(())
@@ -127,7 +127,7 @@ impl Focus {
         let mut buffer = Vec::new();
         let eof_marker = b"\r\n.\r\n";
 
-        if let Some(ref mut port) = self.port_mutex {
+        if let Some(ref mut port) = self.port {
             loop {
                 let prev_len = buffer.len();
                 buffer.resize(prev_len + 1024, 0);
