@@ -4,7 +4,7 @@
 
 ## About
 
-This crate is a Rust mapping of the Dygma Focus API.
+This crate is a Rust implementation of the Dygma Focus API.
 
 Make sure to not have Bazecor running and connected while trying to communicate with your keyboard.
 
@@ -22,18 +22,16 @@ main.rs
 
 ```rust
 use anyhow::Result;
-use dygma_focus::Focus;
+use dygma_focus::prelude::*;
 
 fn main() -> Result<()> {
-    // Declare a mutable variable
-    let mut focus = Focus::new();
-
-    // Open the first device found, other options are under focus.device_*
-    focus.focus_open_first()?;
+    // Open the first device found and declare as mutable
+    // Other constructors are under Focus::new_*
+    let mut focus = Focus::new_first_available()?;
 
     // Call whatever you want here
-    let response = focus.wireless_rf_power_get()?;
-    println!("Wireless RF Power Level: {:?}", &response);
+    let response = focus.wireless_rf_power_level_get()?;
+    println!("Wireless RF Power level: {:?}", &response);
 
     Ok(())
 }
