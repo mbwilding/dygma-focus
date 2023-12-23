@@ -3,37 +3,58 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Data, DataEnum, DeriveInput};
 
-#[proc_macro_derive(StrEnum)]
-pub fn from_str_enum(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(NumStrEnum)]
+pub fn num_str_enum(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
 
     let name = input.ident;
     let variants = match input.data {
         Data::Enum(DataEnum { variants, .. }) => variants,
-        _ => panic!("#[derive(StrEnum)] is only defined for enums"),
+        _ => panic!("#[derive(NumStrEnum)] is only defined for enums"),
     };
 
     let match_arms = variants.iter().enumerate().map(|(index, variant)| {
         let variant_name = &variant.ident;
-        quote! { #index => Ok(#name::#variant_name), }
+        let index_u8 = index as u8;
+        quote! { #index_u8 => Ok(#name::#variant_name), }
     });
 
     let value_arms = variants.iter().enumerate().map(|(index, variant)| {
+        let index_u8 = index as u8;
         let variant_name = &variant.ident;
-        quote! { #name::#variant_name => #index as u8, }
+        quote! { #name::#variant_name => #index_u8, }
     });
 
-    let expanded = quote! {
-        impl std::str::FromStr for #name {
-            type Err = anyhow::Error;
+    let error_name = quote::format_ident!("{}Error", name);
 
-            fn from_str(s: &str) -> anyhow::Result<Self> {
+    let expanded = quote! {
+        #[derive(Debug)]
+        pub enum #error_name {
+            InvalidString(String),
+            InvalidValue(u8),
+        }
+
+        impl std::error::Error for #error_name {}
+
+        impl std::fmt::Display for #error_name {
+            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                match self {
+                    #error_name::InvalidString(value) => write!(f, "Invalid string: {}", value),
+                    #error_name::InvalidValue(value) => write!(f, "Invalid value: {}", value),
+                }
+            }
+        }
+
+        impl std::str::FromStr for #name {
+            type Err = #error_name;
+
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
                 match s.parse::<u8>() {
-                    Ok(num) => match num as usize {
+                    Ok(num) => match num {
                         #(#match_arms)*
-                        _ => Err(anyhow::anyhow!("Invalid value for {}", stringify!(#name))),
+                        _ => Err(#error_name::InvalidValue(num)),
                     },
-                    Err(_) => Err(anyhow::anyhow!("Invalid value for {}", stringify!(#name))),
+                    Err(_) => Err(#error_name::InvalidString(s.to_string())),
                 }
             }
         }

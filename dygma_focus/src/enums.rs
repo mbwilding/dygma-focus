@@ -1,7 +1,7 @@
 use dygma_focus_proc_macros::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, StrEnum)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, NumStrEnum)]
 pub enum LedMode {
     PerLayer,
     RainbowWave,
@@ -16,7 +16,7 @@ pub enum LedMode {
     Bluetooth,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, StrEnum)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, NumStrEnum)]
 pub enum WirelessPowerMode {
     Low,
     Medium,
