@@ -13,9 +13,26 @@ use std::str::FromStr;
 use std::time::Duration;
 use tracing::{debug, error, trace};
 
-#[derive(Default)]
 pub struct Focus {
     port: Option<Box<dyn SerialPort>>,
+    response_buffer: Vec<u8>,
+}
+
+impl Focus {
+    /// Create a new instance of the Focus API.
+    pub fn new() -> Self {
+        Self {
+            port: None,
+            response_buffer: Vec::with_capacity(4096),
+        }
+    }
+}
+
+impl Default for Focus {
+    /// Create a new instance of the Focus API.
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Focus {
@@ -124,19 +141,20 @@ impl Focus {
     fn command_response_string(&mut self, command: &str) -> Result<String> {
         self.command(command)?;
 
-        let mut buffer = Vec::new();
         let eof_marker = b"\r\n.\r\n";
 
         if let Some(ref mut port) = self.port {
+            self.response_buffer.clear();
+
             loop {
-                let prev_len = buffer.len();
-                buffer.resize(prev_len + 1024, 0);
-                match port.read(&mut buffer[prev_len..]) {
+                let prev_len = self.response_buffer.len();
+                self.response_buffer.resize(prev_len + 1024, 0);
+                match port.read(&mut self.response_buffer[prev_len..]) {
                     Ok(0) => continue,
                     Ok(size) => {
-                        buffer.truncate(prev_len + size);
+                        self.response_buffer.truncate(prev_len + size);
 
-                        if buffer.ends_with(eof_marker) {
+                        if self.response_buffer.ends_with(eof_marker) {
                             break;
                         }
                     }
@@ -145,24 +163,27 @@ impl Focus {
                 }
             }
 
-            while let Some(pos) = buffer
+            while let Some(pos) = self
+                .response_buffer
                 .windows(eof_marker.len())
                 .position(|window| window == eof_marker)
             {
-                buffer.drain(pos..pos + eof_marker.len());
+                self.response_buffer.drain(pos..pos + eof_marker.len());
             }
 
-            let start = buffer
+            let start = self
+                .response_buffer
                 .iter()
                 .position(|&b| !b.is_ascii_whitespace())
                 .unwrap_or(0);
 
-            let end = buffer
+            let end = self
+                .response_buffer
                 .iter()
                 .rposition(|&b| !b.is_ascii_whitespace())
                 .map_or(0, |p| p + 1);
 
-            let trimmed_buffer = &buffer[start..end];
+            let trimmed_buffer = &self.response_buffer[start..end];
 
             let response = String::from_utf8(trimmed_buffer.to_vec())
                 .map_err(|e| anyhow!("Failed to convert response to UTF-8 string: {:?}", e))?;

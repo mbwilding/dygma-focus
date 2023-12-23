@@ -26,7 +26,7 @@ use dygma_focus::Focus;
 
 fn main() -> Result<()> {
     // Declare a mutable variable
-    let mut focus = Focus::default();
+    let mut focus = Focus::new();
 
     // Open the first device found, other options are under focus.device_*
     focus.device_open_first()?;
