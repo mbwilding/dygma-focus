@@ -9,15 +9,13 @@ use crate::prelude::*;
 use anyhow::{anyhow, bail, Result};
 use devices::DEVICES;
 use serialport::{SerialPort, SerialPortType};
-use std::io::{Read, Write};
 use std::str::FromStr;
-use std::sync::Mutex;
 use std::time::Duration;
 use tracing::{debug, error, trace};
 
 #[derive(Default)]
 pub struct Focus {
-    port_mutex: Option<Mutex<Box<dyn SerialPort>>>,
+    port_mutex: Option<Box<dyn SerialPort>>,
 }
 
 impl Focus {
@@ -99,7 +97,7 @@ impl Focus {
 
         port.write_data_terminal_ready(true)?;
 
-        self.port_mutex = Some(Mutex::new(port));
+        self.port_mutex = Some(port);
 
         Ok(())
     }
@@ -113,8 +111,7 @@ impl Focus {
     fn command(&mut self, command: &str) -> Result<()> {
         trace!("Command TX: {}", command);
 
-        if let Some(ref port_mutex) = self.port_mutex {
-            let mut port = port_mutex.lock().unwrap();
+        if let Some(ref mut port) = self.port_mutex {
             port.write_all(format!("{}\n", command).as_bytes())?;
 
             Ok(())
@@ -130,8 +127,7 @@ impl Focus {
         let mut buffer = Vec::new();
         let eof_marker = b"\r\n.\r\n";
 
-        if let Some(ref port_mutex) = self.port_mutex {
-            let mut port = port_mutex.lock().unwrap();
+        if let Some(ref mut port) = self.port_mutex {
             loop {
                 let prev_len = buffer.len();
                 buffer.resize(prev_len + 1024, 0);
