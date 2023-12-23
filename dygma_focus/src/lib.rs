@@ -21,6 +21,7 @@ pub struct Focus {
 }
 
 impl Focus {
+    /// Find all supported devices.
     pub fn device_find_all(&self) -> Result<Vec<Device>> {
         let ports = match serialport::available_ports() {
             Ok(ports) => ports,
@@ -52,6 +53,7 @@ impl Focus {
         Ok(found_devices)
     }
 
+    /// Find the first supported device.
     pub fn device_find_first(&self) -> Result<Device> {
         let devices = match self.device_find_all() {
             Ok(devices) => devices,
@@ -71,6 +73,7 @@ impl Focus {
         Ok(device.clone())
     }
 
+    /// Open a connection to the keyboard via the first supported device found.
     pub fn device_open_first(&mut self) -> Result<()> {
         self.device_open_via_device(self.device_find_all()?.first().ok_or_else(|| {
             let err_msg = "No supported devices found";
@@ -79,6 +82,7 @@ impl Focus {
         })?)
     }
 
+    /// Open a connection to the keyboard via port.
     pub fn device_open_via_port(&mut self, port: &str) -> Result<()> {
         let port_settings = serialport::new(port, 115_200)
             .data_bits(serialport::DataBits::Eight)
@@ -100,11 +104,13 @@ impl Focus {
         Ok(())
     }
 
+    /// Open a connection to the keyboard via device.
     pub fn device_open_via_device(&mut self, device: &Device) -> Result<()> {
         self.device_open_via_port(&device.port)
     }
 
-    fn command(&self, command: &str) -> Result<()> {
+    /// Sends a command to the device, with no response.
+    fn command(&mut self, command: &str) -> Result<()> {
         trace!("Command TX: {}", command);
 
         if let Some(ref port_mutex) = self.port_mutex {
@@ -117,6 +123,7 @@ impl Focus {
         }
     }
 
+    /// Sends a command to the device, and returns the response as a string.
     fn command_response_string(&mut self, command: &str) -> Result<String> {
         self.command(command)?;
 
@@ -172,7 +179,8 @@ impl Focus {
         }
     }
 
-    fn command_response_value<T>(&mut self, command: &str) -> Result<T>
+    /// Sends a command to the device, and returns the response as a numerical value.
+    fn command_response_numerical<T>(&mut self, command: &str) -> Result<T>
     where
         T: FromStr,
         <T as FromStr>::Err: std::fmt::Debug,
@@ -183,11 +191,13 @@ impl Focus {
             .map_err(|e| anyhow!("Failed to parse response: {:?}", e))
     }
 
+    /// Sends a command to the device, and returns the response as a boolean value.
     fn command_response_bool(&mut self, command: &str) -> Result<bool> {
         let response = self.command_response_string(command)?;
         Ok(response == "1")
     }
 
+    /// Sends a command to the device, and returns the response as a vector of strings.
     fn command_response_vec_string(&mut self, command: &str) -> Result<Vec<String>> {
         Ok(self
             .command_response_string(command)?
@@ -233,7 +243,7 @@ impl Focus {
 
     /// Returns the default layer the keyboard will boot with. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#settingsdefaultlayer
     pub fn settings_default_layer_get(&mut self) -> Result<i8> {
-        self.command_response_value("settings.defaultLayer")
+        self.command_response_numerical("settings.defaultLayer")
     }
 
     /// Sets the default layer the keyboard will boot with. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#settingsdefaultlayer
@@ -243,7 +253,7 @@ impl Focus {
 
     /// Returns a boolean value that states true if all checks have been performed on the current settings and its upload was done in the intended way. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#settingsvalid
     pub fn settings_valid_get(&mut self) -> Result<bool> {
-        self.command_response_value("settings.valid?")
+        self.command_response_numerical("settings.valid?")
     }
 
     /// Gets the current settings version. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#settingsversion
@@ -304,7 +314,7 @@ impl Focus {
 
     /// Gets the wait for value in milliseconds of the keyboard to alter the behaviour of the super keys. Wait for value specifies the time between the first and subsequent releases of the HOLD actions meanwhile is held, so for example, if the variable is set to 500ms, you can maintain the hold key, it will emmit a key code corresponding to the action that it triggers, then it will wait for wait for time for making another key press with that same key code. This enables the user to delay the hold "machinegun" to be able to release the key and achieve a single keypress from a hold action. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeyswaitfor
     pub fn super_keys_wait_for_get(&mut self) -> Result<u16> {
-        self.command_response_value("superkeys.waitfor")
+        self.command_response_numerical("superkeys.waitfor")
     }
 
     /// Sets the wait for value in milliseconds of the keyboard to alter the behaviour of the super keys. Wait for value specifies the time between the first and subsequent releases of the HOLD actions meanwhile is held, so for example, if the variable is set to 500ms, you can maintain the hold key, it will emmit a key code corresponding to the action that it triggers, then it will wait for wait for time for making another key press with that same key code. This enables the user to delay the hold "machinegun" to be able to release the key and achieve a single keypress from a hold action. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeyswaitfor
@@ -314,7 +324,7 @@ impl Focus {
 
     /// Gets the timeout of how long super keys waits for the next tap. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeystimeout
     pub fn super_keys_timeout_get(&mut self) -> Result<u16> {
-        self.command_response_value("superkeys.timeout")
+        self.command_response_numerical("superkeys.timeout")
     }
 
     /// Sets the timeout of how long super keys waits for the next tap. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeystimeout
@@ -324,7 +334,7 @@ impl Focus {
 
     /// Gets the repeat value of the keyboard to alter the behaviour of the super keys. The repeat value specifies the time between the second and subsequent key code releases when on hold, it only takes effect after the wait for timer has been exceeded. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysrepeat
     pub fn super_keys_repeat_get(&mut self) -> Result<u16> {
-        self.command_response_value("superkeys.repeat")
+        self.command_response_numerical("superkeys.repeat")
     }
 
     /// Sets the repeat value of the keyboard to alter the behaviour of the super keys. The repeat value specifies the time between the second and subsequent key code releases when on hold, it only takes effect after the wait for timer has been exceeded. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysrepeat
@@ -334,7 +344,7 @@ impl Focus {
 
     /// Gets the hold start value of the keyboard to alter the behaviour of the super keys. The hold start value specifies the minimum time that has to pass between the first key down and any other action to trigger a hold, if held it will emit a hold action. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysholdstart
     pub fn super_keys_hold_start_get(&mut self) -> Result<u16> {
-        self.command_response_value("superkeys.holdstart")
+        self.command_response_numerical("superkeys.holdstart")
     }
 
     /// Sets the hold start value of the keyboard to alter the behaviour of the super keys. The hold start value specifies the minimum time that has to pass between the first key down and any other action to trigger a hold, if held it will emit a hold action. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysholdstart
@@ -344,7 +354,7 @@ impl Focus {
 
     /// Gets the overlap percentage of the keyboard to alter the behaviour of the super keys. The overlap value specifies the percentage of overlap when fast typing that is allowed to happen before triggering a hold action to the overlapped key pressed after the super key. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysoverlap
     pub fn super_keys_overlap_get(&mut self) -> Result<u8> {
-        self.command_response_value("superkeys.overlap")
+        self.command_response_numerical("superkeys.overlap")
     }
 
     /// Sets the overlap percentage of the keyboard to alter the behaviour of the super keys. The overlap value specifies the percentage of overlap when fast typing that is allowed to happen before triggering a hold action to the overlapped key pressed after the super key. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysoverlap
@@ -391,7 +401,7 @@ impl Focus {
 
     /// Gets the LED mode. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledmode
     pub fn led_mode_get(&mut self) -> Result<LedMode> {
-        self.command_response_value("led.mode")
+        self.command_response_numerical("led.mode")
     }
 
     /// Sets the LED mode. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledmode
@@ -401,7 +411,7 @@ impl Focus {
 
     /// Gets the LED brightness. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightness
     pub fn led_brightness_get(&mut self) -> Result<u8> {
-        self.command_response_value("led.brightness")
+        self.command_response_numerical("led.brightness")
     }
 
     /// Sets the LED brightness. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightness
@@ -411,7 +421,7 @@ impl Focus {
 
     /// Gets the underglow LED brightness. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
     pub fn led_brightness_underglow_get(&mut self) -> Result<u8> {
-        self.command_response_value("led.brightnessUG")
+        self.command_response_numerical("led.brightnessUG")
     }
 
     /// Sets the underglow LED brightness. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
@@ -421,7 +431,7 @@ impl Focus {
 
     /// Gets the wireless LED brightness. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightness
     pub fn led_brightness_wireless_get(&mut self) -> Result<u8> {
-        self.command_response_value("led.brightness.wireless")
+        self.command_response_numerical("led.brightness.wireless")
     }
 
     /// Sets the wireless LED brightness. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightness
@@ -431,7 +441,7 @@ impl Focus {
 
     /// Gets the wireless underglow LED brightness. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
     pub fn led_brightness_underglow_wireless_get(&mut self) -> Result<u8> {
-        self.command_response_value("led.brightnessUG.wireless")
+        self.command_response_numerical("led.brightnessUG.wireless")
     }
 
     /// Sets the wireless underglow LED brightness. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
@@ -441,7 +451,7 @@ impl Focus {
 
     /// Gets the LED fade. Undocumented.
     pub fn led_fade_get(&mut self) -> Result<u16> {
-        self.command_response_value("led.fade")
+        self.command_response_numerical("led.fade")
     }
 
     /// Sets the LED fade. Undocumented.
@@ -491,7 +501,7 @@ impl Focus {
 
     /// Gets the idle LED true sleep time in seconds.
     pub fn led_idle_true_sleep_time_get(&mut self) -> Result<u16> {
-        self.command_response_value("idleleds.true_sleep_time")
+        self.command_response_numerical("idleleds.true_sleep_time")
     }
 
     /// Sets the idle LED true sleep time in seconds.
@@ -504,7 +514,7 @@ impl Focus {
 
     /// Gets the idle LED time limit in seconds. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstime_limit
     pub fn led_idle_time_limit_get(&mut self) -> Result<u16> {
-        self.command_response_value("idleleds.time_limit")
+        self.command_response_numerical("idleleds.time_limit")
     }
 
     /// Sets the idle LED time limit in seconds. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstime_limit
@@ -551,7 +561,7 @@ impl Focus {
 
     /// Gets the macros memory size in bytes.
     pub fn macros_memory_get(&mut self) -> Result<u16> {
-        self.command_response_value("macros.memory")
+        self.command_response_numerical("macros.memory")
     }
 
     /// Gets all the available commands in the current version of the serial protocol. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#help
@@ -561,7 +571,7 @@ impl Focus {
 
     /// Gets the virtual mouse speed.
     pub fn mouse_speed_get(&mut self) -> Result<i8> {
-        self.command_response_value("mouse.speed")
+        self.command_response_numerical("mouse.speed")
     }
 
     /// Sets the virtual mouse speed.
@@ -571,7 +581,7 @@ impl Focus {
 
     /// Gets the virtual mouse delay.
     pub fn mouse_delay_get(&mut self) -> Result<i8> {
-        self.command_response_value("mouse.speedDelay")
+        self.command_response_numerical("mouse.speedDelay")
     }
 
     /// Sets the virtual mouse delay.
@@ -581,7 +591,7 @@ impl Focus {
 
     /// Gets the virtual mouse acceleration speed.
     pub fn mouse_acceleration_speed_get(&mut self) -> Result<u8> {
-        self.command_response_value("mouse.accelSpeed")
+        self.command_response_numerical("mouse.accelSpeed")
     }
 
     /// Sets the virtual mouse acceleration speed.
@@ -591,7 +601,7 @@ impl Focus {
 
     /// Gets the virtual mouse acceleration delay.
     pub fn mouse_acceleration_delay_get(&mut self) -> Result<i8> {
-        self.command_response_value("mouse.accelDelay")
+        self.command_response_numerical("mouse.accelDelay")
     }
 
     /// Sets the virtual mouse acceleration delay.
@@ -601,7 +611,7 @@ impl Focus {
 
     /// Gets the virtual mouse wheel speed.
     pub fn mouse_wheel_speed_get(&mut self) -> Result<i8> {
-        self.command_response_value("mouse.wheelSpeed")
+        self.command_response_numerical("mouse.wheelSpeed")
     }
 
     /// Sets the virtual mouse wheel speed.
@@ -611,7 +621,7 @@ impl Focus {
 
     /// Gets the virtual mouse wheel delay.
     pub fn mouse_wheel_delay_get(&mut self) -> Result<i8> {
-        self.command_response_value("mouse.wheelDelay")
+        self.command_response_numerical("mouse.wheelDelay")
     }
 
     /// Sets the virtual mouse wheel delay.
@@ -621,7 +631,7 @@ impl Focus {
 
     /// Gets the virtual mouse speed limit.
     pub fn mouse_speed_limit_get(&mut self) -> Result<u8> {
-        self.command_response_value("mouse.speedLimit")
+        self.command_response_numerical("mouse.speedLimit")
     }
 
     /// Sets the virtual mouse speed limit.
@@ -641,7 +651,7 @@ impl Focus {
 
     /// Gets the current layer which is active. The layer number will start by 0 to address the first one and will end with 9 if we suppose a 10 layer list to address the last one. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#layerisactive
     pub fn layer_is_active_get(&mut self) -> Result<u8> {
-        self.command_response_value("layer.isActive")
+        self.command_response_numerical("layer.isActive")
     }
 
     /// Switch to a certain layer remotely just by sending its order number. The layer number will start by 0 to address the first one and will end with 9 if we suppose a 10 layer list to address the last one. The difference between this command and the layer_activate alternative, is that the layer_activate adds to the layer switching history, but moveTo will erase that memory and return it to an array length 1 and holding the current layer the keyboard moved to. This does not affect the memory usage as the value is stored in RAM. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#layermoveto
@@ -660,22 +670,22 @@ impl Focus {
 
     /// Gets the battery level of the left keyboard as a percentage.
     pub fn wireless_battery_level_left_get(&mut self) -> Result<u8> {
-        self.command_response_value("wireless.battery.left.level")
+        self.command_response_numerical("wireless.battery.left.level")
     }
 
     /// Gets the battery level of the right keyboard as a percentage.
     pub fn wireless_battery_level_right_get(&mut self) -> Result<u8> {
-        self.command_response_value("wireless.battery.right.level")
+        self.command_response_numerical("wireless.battery.right.level")
     }
 
     /// Gets the battery status of the left keyboard. Undocumented.
     pub fn wireless_battery_status_left_get(&mut self) -> Result<u8> {
-        self.command_response_value("wireless.battery.left.status")
+        self.command_response_numerical("wireless.battery.left.status")
     }
 
     /// Gets the battery status of the right keyboard. Undocumented.
     pub fn wireless_battery_status_right_get(&mut self) -> Result<u8> {
-        self.command_response_value("wireless.battery.right.status")
+        self.command_response_numerical("wireless.battery.right.status")
     }
 
     /// Gets the battery saving mode state.
@@ -690,7 +700,7 @@ impl Focus {
 
     /// Gets the RF power level.
     pub fn wireless_rf_power_get(&mut self) -> Result<WirelessPowerMode> {
-        self.command_response_value("wireless.rf.power")
+        self.command_response_numerical("wireless.rf.power")
     }
 
     /// Sets the RF power level.
