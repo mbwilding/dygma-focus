@@ -29,7 +29,7 @@ fn main() -> Result<()> {
     let mut focus = Focus::new();
 
     // Open the first device found, other options are under focus.device_*
-    focus.device_open_first()?;
+    focus.focus_open_first()?;
 
     // Call whatever you want here
     let response = focus.wireless_rf_power_get()?;
