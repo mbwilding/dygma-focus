@@ -1,10 +1,11 @@
 [package]
 name = "dygma_focus_proc_macros"
-version = "0.1.2"
+version = "0.2.0"
 edition = "2021"
 authors = ["Matthew Wilding <mbwilding@gmail.com>"]
 description = "Dygma Focus API, proc macros"
 license = "MIT OR Apache-2.0"
+repository = "https://github.com/mbwilding/dygma-focus-api-rs"
 
 [lib]
 proc-macro = true

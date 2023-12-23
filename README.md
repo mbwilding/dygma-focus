@@ -6,7 +6,7 @@
 
 This crate is a Rust mapping of the Dygma Focus API.
 
-Make sure to not have Bazecor connected while trying to communicate with your keyboard.
+Make sure to not have Bazecor running and connected while trying to communicate with your keyboard.
 
 ## Usage
 
