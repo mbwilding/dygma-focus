@@ -13,8 +13,11 @@ use std::str::FromStr;
 use std::time::Duration;
 use tracing::{debug, error, trace};
 
+/// The Dygma Focus API.
 pub struct Focus {
     port: Option<Box<dyn SerialPort>>,
+    baud_rate: u32,
+    timeout: Duration,
     response_buffer: Vec<u8>,
 }
 
@@ -23,8 +26,51 @@ impl Focus {
     pub fn new() -> Self {
         Self {
             port: None,
+            baud_rate: 115_200,
+            timeout: Duration::from_millis(40),
             response_buffer: Vec::with_capacity(4096),
         }
+    }
+
+    /// Get the baud rate for serial port operations.
+    pub fn focus_baud_rate_get(&self) -> u32 {
+        self.baud_rate
+    }
+
+    /// Set the baud rate for serial port operations.
+    pub fn focus_baud_rate_set(&mut self, baud_rate: u32) -> Result<()> {
+        self.baud_rate = baud_rate;
+
+        if let Some(ref mut port) = self.port {
+            port.set_baud_rate(baud_rate).unwrap_or_else(|e| {
+                let err_msg = format!("Failed to set baud rate: {:?}", e);
+                error!("{}", err_msg);
+            });
+        }
+
+        Ok(())
+    }
+
+    /// Get the timeout for serial port operations.
+    pub fn focus_timeout_get(&self) -> Duration {
+        self.timeout
+    }
+
+    /// Set the timeout for serial port operations. Increasing this causes it to wait for the timeout before responding. Decreasing this causes it to respond faster, but may cause errors.
+    pub fn focus_timeout_set(&mut self, timeout: Duration) {
+        self.timeout = timeout;
+
+        if let Some(ref mut port) = self.port {
+            port.set_timeout(timeout).unwrap_or_else(|e| {
+                let err_msg = format!("Failed to set timeout: {:?}", e);
+                error!("{}", err_msg);
+            });
+        }
+    }
+
+    /// Set the serial port.
+    pub fn focus_port_set(&mut self, port: Box<dyn SerialPort>) {
+        self.port = Some(port);
     }
 }
 
@@ -37,7 +83,7 @@ impl Default for Focus {
 
 impl Focus {
     /// Find all supported devices.
-    pub fn device_find_all(&self) -> Result<Vec<Device>> {
+    pub fn focus_find_all(&self) -> Result<Vec<Device>> {
         let ports = match serialport::available_ports() {
             Ok(ports) => ports,
             Err(e) => {
@@ -69,8 +115,8 @@ impl Focus {
     }
 
     /// Find the first supported device.
-    pub fn device_find_first(&self) -> Result<Device> {
-        let devices = match self.device_find_all() {
+    pub fn focus_find_first(&self) -> Result<Device> {
+        let devices = match self.focus_find_all() {
             Ok(devices) => devices,
             Err(e) => {
                 let err_msg = format!("No device found: {:?}", e);
@@ -89,8 +135,8 @@ impl Focus {
     }
 
     /// Open a connection to the keyboard via the first supported device found.
-    pub fn device_open_first(&mut self) -> Result<()> {
-        self.device_open_via_device(self.device_find_all()?.first().ok_or_else(|| {
+    pub fn focus_open_first(&mut self) -> Result<()> {
+        self.focus_open_via_device(self.focus_find_all()?.first().ok_or_else(|| {
             let err_msg = "No supported devices found";
             error!("{}", err_msg);
             anyhow!(err_msg)
@@ -98,13 +144,13 @@ impl Focus {
     }
 
     /// Open a connection to the keyboard via port.
-    pub fn device_open_via_port(&mut self, port: &str) -> Result<()> {
-        let port_settings = serialport::new(port, 115_200)
+    pub fn focus_open_via_port(&mut self, port: &str) -> Result<()> {
+        let port_settings = serialport::new(port, self.baud_rate)
             .data_bits(serialport::DataBits::Eight)
             .flow_control(serialport::FlowControl::None)
             .parity(serialport::Parity::None)
             .stop_bits(serialport::StopBits::One)
-            .timeout(Duration::from_millis(50));
+            .timeout(self.timeout);
 
         let mut port = port_settings.open().map_err(|e| {
             let err_msg = format!("Failed to open serial port: {} ({:?})", &port, e);
@@ -120,8 +166,8 @@ impl Focus {
     }
 
     /// Open a connection to the keyboard via device.
-    pub fn device_open_via_device(&mut self, device: &Device) -> Result<()> {
-        self.device_open_via_port(&device.port)
+    pub fn focus_open_via_device(&mut self, device: &Device) -> Result<()> {
+        self.focus_open_via_port(&device.port)
     }
 
     /// Sends a command to the device, with no response.
@@ -666,6 +712,7 @@ impl Focus {
         self.command("layer.deactivate")
     }
 
+    /// Currently broken in the firmware.
     /// Gets the current layer which is active. The layer number will start by 0 to address the first one and will end with 9 if we suppose a 10 layer list to address the last one. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#layerisactive
     pub fn layer_is_active_get(&mut self) -> Result<u8> {
         self.command_response_numerical("layer.isActive")
