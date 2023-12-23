@@ -588,7 +588,15 @@ impl Focus {
         self.command(&format!("idleleds.time_limit {}", seconds))
     }
 
-    // TODO idleleds.wireless
+    /// Gets the idle LED wireless state.
+    pub fn led_idle_wireless_get(&mut self) -> Result<bool> {
+        self.command_response_bool("idleleds.wireless")
+    }
+
+    /// Sets the idle LED wireless state.
+    pub fn led_idle_wireless_set(&mut self, state: bool) -> Result<()> {
+        self.command(&format!("idleleds.wireless {}", state as u8))
+    }
 
     /// Gets the keyboard model name. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#hardwareversion
     pub fn hardware_version_get(&mut self) -> Result<String> {
