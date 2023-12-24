@@ -2,10 +2,14 @@ use anyhow::{anyhow, bail, Result};
 use serialport::SerialPortType;
 use tracing::{debug, error};
 
+/// Supported device.
 #[derive(Debug)]
 pub struct SupportedDevice {
+    /// The name of the device.
     pub name: &'static str,
+    /// The vendor ID of the device.
     pub vendor_id: u16,
+    /// The product ID of the device.
     pub product_id: u16,
 }
 
@@ -20,15 +24,18 @@ impl SupportedDevice {
 }
 
 pub const DEVICES: [SupportedDevice; 4] = [
-    SupportedDevice::new("Defy Wired", 0x35ef, 0x0010),
-    SupportedDevice::new("Defy Wireless", 0x35ef, 0x0012),
-    SupportedDevice::new("Raise ANSI", 0x1209, 0x2201),
-    SupportedDevice::new("Raise ISO", 0x1209, 0x2201),
+    SupportedDevice::new("Dygma Defy Wired", 0x35ef, 0x0010),
+    SupportedDevice::new("Dygma Defy Wireless", 0x35ef, 0x0012),
+    SupportedDevice::new("Dygma Raise ANSI", 0x1209, 0x2201),
+    SupportedDevice::new("Dygma Raise ISO", 0x1209, 0x2201),
 ];
 
+/// Dygma keyboard information.
 #[derive(Debug, Clone)]
 pub struct Keyboard {
+    /// The name of the keyboard.
     pub name: &'static str,
+    /// The port of the keyboard.
     pub port: String,
 }
 

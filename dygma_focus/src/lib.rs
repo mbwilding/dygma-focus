@@ -10,6 +10,8 @@ pub mod enums;
 pub mod keyboards;
 pub mod prelude;
 
+pub const MAX_LAYERS: u8 = 10 - 1;
+
 /// The Dygma Focus API.
 pub struct Focus {
     pub(crate) serial: Box<dyn SerialPort>,

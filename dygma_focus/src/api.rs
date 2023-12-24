@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::Focus;
+use crate::{Focus, MAX_LAYERS};
 use anyhow::{anyhow, bail, Result};
 use std::str::FromStr;
 use tracing::trace;
@@ -136,12 +136,15 @@ impl Focus {
     }
 
     /// Returns the default layer the keyboard will boot with. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#settingsdefaultlayer
-    pub fn settings_default_layer_get(&mut self) -> Result<i8> {
+    pub fn settings_default_layer_get(&mut self) -> Result<u8> {
         self.command_response_numerical("settings.defaultLayer")
     }
 
     /// Sets the default layer the keyboard will boot with. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#settingsdefaultlayer
-    pub fn settings_default_layer_set(&mut self, layer: i8) -> Result<()> {
+    pub fn settings_default_layer_set(&mut self, layer: u8) -> Result<()> {
+        if layer > MAX_LAYERS {
+            bail!("Layer out of range, max is {}: {}", MAX_LAYERS, layer);
+        }
         self.command(&format!("settings.defaultLayer {}", layer))
     }
 
@@ -472,22 +475,25 @@ impl Focus {
     }
 
     /// Gets the virtual mouse speed.
-    pub fn mouse_speed_get(&mut self) -> Result<i8> {
+    pub fn mouse_speed_get(&mut self) -> Result<u8> {
         self.command_response_numerical("mouse.speed")
     }
 
-    /// Sets the virtual mouse speed.
-    pub fn mouse_speed_set(&mut self, speed: i8) -> Result<()> {
+    /// Sets the virtual mouse speed. Max is 127.
+    pub fn mouse_speed_set(&mut self, speed: u8) -> Result<()> {
+        if speed > 127 {
+            bail!("Speed out of range, max is {}: {}", 127, speed);
+        }
         self.command(&format!("mouse.speed {}", speed))
     }
 
     /// Gets the virtual mouse delay.
-    pub fn mouse_delay_get(&mut self) -> Result<i8> {
+    pub fn mouse_delay_get(&mut self) -> Result<u8> {
         self.command_response_numerical("mouse.speedDelay")
     }
 
     /// Sets the virtual mouse delay.
-    pub fn mouse_delay_set(&mut self, delay: i8) -> Result<()> {
+    pub fn mouse_delay_set(&mut self, delay: u8) -> Result<()> {
         self.command(&format!("mouse.speedDelay {}", delay))
     }
 
@@ -502,32 +508,32 @@ impl Focus {
     }
 
     /// Gets the virtual mouse acceleration delay.
-    pub fn mouse_acceleration_delay_get(&mut self) -> Result<i8> {
+    pub fn mouse_acceleration_delay_get(&mut self) -> Result<u8> {
         self.command_response_numerical("mouse.accelDelay")
     }
 
     /// Sets the virtual mouse acceleration delay.
-    pub fn mouse_acceleration_delay_set(&mut self, delay: i8) -> Result<()> {
+    pub fn mouse_acceleration_delay_set(&mut self, delay: u8) -> Result<()> {
         self.command(&format!("mouse.accelDelay {}", delay))
     }
 
     /// Gets the virtual mouse wheel speed.
-    pub fn mouse_wheel_speed_get(&mut self) -> Result<i8> {
+    pub fn mouse_wheel_speed_get(&mut self) -> Result<u8> {
         self.command_response_numerical("mouse.wheelSpeed")
     }
 
     /// Sets the virtual mouse wheel speed.
-    pub fn mouse_wheel_speed_set(&mut self, speed: i8) -> Result<()> {
+    pub fn mouse_wheel_speed_set(&mut self, speed: u8) -> Result<()> {
         self.command(&format!("mouse.wheelSpeed {}", speed))
     }
 
     /// Gets the virtual mouse wheel delay.
-    pub fn mouse_wheel_delay_get(&mut self) -> Result<i8> {
+    pub fn mouse_wheel_delay_get(&mut self) -> Result<u8> {
         self.command_response_numerical("mouse.wheelDelay")
     }
 
     /// Sets the virtual mouse wheel delay.
-    pub fn mouse_wheel_delay_set(&mut self, delay: i8) -> Result<()> {
+    pub fn mouse_wheel_delay_set(&mut self, delay: u8) -> Result<()> {
         self.command(&format!("mouse.wheelDelay {}", delay))
     }
 
@@ -562,7 +568,7 @@ impl Focus {
         self.command(&format!("layer.moveTo {}", layer))
     }
 
-    /// Gets the status for up to 32 layers. It will return a Vec of bools with the state of each layer with the respective index. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#layerstate
+    /// Gets the status for up to 32 layers. It will return a Vec<bool> with the respective index matching each layer, -1 from Bazecor. https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#layerstate
     pub fn layer_state_get(&mut self) -> Result<Vec<bool>> {
         let response = self.command_response_string("layer.state")?;
         let parts = response.split_whitespace().collect::<Vec<&str>>();
@@ -617,17 +623,17 @@ impl Focus {
         ))
     }
 
-    /// Gets the RF channel hop state. Undocumented.
+    /// Gets the RF channel hop state.
     pub fn wireless_rf_channel_hop_get(&mut self) -> Result<bool> {
         self.command_response_bool("wireless.rf.channelHop")
     }
 
-    /// Sets the RF channel hop state. Undocumented.
+    /// Sets the RF channel hop state.
     pub fn wireless_rf_channel_hop_set(&mut self, state: bool) -> Result<()> {
         self.command(&format!("wireless.rf.channelHop {}", state as u8))
     }
 
-    /// Gets the sync pairing state. Undocumented.
+    /// Gets the sync pairing state.
     pub fn wireless_rf_sync_pairing_get(&mut self) -> Result<bool> {
         self.command_response_bool("wireless.rf.syncPairing")
     }
