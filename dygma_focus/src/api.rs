@@ -62,12 +62,12 @@ impl Focus {
 
         let trimmed_buffer = &self.response_buffer[start..end];
 
-        let response = String::from_utf8(trimmed_buffer.to_vec())
+        let response = std::str::from_utf8(trimmed_buffer)
             .map_err(|e| anyhow!("Failed to convert response to UTF-8 string: {:?}", e))?;
 
-        trace!("Command RX: {}", response);
+        trace!("Command RX: {}", &response);
 
-        Ok(response)
+        Ok(response.to_string())
     }
 
     /// Sends a command to the device, and returns the response as a numerical value.
