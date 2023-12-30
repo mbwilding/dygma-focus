@@ -39,7 +39,7 @@ fn main() -> Result<()> {
     println!("settings_valid: {}", &focus.settings_valid_get()?);
     println!("settings_version: {}", &focus.settings_version_get()?);
     println!("settings_crc: {}", &focus.settings_crc_get()?);
-    // println!("eeprom_contents: {}", &focus.eeprom_contents_get()?); // This returns nothing currently, firmware issue.
+    println!("eeprom_contents: {}", &focus.eeprom_contents_get()?);
     println!("eeprom_free: {}", &focus.eeprom_free_get()?);
     println!("super_keys_map: {}", &focus.super_keys_map_get()?);
     println!("super_keys_wait_for: {}", &focus.super_keys_wait_for_get()?);
