@@ -15,7 +15,7 @@ Cargo.toml
 ```toml
 [dependencies]
 anyhow = "1.0"
-dygma_focus = "0.1"
+dygma_focus = "0.2"
 ```
 
 main.rs
