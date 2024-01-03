@@ -18,13 +18,13 @@ anyhow = "1.0"
 dygma_focus = "0.3"
 ```
 
-main.rs
+src/main.rs
 
 ```rust
 use anyhow::Result;
 use dygma_focus::prelude::*;
 
-pub fn init() -> Result<()> {
+fn main() -> Result<()> {
     // Open the first device found and declare as mutable
     // Other constructors are under Focus::new_*
     let mut focus = Focus::new_first_available()?;
