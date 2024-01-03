@@ -244,124 +244,124 @@ impl Focus {
     // TODO: upgrade.keyscanner.finish
     // TODO: upgrade.keyscanner.sendStart
 
-    /// Gets the super keys map.
+    /// Gets the Superkeys map.
     ///
-    /// Each action in a super key is represented by a key code number that encodes the action, for example if you use the number 44, you are encoding space, etc...
+    /// Each action in a Superkey is represented by a key code number that encodes the action, for example if you use the number 44, you are encoding space, etc...
     ///
     /// To know more about keycodes and to find the right one for your actions, check the key map database.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysmap
-    pub fn super_keys_map_get(&mut self) -> Result<String> {
+    pub fn superkeys_map_get(&mut self) -> Result<String> {
         self.command_response_string("superkeys.map")
     }
 
-    /// Sets the super keys map.
+    /// Sets the Superkeys map.
     ///
-    /// Each action in a super key is represented by a key code number that encodes the action, for example if you use the number 44, you are encoding space, etc...
+    /// Each action in a Superkey is represented by a key code number that encodes the action, for example if you use the number 44, you are encoding space, etc...
     ///
     /// To know more about keycodes and to find the right one for your actions, check the key map database.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysmap
-    pub fn super_keys_map_set(&mut self, data: &str) -> Result<()> {
+    pub fn superkeys_map_set(&mut self, data: &str) -> Result<()> {
         if data.len() > 1_024 {
             bail!("Data must be 1024 bytes or less: {}", data.len());
         }
         self.command(&format!("superkeys.map {}", data))
     }
 
-    /// Gets the wait for value in milliseconds of the keyboard to alter the behaviour of the super keys.
+    /// Gets the Superkey wait for in milliseconds.
     ///
     /// Wait for value specifies the time between the first and subsequent releases of the HOLD actions meanwhile is held,
     ///
-    /// so for example,
+    /// So for example,
     /// if the variable is set to 500ms, you can maintain the hold key, it will emmit a key code corresponding to the action that it triggers,
     /// then it will wait for wait for time for making another key press with that same key code.
     /// This enables the user to delay the hold "machinegun" to be able to release the key and achieve a single keypress from a hold action.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeyswaitfor
-    pub fn super_keys_wait_for_get(&mut self) -> Result<u16> {
+    pub fn superkeys_wait_for_get(&mut self) -> Result<u16> {
         self.command_response_numerical("superkeys.waitfor")
     }
 
-    /// Sets the wait for value in milliseconds of the keyboard to alter the behaviour of the super keys.
+    /// Sets the Superkey wait for in milliseconds.
     ///
     /// Wait for value specifies the time between the first and subsequent releases of the HOLD actions meanwhile is held,
     ///
-    /// so for example,
+    /// So for example,
     /// if the variable is set to 500ms, you can maintain the hold key, it will emmit a key code corresponding to the action that it triggers,
     /// then it will wait for wait for time for making another key press with that same key code.
     /// This enables the user to delay the hold "machinegun" to be able to release the key and achieve a single keypress from a hold action.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeyswaitfor
-    pub fn super_keys_wait_for_set(&mut self, milliseconds: &str) -> Result<()> {
+    pub fn superkeys_wait_for_set(&mut self, milliseconds: u16) -> Result<()> {
         self.command(&format!("superkeys.waitfor {}", milliseconds))
     }
 
-    /// Gets the timeout of how long super keys waits for the next tap.
+    /// Gets the timeout of how long Superkeys waits for the next tap.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeystimeout
-    pub fn super_keys_timeout_get(&mut self) -> Result<u16> {
+    pub fn superkeys_timeout_get(&mut self) -> Result<u16> {
         self.command_response_numerical("superkeys.timeout")
     }
 
-    /// Sets the timeout of how long super keys waits for the next tap.
+    /// Sets the timeout of how long Superkeys waits for the next tap.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeystimeout
-    pub fn super_keys_timeout_set(&mut self, milliseconds: u16) -> Result<()> {
+    pub fn superkeys_timeout_set(&mut self, milliseconds: u16) -> Result<()> {
         self.command(&format!("superkeys.timeout {}", milliseconds))
     }
 
-    /// Gets the repeat value of the keyboard to alter the behaviour of the super keys.
+    /// Gets the Superkeys repeat value.
     ///
     /// The repeat value specifies the time between the second and subsequent key code releases when on hold, it only takes effect after the wait for timer has been exceeded.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysrepeat
-    pub fn super_keys_repeat_get(&mut self) -> Result<u16> {
+    pub fn superkeys_repeat_get(&mut self) -> Result<u16> {
         self.command_response_numerical("superkeys.repeat")
     }
 
-    /// Sets the repeat value of the keyboard to alter the behaviour of the super keys.
+    /// Sets the Superkeys repeat value in milliseconds.
     ///
     /// The repeat value specifies the time between the second and subsequent key code releases when on hold, it only takes effect after the wait for timer has been exceeded.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysrepeat
-    pub fn super_keys_repeat_set(&mut self, milliseconds: u16) -> Result<()> {
+    pub fn superkeys_repeat_set(&mut self, milliseconds: u16) -> Result<()> {
         self.command(&format!("superkeys.repeat {}", milliseconds))
     }
 
-    /// Gets the hold start value of the keyboard to alter the behaviour of the super keys.
+    /// Gets the Superkeys hold start value in milliseconds.
     ///
     /// The hold start value specifies the minimum time that has to pass between the first key down and any other action to trigger a hold, if held it will emit a hold action.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysholdstart
-    pub fn super_keys_hold_start_get(&mut self) -> Result<u16> {
+    pub fn superkeys_hold_start_get(&mut self) -> Result<u16> {
         self.command_response_numerical("superkeys.holdstart")
     }
 
-    /// Sets the hold start value of the keyboard to alter the behaviour of the super keys.
+    /// Sets the Superkeys hold start value in milliseconds.
     ///
     /// The hold start value specifies the minimum time that has to pass between the first key down and any other action to trigger a hold, if held it will emit a hold action.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysholdstart
-    pub fn super_keys_hold_start_set(&mut self, milliseconds: u16) -> Result<()> {
+    pub fn superkeys_hold_start_set(&mut self, milliseconds: u16) -> Result<()> {
         self.command(&format!("superkeys.holdstart {}", milliseconds))
     }
 
-    /// Gets the overlap percentage of the keyboard to alter the behaviour of the super keys.
+    /// Gets the Superkeys overlap percentage.
     ///
     /// The overlap value specifies the percentage of overlap when fast typing that is allowed to happen before triggering a hold action to the overlapped key pressed after the super key.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysoverlap
-    pub fn super_keys_overlap_get(&mut self) -> Result<u8> {
+    pub fn superkeys_overlap_get(&mut self) -> Result<u8> {
         self.command_response_numerical("superkeys.overlap")
     }
 
-    /// Sets the overlap percentage of the keyboard to alter the behaviour of the super keys.
+    /// Sets the Superkeys overlap percentage.
     ///
     /// The overlap value specifies the percentage of overlap when fast typing that is allowed to happen before triggering a hold action to the overlapped key pressed after the super key.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysoverlap
-    pub fn super_keys_overlap_set(&mut self, percentage: u8) -> Result<()> {
+    pub fn superkeys_overlap_set(&mut self, percentage: u8) -> Result<()> {
         if percentage > 80 {
             bail!("Percentage must be 80 or below: {}", percentage);
         }
@@ -601,8 +601,34 @@ impl Focus {
     // TODO: hardware.firmware https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#hardwarefirmware
     // TODO: hardware.chip_id
     // TODO: hardware.chip_info
-    // TODO: qukeys.holdTimeout
-    // TODO: qukeys.overlapThreshold
+
+    /// Gets the Qukeys hold timeout in milliseconds.
+    ///
+    /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
+    pub fn qukeys_hold_timeout_get(&mut self) -> Result<u16> {
+        self.command_response_numerical("qukeys.holdTimeout")
+    }
+
+    /// Sets the Qukeys hold timeout in milliseconds.
+    ///
+    /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
+    pub fn qukeys_hold_timeout_set(&mut self, milliseconds: u16) -> Result<()> {
+        self.command(&format!("qukeys.holdTimeout {}", milliseconds))
+    }
+
+    /// Gets the Qukeys overlap threshold in milliseconds.
+    ///
+    /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
+    pub fn qukeys_overlap_threshold_get(&mut self) -> Result<u16> {
+        self.command_response_numerical("qukeys.overlapThreshold")
+    }
+
+    /// Sets the Qukeys overlap threshold in milliseconds.
+    ///
+    /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
+    pub fn qukeys_overlap_threshold_set(&mut self, milliseconds: u16) -> Result<()> {
+        self.command(&format!("qukeys.overlapThreshold {}", milliseconds))
+    }
 
     /// Gets the macros map.
     ///

@@ -1,6 +1,6 @@
 [package]
 name = "dygma_focus"
-version = "0.2.4"
+version = "0.3.0"
 edition = "2021"
 authors = ["Matthew Wilding <mbwilding@gmail.com>"]
 description = "Dygma Focus API, for use with Dygma keyboards"

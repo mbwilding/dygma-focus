@@ -15,7 +15,7 @@ Cargo.toml
 ```toml
 [dependencies]
 anyhow = "1.0"
-dygma_focus = "0.2"
+dygma_focus = "0.3"
 ```
 
 main.rs
@@ -24,13 +24,13 @@ main.rs
 use anyhow::Result;
 use dygma_focus::prelude::*;
 
-fn main() -> Result<()> {
+pub fn init() -> Result<()> {
     // Open the first device found and declare as mutable
     // Other constructors are under Focus::new_*
     let mut focus = Focus::new_first_available()?;
 
     // Here are some example get methods, most have a matching set method
-    // There are also other methods, for example, triggering macros or switching layers
+    // There are also other methods for triggering macros or switching layers for example
     println!("version: {}", &focus.version_get()?);
     println!("keymap_custom: {}", &focus.keymap_custom_get()?);
     println!("keymap_default: {}", &focus.keymap_default_get()?);
@@ -41,12 +41,12 @@ fn main() -> Result<()> {
     println!("settings_crc: {}", &focus.settings_crc_get()?);
     println!("eeprom_contents: {}", &focus.eeprom_contents_get()?);
     println!("eeprom_free: {}", &focus.eeprom_free_get()?);
-    println!("super_keys_map: {}", &focus.super_keys_map_get()?);
-    println!("super_keys_wait_for: {}", &focus.super_keys_wait_for_get()?);
-    println!("super_keys_timeout: {}", &focus.super_keys_timeout_get()?);
-    println!("super_keys_repeat: {}", &focus.super_keys_repeat_get()?);
-    println!("super_keys_hold_start: {}", &focus.super_keys_hold_start_get()?);
-    println!("super_keys_overlap: {}", &focus.super_keys_overlap_get()?);
+    println!("superkeys_map: {}", &focus.superkeys_map_get()?);
+    println!("superkeys_wait_for: {}", &focus.superkeys_wait_for_get()?);
+    println!("superkeys_timeout: {}", &focus.superkeys_timeout_get()?);
+    println!("superkeys_repeat: {}", &focus.superkeys_repeat_get()?);
+    println!("superkeys_hold_start: {}", &focus.superkeys_hold_start_get()?);
+    println!("superkeys_overlap: {}", &focus.superkeys_overlap_get()?);
     println!("led_at: {:?}", &focus.led_at_get(0)?);
     println!("led_mode: {:?}", &focus.led_mode_get()?);
     println!("led_brightness: {}", &focus.led_brightness_get()?);
@@ -62,6 +62,8 @@ fn main() -> Result<()> {
     println!("led_idle_time_limit: {}", &focus.led_idle_time_limit_get()?);
     println!("led_idle_wireless: {}", &focus.led_idle_wireless_get()?);
     println!("hardware_version: {}", &focus.hardware_version_get()?);
+    println!("qukeys_hold_timeout: {}", &focus.qukeys_hold_timeout_get()?);
+    println!("qukeys_overlap_threshold: {}", &focus.qukeys_overlap_threshold_get()?);
     println!("macros_map: {}", &focus.macros_map_get()?);
     println!("macros_memory: {}", &focus.macros_memory_get()?);
     println!("help: {:#?}", &focus.help_get()?);
