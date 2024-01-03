@@ -30,7 +30,7 @@ fn main() -> Result<()> {
     let mut focus = Focus::new_first_available()?;
 
     // Here are some example get methods, most have a matching set method
-    // There are also other methods for triggering macros or switching layers
+    // There are also other methods, for example, triggering macros or switching layers
     println!("version: {}", &focus.version_get()?);
     println!("keymap_custom: {}", &focus.keymap_custom_get()?);
     println!("keymap_default: {}", &focus.keymap_default_get()?);
@@ -72,7 +72,7 @@ fn main() -> Result<()> {
     println!("mouse_wheel_speed: {}", &focus.mouse_wheel_speed_get()?);
     println!("mouse_wheel_delay: {}", &focus.mouse_wheel_delay_get()?);
     println!("mouse_speed_limit: {}", &focus.mouse_speed_limit_get()?);
-    // println!("layer_is_active: {}", &focus.layer_is_active_get()?); // This returns nothing currently, firmware issue.
+    println!("layer_is_active: {}", &focus.layer_is_active_get(0)?);
     println!("layer_state: {:#?}", &focus.layer_state_get()?);
     println!("wireless_battery_level_left: {}", &focus.wireless_battery_level_left_get()?);
     println!("wireless_battery_level_right: {}", &focus.wireless_battery_level_right_get()?);
