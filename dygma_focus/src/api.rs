@@ -89,7 +89,7 @@ impl Focus {
         command: &str,
         time_unit: TimeUnit,
     ) -> Result<Duration> {
-        let response: u64 = self.command_response_numerical(command)?;
+        let response = self.command_response_numerical(command)?;
 
         let duration = match time_unit {
             TimeUnit::Milliseconds => Duration::from_millis(response),
