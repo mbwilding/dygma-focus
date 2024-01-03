@@ -1,6 +1,13 @@
 use dygma_focus_proc_macros::*;
 use serde::{Deserialize, Serialize};
 
+/// Time units for use with converting from string.
+pub(crate) enum TimeUnit {
+    Milliseconds,
+    Seconds,
+}
+
+/// The LED mode states.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, NumStrEnum)]
 pub enum LedMode {
     /// The default mode. The LEDs will be set to the color of the layer you are on.
@@ -27,6 +34,7 @@ pub enum LedMode {
     Bluetooth,
 }
 
+/// The wireless power mode states.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, NumStrEnum)]
 pub enum WirelessPowerMode {
     /// Low power mode. The battery will last longer but the wireless range will be shorter.

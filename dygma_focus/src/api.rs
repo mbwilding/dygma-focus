@@ -2,6 +2,7 @@ use crate::prelude::*;
 use crate::{Focus, MAX_LAYERS};
 use anyhow::{anyhow, bail, Result};
 use std::str::FromStr;
+use std::time::Duration;
 use tracing::trace;
 
 /// Private methods
@@ -80,6 +81,22 @@ impl Focus {
         response
             .parse::<T>()
             .map_err(|e| anyhow!("Failed to parse response: {:?}", e))
+    }
+
+    /// Sends a command to the device, and returns the response as a duration.
+    fn command_response_duration(
+        &mut self,
+        command: &str,
+        time_unit: TimeUnit,
+    ) -> Result<Duration> {
+        let response: u64 = self.command_response_numerical(command)?;
+
+        let duration = match time_unit {
+            TimeUnit::Milliseconds => Duration::from_millis(response),
+            TimeUnit::Seconds => Duration::from_secs(response),
+        };
+
+        Ok(duration)
     }
 
     /// Sends a command to the device, and returns the response as a boolean value.
@@ -269,7 +286,7 @@ impl Focus {
         self.command(&format!("superkeys.map {}", data))
     }
 
-    /// Gets the Superkey wait for in milliseconds.
+    /// Gets the Superkeys wait for duration.
     ///
     /// Wait for value specifies the time between the first and subsequent releases of the HOLD actions meanwhile is held,
     ///
@@ -279,11 +296,11 @@ impl Focus {
     /// This enables the user to delay the hold "machinegun" to be able to release the key and achieve a single keypress from a hold action.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeyswaitfor
-    pub fn superkeys_wait_for_get(&mut self) -> Result<u16> {
-        self.command_response_numerical("superkeys.waitfor")
+    pub fn superkeys_wait_for_get(&mut self) -> Result<Duration> {
+        self.command_response_duration("superkeys.waitfor", TimeUnit::Milliseconds)
     }
 
-    /// Sets the Superkey wait for in milliseconds.
+    /// Sets the Superkeys wait for duration.
     ///
     /// Wait for value specifies the time between the first and subsequent releases of the HOLD actions meanwhile is held,
     ///
@@ -293,58 +310,58 @@ impl Focus {
     /// This enables the user to delay the hold "machinegun" to be able to release the key and achieve a single keypress from a hold action.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeyswaitfor
-    pub fn superkeys_wait_for_set(&mut self, milliseconds: u16) -> Result<()> {
-        self.command(&format!("superkeys.waitfor {}", milliseconds))
+    pub fn superkeys_wait_for_set(&mut self, duration: Duration) -> Result<()> {
+        self.command(&format!("superkeys.waitfor {}", duration.as_millis()))
     }
 
-    /// Gets the timeout of how long Superkeys waits for the next tap.
+    /// Gets the Superkeys timeout of how long it waits for the next tap.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeystimeout
-    pub fn superkeys_timeout_get(&mut self) -> Result<u16> {
-        self.command_response_numerical("superkeys.timeout")
+    pub fn superkeys_timeout_get(&mut self) -> Result<Duration> {
+        self.command_response_duration("superkeys.timeout", TimeUnit::Milliseconds)
     }
 
-    /// Sets the timeout of how long Superkeys waits for the next tap.
+    /// Sets the Superkeys timeout of how long it waits for the next tap.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeystimeout
-    pub fn superkeys_timeout_set(&mut self, milliseconds: u16) -> Result<()> {
-        self.command(&format!("superkeys.timeout {}", milliseconds))
+    pub fn superkeys_timeout_set(&mut self, duration: Duration) -> Result<()> {
+        self.command(&format!("superkeys.timeout {}", duration.as_millis()))
     }
 
-    /// Gets the Superkeys repeat value.
+    /// Gets the Superkeys repeat duration.
     ///
     /// The repeat value specifies the time between the second and subsequent key code releases when on hold, it only takes effect after the wait for timer has been exceeded.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysrepeat
-    pub fn superkeys_repeat_get(&mut self) -> Result<u16> {
-        self.command_response_numerical("superkeys.repeat")
+    pub fn superkeys_repeat_get(&mut self) -> Result<Duration> {
+        self.command_response_duration("superkeys.repeat", TimeUnit::Milliseconds)
     }
 
-    /// Sets the Superkeys repeat value in milliseconds.
+    /// Sets the Superkeys repeat duration.
     ///
     /// The repeat value specifies the time between the second and subsequent key code releases when on hold, it only takes effect after the wait for timer has been exceeded.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysrepeat
-    pub fn superkeys_repeat_set(&mut self, milliseconds: u16) -> Result<()> {
-        self.command(&format!("superkeys.repeat {}", milliseconds))
+    pub fn superkeys_repeat_set(&mut self, duration: Duration) -> Result<()> {
+        self.command(&format!("superkeys.repeat {}", duration.as_millis()))
     }
 
-    /// Gets the Superkeys hold start value in milliseconds.
+    /// Gets the Superkeys hold start duration.
     ///
     /// The hold start value specifies the minimum time that has to pass between the first key down and any other action to trigger a hold, if held it will emit a hold action.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysholdstart
-    pub fn superkeys_hold_start_get(&mut self) -> Result<u16> {
-        self.command_response_numerical("superkeys.holdstart")
+    pub fn superkeys_hold_start_get(&mut self) -> Result<Duration> {
+        self.command_response_duration("superkeys.holdstart", TimeUnit::Milliseconds)
     }
 
-    /// Sets the Superkeys hold start value in milliseconds.
+    /// Sets the Superkeys hold start duration.
     ///
     /// The hold start value specifies the minimum time that has to pass between the first key down and any other action to trigger a hold, if held it will emit a hold action.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysholdstart
-    pub fn superkeys_hold_start_set(&mut self, milliseconds: u16) -> Result<()> {
-        self.command(&format!("superkeys.holdstart {}", milliseconds))
+    pub fn superkeys_hold_start_set(&mut self, duration: Duration) -> Result<()> {
+        self.command(&format!("superkeys.holdstart {}", duration.as_millis()))
     }
 
     /// Gets the Superkeys overlap percentage.
@@ -548,33 +565,39 @@ impl Focus {
         self.command(&format!("idleleds.true_sleep {}", state as u8))
     }
 
-    /// Gets the idle LED true sleep time in seconds.
-    pub fn led_idle_true_sleep_time_get(&mut self) -> Result<u16> {
-        self.command_response_numerical("idleleds.true_sleep_time")
+    /// Gets the idle LED true sleep time.
+    pub fn led_idle_true_sleep_time_get(&mut self) -> Result<Duration> {
+        self.command_response_duration("idleleds.true_sleep_time", TimeUnit::Seconds)
     }
 
-    /// Sets the idle LED true sleep time in seconds.
-    pub fn led_idle_true_sleep_time_set(&mut self, seconds: u16) -> Result<()> {
+    /// Sets the idle LED true sleep time.
+    pub fn led_idle_true_sleep_time_set(&mut self, duration: Duration) -> Result<()> {
+        let seconds = duration.as_secs();
+
         if seconds > 65_000 {
             bail!("Seconds must be 65000 or below: {}", seconds);
         }
+
         self.command(&format!("idleleds.true_sleep_time {}", seconds))
     }
 
-    /// Gets the idle LED time limit in seconds.
+    /// Gets the idle LED time limit.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstime_limit
-    pub fn led_idle_time_limit_get(&mut self) -> Result<u16> {
-        self.command_response_numerical("idleleds.time_limit")
+    pub fn led_idle_time_limit_get(&mut self) -> Result<Duration> {
+        self.command_response_duration("idleleds.time_limit", TimeUnit::Seconds)
     }
 
-    /// Sets the idle LED time limit in seconds.
+    /// Sets the idle LED time limit.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstime_limit
-    pub fn led_idle_time_limit_set(&mut self, seconds: u16) -> Result<()> {
+    pub fn led_idle_time_limit_set(&mut self, duration: Duration) -> Result<()> {
+        let seconds = duration.as_secs();
+
         if seconds > 65_000 {
-            bail!("Seconds must be 65000 or below: {}", seconds);
+            bail!("Duration must be 65000 seconds or below, got: {}", seconds);
         }
+
         self.command(&format!("idleleds.time_limit {}", seconds))
     }
 
@@ -602,32 +625,32 @@ impl Focus {
     // TODO: hardware.chip_id
     // TODO: hardware.chip_info
 
-    /// Gets the Qukeys hold timeout in milliseconds.
+    /// Gets the Qukeys hold timeout.
     ///
     /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
-    pub fn qukeys_hold_timeout_get(&mut self) -> Result<u16> {
-        self.command_response_numerical("qukeys.holdTimeout")
+    pub fn qukeys_hold_timeout_get(&mut self) -> Result<Duration> {
+        self.command_response_duration("qukeys.holdTimeout", TimeUnit::Milliseconds)
     }
 
-    /// Sets the Qukeys hold timeout in milliseconds.
+    /// Sets the Qukeys hold timeout.
     ///
     /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
-    pub fn qukeys_hold_timeout_set(&mut self, milliseconds: u16) -> Result<()> {
-        self.command(&format!("qukeys.holdTimeout {}", milliseconds))
+    pub fn qukeys_hold_timeout_set(&mut self, duration: Duration) -> Result<()> {
+        self.command(&format!("qukeys.holdTimeout {}", duration.as_millis()))
     }
 
-    /// Gets the Qukeys overlap threshold in milliseconds.
+    /// Gets the Qukeys overlap threshold.
     ///
     /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
-    pub fn qukeys_overlap_threshold_get(&mut self) -> Result<u16> {
-        self.command_response_numerical("qukeys.overlapThreshold")
+    pub fn qukeys_overlap_threshold_get(&mut self) -> Result<Duration> {
+        self.command_response_duration("qukeys.overlapThreshold", TimeUnit::Milliseconds)
     }
 
-    /// Sets the Qukeys overlap threshold in milliseconds.
+    /// Sets the Qukeys overlap threshold.
     ///
     /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
-    pub fn qukeys_overlap_threshold_set(&mut self, milliseconds: u16) -> Result<()> {
-        self.command(&format!("qukeys.overlapThreshold {}", milliseconds))
+    pub fn qukeys_overlap_threshold_set(&mut self, duration: Duration) -> Result<()> {
+        self.command(&format!("qukeys.overlapThreshold {}", duration.as_millis()))
     }
 
     /// Gets the macros map.
@@ -680,13 +703,13 @@ impl Focus {
     }
 
     /// Gets the virtual mouse delay.
-    pub fn mouse_delay_get(&mut self) -> Result<u8> {
-        self.command_response_numerical("mouse.speedDelay")
+    pub fn mouse_delay_get(&mut self) -> Result<Duration> {
+        self.command_response_duration("mouse.speedDelay", TimeUnit::Milliseconds)
     }
 
     /// Sets the virtual mouse delay.
-    pub fn mouse_delay_set(&mut self, delay: u8) -> Result<()> {
-        self.command(&format!("mouse.speedDelay {}", delay))
+    pub fn mouse_delay_set(&mut self, duration: Duration) -> Result<()> {
+        self.command(&format!("mouse.speedDelay {}", duration.as_millis()))
     }
 
     /// Gets the virtual mouse acceleration speed.
@@ -700,13 +723,13 @@ impl Focus {
     }
 
     /// Gets the virtual mouse acceleration delay.
-    pub fn mouse_acceleration_delay_get(&mut self) -> Result<u8> {
-        self.command_response_numerical("mouse.accelDelay")
+    pub fn mouse_acceleration_delay_get(&mut self) -> Result<Duration> {
+        self.command_response_duration("mouse.accelDelay", TimeUnit::Milliseconds)
     }
 
     /// Sets the virtual mouse acceleration delay.
-    pub fn mouse_acceleration_delay_set(&mut self, delay: u8) -> Result<()> {
-        self.command(&format!("mouse.accelDelay {}", delay))
+    pub fn mouse_acceleration_delay_set(&mut self, duration: Duration) -> Result<()> {
+        self.command(&format!("mouse.accelDelay {}", duration.as_millis()))
     }
 
     /// Gets the virtual mouse wheel speed.
@@ -720,13 +743,13 @@ impl Focus {
     }
 
     /// Gets the virtual mouse wheel delay.
-    pub fn mouse_wheel_delay_get(&mut self) -> Result<u8> {
-        self.command_response_numerical("mouse.wheelDelay")
+    pub fn mouse_wheel_delay_get(&mut self) -> Result<Duration> {
+        self.command_response_duration("mouse.wheelDelay", TimeUnit::Milliseconds)
     }
 
     /// Sets the virtual mouse wheel delay.
-    pub fn mouse_wheel_delay_set(&mut self, delay: u8) -> Result<()> {
-        self.command(&format!("mouse.wheelDelay {}", delay))
+    pub fn mouse_wheel_delay_set(&mut self, duration: Duration) -> Result<()> {
+        self.command(&format!("mouse.wheelDelay {}", duration.as_millis()))
     }
 
     /// Gets the virtual mouse speed limit.
