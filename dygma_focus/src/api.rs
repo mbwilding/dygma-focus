@@ -1,9 +1,9 @@
 use crate::prelude::*;
 use crate::{Focus, MAX_LAYERS};
 use anyhow::{anyhow, bail, Result};
+use log::trace;
 use std::str::FromStr;
 use std::time::Duration;
-use tracing::trace;
 
 /// Private methods
 impl Focus {

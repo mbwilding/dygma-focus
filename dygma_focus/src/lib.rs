@@ -1,8 +1,8 @@
 use crate::keyboards::Keyboard;
 use anyhow::{anyhow, Result};
+use log::error;
 use serialport::SerialPort;
 use std::time::Duration;
-use tracing::error;
 
 pub mod api;
 pub mod color;

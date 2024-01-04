@@ -1,6 +1,6 @@
 use anyhow::{anyhow, bail, Result};
+use log::{debug, error};
 use serialport::SerialPortType;
-use tracing::{debug, error};
 
 /// Supported device.
 #[derive(Debug)]
