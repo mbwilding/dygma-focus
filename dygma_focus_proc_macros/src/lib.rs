@@ -1,4 +1,3 @@
-extern crate proc_macro;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Data, DataEnum, DeriveInput};
@@ -7,11 +6,12 @@ use syn::{parse_macro_input, Data, DataEnum, DeriveInput};
 pub fn num_str_enum(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
 
-    let name = input.ident;
     let variants = match input.data {
         Data::Enum(DataEnum { variants, .. }) => variants,
         _ => panic!("#[derive(NumStrEnum)] is only defined for enums"),
     };
+
+    let name = input.ident;
 
     let match_arms = variants.iter().enumerate().map(|(index, variant)| {
         let variant_name = &variant.ident;

@@ -1,9 +1,10 @@
 use anyhow::{anyhow, bail, Result};
 use log::{debug, error};
+use serde::{Deserialize, Serialize};
 use serialport::SerialPortType;
 
 /// Supported device.
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SupportedDevice {
     /// The name of the device.
     pub name: &'static str,
@@ -31,7 +32,7 @@ pub const DEVICES: [SupportedDevice; 4] = [
 ];
 
 /// Dygma keyboard information.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Keyboard {
     /// The name of the keyboard.
     pub name: &'static str,

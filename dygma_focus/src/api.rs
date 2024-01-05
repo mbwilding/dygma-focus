@@ -117,6 +117,59 @@ impl Focus {
 
 /// Public methods
 impl Focus {
+    /// Gets the whole configuration stored in the keyboard.
+    pub fn dygma_backup(&mut self) -> Result<Configuration> {
+        Ok(Configuration {
+            keymap_custom: self.keymap_custom_get()?,
+            keymap_default: self.keymap_default_get()?,
+            keymap_only_custom: self.keymap_only_custom_get()?,
+            settings_default_layer: self.settings_default_layer_get()?,
+            settings_version: self.settings_version_get()?,
+            eeprom_contents: self.eeprom_contents_get()?,
+            superkeys_map: self.superkeys_map_get()?,
+            superkeys_wait_for: self.superkeys_wait_for_get()?,
+            superkeys_timeout: self.superkeys_timeout_get()?,
+            superkeys_repeat: self.superkeys_repeat_get()?,
+            superkeys_hold_start: self.superkeys_hold_start_get()?,
+            superkeys_overlap: self.superkeys_overlap_get()?,
+            led_mode: self.led_mode_get()?,
+            led_brightness: self.led_brightness_get()?,
+            led_brightness_underglow: self.led_brightness_underglow_get()?,
+            led_brightness_wireless: self.led_brightness_wireless_get()?,
+            led_brightness_underglow_wireless: self.led_brightness_underglow_wireless_get()?,
+            led_fade: self.led_fade_get()?,
+            led_theme: self.led_theme_get()?,
+            palette: self.palette_get()?,
+            color_map: self.color_map_get()?,
+            led_idle_true_sleep: self.led_idle_true_sleep_get()?,
+            led_idle_true_sleep_time: self.led_idle_true_sleep_time_get()?,
+            led_idle_time_limit: self.led_idle_time_limit_get()?,
+            led_idle_wireless: self.led_idle_wireless_get()?,
+            hardware_version: self.hardware_version_get()?,
+            qukeys_hold_timeout: self.qukeys_hold_timeout_get()?,
+            qukeys_overlap_threshold: self.qukeys_overlap_threshold_get()?,
+            macros_map: self.macros_map_get()?,
+            mouse_speed: self.mouse_speed_get()?,
+            mouse_delay: self.mouse_delay_get()?,
+            mouse_acceleration_speed: self.mouse_acceleration_speed_get()?,
+            mouse_acceleration_delay: self.mouse_acceleration_delay_get()?,
+            mouse_wheel_speed: self.mouse_wheel_speed_get()?,
+            mouse_wheel_delay: self.mouse_wheel_delay_get()?,
+            mouse_speed_limit: self.mouse_speed_limit_get()?,
+            wireless_battery_saving_mode: self.wireless_battery_saving_mode_get()?,
+            wireless_rf_power_level: self.wireless_rf_power_level_get()?,
+            wireless_rf_channel_hop: self.wireless_rf_channel_hop_get()?,
+        })
+    }
+
+    /// Sets the whole configuration stored in the keyboard.
+    pub fn dygma_restore(&mut self, _config: &Configuration) -> Result<()> {
+        unimplemented!();
+    }
+}
+
+/// Public API methods
+impl Focus {
     /// Get the version of the firmware.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#version
@@ -311,7 +364,7 @@ impl Focus {
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeyswaitfor
     pub fn superkeys_wait_for_set(&mut self, duration: Duration) -> Result<()> {
-        self.command(&format!("superkeys.waitfor {}", duration.as_millis()))
+        self.command(&format!("superkeys.waitfor {}", &duration.as_millis()))
     }
 
     /// Gets the Superkeys timeout of how long it waits for the next tap.
@@ -325,7 +378,7 @@ impl Focus {
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeystimeout
     pub fn superkeys_timeout_set(&mut self, duration: Duration) -> Result<()> {
-        self.command(&format!("superkeys.timeout {}", duration.as_millis()))
+        self.command(&format!("superkeys.timeout {}", &duration.as_millis()))
     }
 
     /// Gets the Superkeys repeat duration.
@@ -343,7 +396,7 @@ impl Focus {
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysrepeat
     pub fn superkeys_repeat_set(&mut self, duration: Duration) -> Result<()> {
-        self.command(&format!("superkeys.repeat {}", duration.as_millis()))
+        self.command(&format!("superkeys.repeat {}", &duration.as_millis()))
     }
 
     /// Gets the Superkeys hold start duration.
@@ -361,7 +414,7 @@ impl Focus {
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysholdstart
     pub fn superkeys_hold_start_set(&mut self, duration: Duration) -> Result<()> {
-        self.command(&format!("superkeys.holdstart {}", duration.as_millis()))
+        self.command(&format!("superkeys.holdstart {}", &duration.as_millis()))
     }
 
     /// Gets the Superkeys overlap percentage.
@@ -411,7 +464,7 @@ impl Focus {
     /// Sets the color of a specific LED.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledat
-    pub fn led_at_set(&mut self, led: u8, color: Color) -> Result<()> {
+    pub fn led_at_set(&mut self, led: u8, color: &Color) -> Result<()> {
         self.command(&format!(
             "led.at {} {} {} {}",
             led, color.r, color.g, color.b
@@ -421,7 +474,7 @@ impl Focus {
     /// Sets the color of all the LEDs.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledsetall
-    pub fn led_all_set(&mut self, color: Color) -> Result<()> {
+    pub fn led_all_set(&mut self, color: &Color) -> Result<()> {
         self.command(&format!("led.setAll {} {} {}", color.r, color.g, color.b,))
     }
 
@@ -436,7 +489,7 @@ impl Focus {
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledmode
     pub fn led_mode_set(&mut self, mode: LedMode) -> Result<()> {
-        self.command(&format!("led.mode {}", mode.value()))
+        self.command(&format!("led.mode {}", &mode.value()))
     }
 
     /// Gets the LED brightness.
@@ -618,6 +671,11 @@ impl Focus {
         self.command_response_string("hardware.version")
     }
 
+    /// Sets the keyboard model name.
+    pub fn hardware_version_set(&mut self, data: &str) -> Result<()> {
+        self.command(&format!("hardware.version {}", data))
+    }
+
     // TODO: hardware.side_power https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#hardwareside_power
     // TODO: hardware.side_ver https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#hardwareside_ver
     // TODO: hardware.keyscanInterval
@@ -636,7 +694,7 @@ impl Focus {
     ///
     /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
     pub fn qukeys_hold_timeout_set(&mut self, duration: Duration) -> Result<()> {
-        self.command(&format!("qukeys.holdTimeout {}", duration.as_millis()))
+        self.command(&format!("qukeys.holdTimeout {}", &duration.as_millis()))
     }
 
     /// Gets the Qukeys overlap threshold.
@@ -650,7 +708,10 @@ impl Focus {
     ///
     /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
     pub fn qukeys_overlap_threshold_set(&mut self, duration: Duration) -> Result<()> {
-        self.command(&format!("qukeys.overlapThreshold {}", duration.as_millis()))
+        self.command(&format!(
+            "qukeys.overlapThreshold {}",
+            &duration.as_millis()
+        ))
     }
 
     /// Gets the macros map.
@@ -709,7 +770,7 @@ impl Focus {
 
     /// Sets the virtual mouse delay.
     pub fn mouse_delay_set(&mut self, duration: Duration) -> Result<()> {
-        self.command(&format!("mouse.speedDelay {}", duration.as_millis()))
+        self.command(&format!("mouse.speedDelay {}", &duration.as_millis()))
     }
 
     /// Gets the virtual mouse acceleration speed.
@@ -729,7 +790,7 @@ impl Focus {
 
     /// Sets the virtual mouse acceleration delay.
     pub fn mouse_acceleration_delay_set(&mut self, duration: Duration) -> Result<()> {
-        self.command(&format!("mouse.accelDelay {}", duration.as_millis()))
+        self.command(&format!("mouse.accelDelay {}", &duration.as_millis()))
     }
 
     /// Gets the virtual mouse wheel speed.
@@ -749,7 +810,7 @@ impl Focus {
 
     /// Sets the virtual mouse wheel delay.
     pub fn mouse_wheel_delay_set(&mut self, duration: Duration) -> Result<()> {
-        self.command(&format!("mouse.wheelDelay {}", duration.as_millis()))
+        self.command(&format!("mouse.wheelDelay {}", &duration.as_millis()))
     }
 
     /// Gets the virtual mouse speed limit.
@@ -870,7 +931,7 @@ impl Focus {
     ) -> Result<()> {
         self.command(&format!(
             "wireless.rf.power {}",
-            wireless_power_mode.value()
+            &wireless_power_mode.value()
         ))
     }
 

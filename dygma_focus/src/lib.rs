@@ -6,6 +6,7 @@ use std::time::Duration;
 
 pub mod api;
 pub mod color;
+pub mod configuration;
 pub mod enums;
 pub mod keyboards;
 pub mod prelude;
