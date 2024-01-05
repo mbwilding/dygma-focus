@@ -164,45 +164,45 @@ impl Focus {
 
     /// Sets the whole configuration stored in the keyboard.
     pub fn dygma_restore(&mut self, config: &Configuration) -> Result<()> {
-        self.keymap_custom_set(&config.keymap_custom, true)?;
-        self.keymap_default_set(&config.keymap_default, true)?;
-        self.keymap_only_custom_set(config.keymap_only_custom, true)?;
-        self.settings_default_layer_set(config.settings_default_layer, true)?;
-        self.settings_version_set(&config.settings_version, true)?;
-        // self.eeprom_contents_set(&config.eeprom_contents, true)?;
-        self.superkeys_map_set(&config.superkeys_map, true)?;
-        self.superkeys_wait_for_set(config.superkeys_wait_for, true)?;
-        self.superkeys_timeout_set(config.superkeys_timeout, true)?;
-        self.superkeys_repeat_set(config.superkeys_repeat, true)?;
-        self.superkeys_hold_start_set(config.superkeys_hold_start, true)?;
-        self.superkeys_overlap_set(config.superkeys_overlap, true)?;
-        self.led_mode_set(config.led_mode, true)?;
-        self.led_brightness_set(config.led_brightness, true)?;
-        self.led_brightness_underglow_set(config.led_brightness_underglow, true)?;
-        self.led_brightness_wireless_set(config.led_brightness_wireless, true)?;
-        self.led_brightness_underglow_wireless_set(config.led_brightness_underglow_wireless, true)?;
-        self.led_fade_set(config.led_fade, true)?;
-        self.led_theme_set(&config.led_theme, true)?;
-        self.palette_set(&config.palette, true)?;
-        self.color_map_set(&config.color_map, true)?;
-        self.led_idle_true_sleep_set(config.led_idle_true_sleep, true)?;
-        self.led_idle_true_sleep_time_set(config.led_idle_true_sleep_time, true)?;
-        self.led_idle_time_limit_set(config.led_idle_time_limit, true)?;
-        self.led_idle_wireless_set(config.led_idle_wireless, true)?;
-        self.hardware_version_set(&config.hardware_version, true)?;
-        self.qukeys_hold_timeout_set(config.qukeys_hold_timeout, true)?;
-        self.qukeys_overlap_threshold_set(config.qukeys_overlap_threshold, true)?;
-        self.macros_map_set(&config.macros_map, true)?;
-        self.mouse_speed_set(config.mouse_speed, true)?;
-        self.mouse_delay_set(config.mouse_delay, true)?;
-        self.mouse_acceleration_speed_set(config.mouse_acceleration_speed, true)?;
-        self.mouse_acceleration_delay_set(config.mouse_acceleration_delay, true)?;
-        self.mouse_wheel_speed_set(config.mouse_wheel_speed, true)?;
-        self.mouse_wheel_delay_set(config.mouse_wheel_delay, true)?;
-        self.mouse_speed_limit_set(config.mouse_speed_limit, true)?;
-        self.wireless_battery_saving_mode_set(config.wireless_battery_saving_mode, true)?;
-        self.wireless_rf_power_level_set(config.wireless_rf_power_level, true)?;
-        self.wireless_rf_channel_hop_set(config.wireless_rf_channel_hop, true)?;
+        self.keymap_custom_set(&config.keymap_custom)?;
+        self.keymap_default_set(&config.keymap_default)?;
+        self.keymap_only_custom_set(config.keymap_only_custom)?;
+        self.settings_default_layer_set(config.settings_default_layer)?;
+        self.settings_version_set(&config.settings_version)?;
+        // self.eeprom_contents_set(&config.eeprom_contents)?;
+        self.superkeys_map_set(&config.superkeys_map)?;
+        self.superkeys_wait_for_set(config.superkeys_wait_for)?;
+        self.superkeys_timeout_set(config.superkeys_timeout)?;
+        self.superkeys_repeat_set(config.superkeys_repeat)?;
+        self.superkeys_hold_start_set(config.superkeys_hold_start)?;
+        self.superkeys_overlap_set(config.superkeys_overlap)?;
+        self.led_mode_set(config.led_mode)?;
+        self.led_brightness_set(config.led_brightness)?;
+        self.led_brightness_underglow_set(config.led_brightness_underglow)?;
+        self.led_brightness_wireless_set(config.led_brightness_wireless)?;
+        self.led_brightness_underglow_wireless_set(config.led_brightness_underglow_wireless)?;
+        self.led_fade_set(config.led_fade)?;
+        self.led_theme_set(&config.led_theme)?;
+        self.palette_set(&config.palette)?;
+        self.color_map_set(&config.color_map)?;
+        self.led_idle_true_sleep_set(config.led_idle_true_sleep)?;
+        self.led_idle_true_sleep_time_set(config.led_idle_true_sleep_time)?;
+        self.led_idle_time_limit_set(config.led_idle_time_limit)?;
+        self.led_idle_wireless_set(config.led_idle_wireless)?;
+        self.hardware_version_set(&config.hardware_version)?;
+        self.qukeys_hold_timeout_set(config.qukeys_hold_timeout)?;
+        self.qukeys_overlap_threshold_set(config.qukeys_overlap_threshold)?;
+        self.macros_map_set(&config.macros_map)?;
+        self.mouse_speed_set(config.mouse_speed)?;
+        self.mouse_delay_set(config.mouse_delay)?;
+        self.mouse_acceleration_speed_set(config.mouse_acceleration_speed)?;
+        self.mouse_acceleration_delay_set(config.mouse_acceleration_delay)?;
+        self.mouse_wheel_speed_set(config.mouse_wheel_speed)?;
+        self.mouse_wheel_delay_set(config.mouse_wheel_delay)?;
+        self.mouse_speed_limit_set(config.mouse_speed_limit)?;
+        self.wireless_battery_saving_mode_set(config.wireless_battery_saving_mode)?;
+        self.wireless_rf_power_level_set(config.wireless_rf_power_level)?;
+        self.wireless_rf_channel_hop_set(config.wireless_rf_channel_hop)?;
 
         Ok(())
     }
@@ -231,8 +231,8 @@ impl Focus {
     /// Layers 0 and above, The layers are -1 to Bazecor.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#keymapcustom
-    pub fn keymap_custom_set(&mut self, data: &str, check: bool) -> Result<()> {
-        if check && self.keymap_custom_get()? == data {
+    pub fn keymap_custom_set(&mut self, data: &str) -> Result<()> {
+        if self.keymap_custom_get()? == data {
             return Ok(());
         }
 
@@ -253,8 +253,8 @@ impl Focus {
     /// Layers -1 and -2, the layers are -1 to Bazecor.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#keymapdefault
-    pub fn keymap_default_set(&mut self, data: &str, check: bool) -> Result<()> {
-        if check && self.keymap_default_get()? == data {
+    pub fn keymap_default_set(&mut self, data: &str) -> Result<()> {
+        if self.keymap_default_get()? == data {
             return Ok(());
         }
 
@@ -277,8 +277,8 @@ impl Focus {
     /// They are there so you can store a backup for two layers in your keyboard.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#keymaponlycustom
-    pub fn keymap_only_custom_set(&mut self, state: bool, check: bool) -> Result<()> {
-        if check && self.keymap_only_custom_get()? == state {
+    pub fn keymap_only_custom_set(&mut self, state: bool) -> Result<()> {
+        if self.keymap_only_custom_get()? == state {
             return Ok(());
         }
 
@@ -297,12 +297,12 @@ impl Focus {
     /// Sets the default layer the keyboard will boot with.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#settingsdefaultlayer
-    pub fn settings_default_layer_set(&mut self, layer: u8, check: bool) -> Result<()> {
+    pub fn settings_default_layer_set(&mut self, layer: u8) -> Result<()> {
         if layer > MAX_LAYERS {
             bail!("Layer out of range, max is {}: {}", MAX_LAYERS, layer);
         }
 
-        if check && self.settings_default_layer_get()? == layer {
+        if self.settings_default_layer_get()? == layer {
             return Ok(());
         }
 
@@ -326,8 +326,8 @@ impl Focus {
     /// Sets the current settings version.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#settingsversion
-    pub fn settings_version_set(&mut self, version: &str, check: bool) -> Result<()> {
-        if check && self.settings_version_get()? == version {
+    pub fn settings_version_set(&mut self, version: &str) -> Result<()> {
+        if self.settings_version_get()? == version {
             return Ok(());
         }
 
@@ -351,8 +351,8 @@ impl Focus {
     /// Sets the EEPROM's contents.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#eepromcontents
-    pub fn eeprom_contents_set(&mut self, data: &str, check: bool) -> Result<()> {
-        if check && self.eeprom_contents_get()? == data {
+    pub fn eeprom_contents_set(&mut self, data: &str) -> Result<()> {
+        if self.eeprom_contents_get()? == data {
             return Ok(());
         }
 
@@ -397,8 +397,8 @@ impl Focus {
     /// To know more about keycodes and to find the right one for your actions, check the key map database.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysmap
-    pub fn superkeys_map_set(&mut self, data: &str, check: bool) -> Result<()> {
-        if check && self.superkeys_map_get()? == data {
+    pub fn superkeys_map_set(&mut self, data: &str) -> Result<()> {
+        if self.superkeys_map_get()? == data {
             return Ok(());
         }
 
@@ -429,8 +429,8 @@ impl Focus {
     /// This enables the user to delay the hold "machinegun" to be able to release the key and achieve a single keypress from a hold action.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeyswaitfor
-    pub fn superkeys_wait_for_set(&mut self, duration: Duration, check: bool) -> Result<()> {
-        if check && self.superkeys_wait_for_get()? == duration {
+    pub fn superkeys_wait_for_set(&mut self, duration: Duration) -> Result<()> {
+        if self.superkeys_wait_for_get()? == duration {
             return Ok(());
         }
 
@@ -447,8 +447,8 @@ impl Focus {
     /// Sets the Superkeys timeout of how long it waits for the next tap.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeystimeout
-    pub fn superkeys_timeout_set(&mut self, duration: Duration, check: bool) -> Result<()> {
-        if check && self.superkeys_timeout_get()? == duration {
+    pub fn superkeys_timeout_set(&mut self, duration: Duration) -> Result<()> {
+        if self.superkeys_timeout_get()? == duration {
             return Ok(());
         }
 
@@ -469,8 +469,8 @@ impl Focus {
     /// The repeat value specifies the time between the second and subsequent key code releases when on hold, it only takes effect after the wait for timer has been exceeded.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysrepeat
-    pub fn superkeys_repeat_set(&mut self, duration: Duration, check: bool) -> Result<()> {
-        if check && self.superkeys_repeat_get()? == duration {
+    pub fn superkeys_repeat_set(&mut self, duration: Duration) -> Result<()> {
+        if self.superkeys_repeat_get()? == duration {
             return Ok(());
         }
 
@@ -491,8 +491,8 @@ impl Focus {
     /// The hold start value specifies the minimum time that has to pass between the first key down and any other action to trigger a hold, if held it will emit a hold action.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysholdstart
-    pub fn superkeys_hold_start_set(&mut self, duration: Duration, check: bool) -> Result<()> {
-        if check && self.superkeys_hold_start_get()? == duration {
+    pub fn superkeys_hold_start_set(&mut self, duration: Duration) -> Result<()> {
+        if self.superkeys_hold_start_get()? == duration {
             return Ok(());
         }
 
@@ -513,12 +513,12 @@ impl Focus {
     /// The overlap value specifies the percentage of overlap when fast typing that is allowed to happen before triggering a hold action to the overlapped key pressed after the super key.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysoverlap
-    pub fn superkeys_overlap_set(&mut self, percentage: u8, check: bool) -> Result<()> {
+    pub fn superkeys_overlap_set(&mut self, percentage: u8) -> Result<()> {
         if percentage > 80 {
             bail!("Percentage must be 80 or below: {}", percentage);
         }
 
-        if check && self.superkeys_overlap_get()? == percentage {
+        if self.superkeys_overlap_get()? == percentage {
             return Ok(());
         }
 
@@ -551,8 +551,8 @@ impl Focus {
     /// Sets the color of a specific LED.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledat
-    pub fn led_at_set(&mut self, led: u8, color: &Color, check: bool) -> Result<()> {
-        if check && &self.led_at_get(led)? == color {
+    pub fn led_at_set(&mut self, led: u8, color: &Color) -> Result<()> {
+        if &self.led_at_get(led)? == color {
             return Ok(());
         }
 
@@ -579,8 +579,8 @@ impl Focus {
     /// Sets the LED mode.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledmode
-    pub fn led_mode_set(&mut self, mode: LedMode, check: bool) -> Result<()> {
-        if check && self.led_mode_get()? == mode {
+    pub fn led_mode_set(&mut self, mode: LedMode) -> Result<()> {
+        if self.led_mode_get()? == mode {
             return Ok(());
         }
 
@@ -597,8 +597,8 @@ impl Focus {
     /// Sets the LED brightness.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightness
-    pub fn led_brightness_set(&mut self, brightness: u8, check: bool) -> Result<()> {
-        if check && self.led_brightness_get()? == brightness {
+    pub fn led_brightness_set(&mut self, brightness: u8) -> Result<()> {
+        if self.led_brightness_get()? == brightness {
             return Ok(());
         }
 
@@ -615,8 +615,8 @@ impl Focus {
     /// Sets the underglow LED brightness.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
-    pub fn led_brightness_underglow_set(&mut self, brightness: u8, check: bool) -> Result<()> {
-        if check && self.led_brightness_underglow_get()? == brightness {
+    pub fn led_brightness_underglow_set(&mut self, brightness: u8) -> Result<()> {
+        if self.led_brightness_underglow_get()? == brightness {
             return Ok(());
         }
 
@@ -633,8 +633,8 @@ impl Focus {
     /// Sets the wireless LED brightness.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightness
-    pub fn led_brightness_wireless_set(&mut self, brightness: u8, check: bool) -> Result<()> {
-        if check && self.led_brightness_wireless_get()? == brightness {
+    pub fn led_brightness_wireless_set(&mut self, brightness: u8) -> Result<()> {
+        if self.led_brightness_wireless_get()? == brightness {
             return Ok(());
         }
 
@@ -651,12 +651,8 @@ impl Focus {
     /// Sets the wireless underglow LED brightness.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
-    pub fn led_brightness_underglow_wireless_set(
-        &mut self,
-        brightness: u8,
-        check: bool,
-    ) -> Result<()> {
-        if check && self.led_brightness_underglow_wireless_get()? == brightness {
+    pub fn led_brightness_underglow_wireless_set(&mut self, brightness: u8) -> Result<()> {
+        if self.led_brightness_underglow_wireless_get()? == brightness {
             return Ok(());
         }
 
@@ -669,8 +665,8 @@ impl Focus {
     }
 
     /// Sets the LED fade.
-    pub fn led_fade_set(&mut self, fade: u16, check: bool) -> Result<()> {
-        if check && self.led_fade_get()? == fade {
+    pub fn led_fade_set(&mut self, fade: u16) -> Result<()> {
+        if self.led_fade_get()? == fade {
             return Ok(());
         }
 
@@ -687,8 +683,8 @@ impl Focus {
     /// Sets the LED theme.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledtheme
-    pub fn led_theme_set(&mut self, data: &str, check: bool) -> Result<()> {
-        if check && self.led_theme_get()? == data {
+    pub fn led_theme_set(&mut self, data: &str) -> Result<()> {
+        if self.led_theme_get()? == data {
             return Ok(());
         }
 
@@ -709,8 +705,8 @@ impl Focus {
     /// The color palette is used by the color map to establish each color that can be assigned to the keyboard.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#palette
-    pub fn palette_set(&mut self, data: &str, check: bool) -> Result<()> {
-        if check && self.palette_get()? == data {
+    pub fn palette_set(&mut self, data: &str) -> Result<()> {
+        if self.palette_get()? == data {
             return Ok(());
         }
 
@@ -731,8 +727,8 @@ impl Focus {
     /// This command writes the color map that assigns each color listed in the palette to individual LEDs, mapping them to the keyboard's current layout.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#colormapmap
-    pub fn color_map_set(&mut self, data: &str, check: bool) -> Result<()> {
-        if check && self.color_map_get()? == data {
+    pub fn color_map_set(&mut self, data: &str) -> Result<()> {
+        if self.color_map_get()? == data {
             return Ok(());
         }
 
@@ -745,8 +741,8 @@ impl Focus {
     }
 
     /// Sets the idle LED true sleep state.
-    pub fn led_idle_true_sleep_set(&mut self, state: bool, check: bool) -> Result<()> {
-        if check && self.led_idle_true_sleep_get()? == state {
+    pub fn led_idle_true_sleep_set(&mut self, state: bool) -> Result<()> {
+        if self.led_idle_true_sleep_get()? == state {
             return Ok(());
         }
 
@@ -759,14 +755,14 @@ impl Focus {
     }
 
     /// Sets the idle LED true sleep time.
-    pub fn led_idle_true_sleep_time_set(&mut self, duration: Duration, check: bool) -> Result<()> {
+    pub fn led_idle_true_sleep_time_set(&mut self, duration: Duration) -> Result<()> {
         let seconds = duration.as_secs();
 
         if seconds > 65_000 {
             bail!("Seconds must be 65000 or below: {}", seconds);
         }
 
-        if check && self.led_idle_true_sleep_time_get()? == duration {
+        if self.led_idle_true_sleep_time_get()? == duration {
             return Ok(());
         }
 
@@ -783,14 +779,14 @@ impl Focus {
     /// Sets the idle LED time limit.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstime_limit
-    pub fn led_idle_time_limit_set(&mut self, duration: Duration, check: bool) -> Result<()> {
+    pub fn led_idle_time_limit_set(&mut self, duration: Duration) -> Result<()> {
         let seconds = duration.as_secs();
 
         if seconds > 65_000 {
             bail!("Duration must be 65000 seconds or below, got: {}", seconds);
         }
 
-        if check && self.led_idle_time_limit_get()? == duration {
+        if self.led_idle_time_limit_get()? == duration {
             return Ok(());
         }
 
@@ -803,8 +799,8 @@ impl Focus {
     }
 
     /// Sets the idle LED wireless state.
-    pub fn led_idle_wireless_set(&mut self, state: bool, check: bool) -> Result<()> {
-        if check && self.led_idle_wireless_get()? == state {
+    pub fn led_idle_wireless_set(&mut self, state: bool) -> Result<()> {
+        if self.led_idle_wireless_get()? == state {
             return Ok(());
         }
 
@@ -819,8 +815,8 @@ impl Focus {
     }
 
     /// Sets the keyboard model name.
-    pub fn hardware_version_set(&mut self, data: &str, check: bool) -> Result<()> {
-        if check && self.hardware_version_get()? == data {
+    pub fn hardware_version_set(&mut self, data: &str) -> Result<()> {
+        if self.hardware_version_get()? == data {
             return Ok(());
         }
 
@@ -844,8 +840,8 @@ impl Focus {
     /// Sets the Qukeys hold timeout.
     ///
     /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
-    pub fn qukeys_hold_timeout_set(&mut self, duration: Duration, check: bool) -> Result<()> {
-        if check && self.qukeys_hold_timeout_get()? == duration {
+    pub fn qukeys_hold_timeout_set(&mut self, duration: Duration) -> Result<()> {
+        if self.qukeys_hold_timeout_get()? == duration {
             return Ok(());
         }
 
@@ -862,8 +858,8 @@ impl Focus {
     /// Sets the Qukeys overlap threshold.
     ///
     /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
-    pub fn qukeys_overlap_threshold_set(&mut self, duration: Duration, check: bool) -> Result<()> {
-        if check && self.qukeys_overlap_threshold_get()? == duration {
+    pub fn qukeys_overlap_threshold_set(&mut self, duration: Duration) -> Result<()> {
+        if self.qukeys_overlap_threshold_get()? == duration {
             return Ok(());
         }
 
@@ -883,8 +879,8 @@ impl Focus {
     /// Sets the macros map.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#macrosmap
-    pub fn macros_map_set(&mut self, data: &str, check: bool) -> Result<()> {
-        if check && self.macros_map_get()? == data {
+    pub fn macros_map_set(&mut self, data: &str) -> Result<()> {
+        if self.macros_map_get()? == data {
             return Ok(());
         }
 
@@ -916,12 +912,12 @@ impl Focus {
     }
 
     /// Sets the virtual mouse speed.
-    pub fn mouse_speed_set(&mut self, speed: u8, check: bool) -> Result<()> {
+    pub fn mouse_speed_set(&mut self, speed: u8) -> Result<()> {
         if speed > 127 {
             bail!("Speed out of range, max is {}: {}", 127, speed);
         }
 
-        if check && self.mouse_speed_get()? == speed {
+        if self.mouse_speed_get()? == speed {
             return Ok(());
         }
 
@@ -934,8 +930,8 @@ impl Focus {
     }
 
     /// Sets the virtual mouse delay.
-    pub fn mouse_delay_set(&mut self, duration: Duration, check: bool) -> Result<()> {
-        if check && self.mouse_delay_get()? == duration {
+    pub fn mouse_delay_set(&mut self, duration: Duration) -> Result<()> {
+        if self.mouse_delay_get()? == duration {
             return Ok(());
         }
 
@@ -948,8 +944,8 @@ impl Focus {
     }
 
     /// Sets the virtual mouse acceleration speed.
-    pub fn mouse_acceleration_speed_set(&mut self, speed: u8, check: bool) -> Result<()> {
-        if check && self.mouse_acceleration_speed_get()? == speed {
+    pub fn mouse_acceleration_speed_set(&mut self, speed: u8) -> Result<()> {
+        if self.mouse_acceleration_speed_get()? == speed {
             return Ok(());
         }
 
@@ -962,8 +958,8 @@ impl Focus {
     }
 
     /// Sets the virtual mouse acceleration delay.
-    pub fn mouse_acceleration_delay_set(&mut self, duration: Duration, check: bool) -> Result<()> {
-        if check && self.mouse_acceleration_delay_get()? == duration {
+    pub fn mouse_acceleration_delay_set(&mut self, duration: Duration) -> Result<()> {
+        if self.mouse_acceleration_delay_get()? == duration {
             return Ok(());
         }
 
@@ -976,8 +972,8 @@ impl Focus {
     }
 
     /// Sets the virtual mouse wheel speed.
-    pub fn mouse_wheel_speed_set(&mut self, speed: u8, check: bool) -> Result<()> {
-        if check && self.mouse_wheel_speed_get()? == speed {
+    pub fn mouse_wheel_speed_set(&mut self, speed: u8) -> Result<()> {
+        if self.mouse_wheel_speed_get()? == speed {
             return Ok(());
         }
 
@@ -990,8 +986,8 @@ impl Focus {
     }
 
     /// Sets the virtual mouse wheel delay.
-    pub fn mouse_wheel_delay_set(&mut self, duration: Duration, check: bool) -> Result<()> {
-        if check && self.mouse_wheel_delay_get()? == duration {
+    pub fn mouse_wheel_delay_set(&mut self, duration: Duration) -> Result<()> {
+        if self.mouse_wheel_delay_get()? == duration {
             return Ok(());
         }
 
@@ -1004,8 +1000,8 @@ impl Focus {
     }
 
     /// Sets the virtual mouse speed limit.
-    pub fn mouse_speed_limit_set(&mut self, limit: u8, check: bool) -> Result<()> {
-        if check && self.mouse_speed_limit_get()? == limit {
+    pub fn mouse_speed_limit_set(&mut self, limit: u8) -> Result<()> {
+        if self.mouse_speed_limit_get()? == limit {
             return Ok(());
         }
 
@@ -1104,8 +1100,8 @@ impl Focus {
     }
 
     /// Sets the battery saving mode state.
-    pub fn wireless_battery_saving_mode_set(&mut self, state: bool, check: bool) -> Result<()> {
-        if check && self.wireless_battery_saving_mode_get()? == state {
+    pub fn wireless_battery_saving_mode_set(&mut self, state: bool) -> Result<()> {
+        if self.wireless_battery_saving_mode_get()? == state {
             return Ok(());
         }
 
@@ -1121,9 +1117,8 @@ impl Focus {
     pub fn wireless_rf_power_level_set(
         &mut self,
         wireless_power_mode: WirelessPowerMode,
-        check: bool,
     ) -> Result<()> {
-        if check && self.wireless_rf_power_level_get()? == wireless_power_mode {
+        if self.wireless_rf_power_level_get()? == wireless_power_mode {
             return Ok(());
         }
 
@@ -1139,8 +1134,8 @@ impl Focus {
     }
 
     /// Sets the RF channel hop state.
-    pub fn wireless_rf_channel_hop_set(&mut self, state: bool, check: bool) -> Result<()> {
-        if check && self.wireless_rf_channel_hop_get()? == state {
+    pub fn wireless_rf_channel_hop_set(&mut self, state: bool) -> Result<()> {
+        if self.wireless_rf_channel_hop_get()? == state {
             return Ok(());
         }
 
