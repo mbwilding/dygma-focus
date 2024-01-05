@@ -1,3 +1,5 @@
+extern crate core;
+
 use crate::keyboards::Keyboard;
 use anyhow::{anyhow, Result};
 use log::error;
@@ -8,6 +10,7 @@ pub mod api;
 pub mod color;
 pub mod configuration;
 pub mod enums;
+pub(crate) mod helpers;
 pub mod keyboards;
 pub mod prelude;
 

@@ -32,8 +32,8 @@ fn main() -> Result<()> {
     // Here are some example get methods, most have a matching set method
     // There are also other methods for triggering macros or switching layers for example
     println!("version: {}", &focus.version_get()?);
-    println!("keymap_custom: {}", &focus.keymap_custom_get()?);
-    println!("keymap_default: {}", &focus.keymap_default_get()?);
+    println!("keymap_custom: {:?}", &focus.keymap_custom_get()?);
+    println!("keymap_default: {:?}", &focus.keymap_default_get()?);
     println!("keymap_only_custom: {}", &focus.keymap_only_custom_get()?);
     println!("settings_default_layer: {}", &focus.settings_default_layer_get()?);
     println!("settings_valid: {}", &focus.settings_valid_get()?);
@@ -41,7 +41,7 @@ fn main() -> Result<()> {
     println!("settings_crc: {}", &focus.settings_crc_get()?);
     println!("eeprom_contents: {}", &focus.eeprom_contents_get()?);
     println!("eeprom_free: {}", &focus.eeprom_free_get()?);
-    println!("superkeys_map: {}", &focus.superkeys_map_get()?);
+    println!("superkeys_map: {:?}", &focus.superkeys_map_get()?);
     println!("superkeys_wait_for: {:?}", &focus.superkeys_wait_for_get()?);
     println!("superkeys_timeout: {:?}", &focus.superkeys_timeout_get()?);
     println!("superkeys_repeat: {:?}", &focus.superkeys_repeat_get()?);
@@ -54,9 +54,9 @@ fn main() -> Result<()> {
     println!("led_brightness_wireless: {}", &focus.led_brightness_wireless_get()?);
     println!("led_brightness_underglow_wireless: {}", &focus.led_brightness_underglow_wireless_get()?);
     println!("led_fade: {}", &focus.led_fade_get()?);
-    println!("led_theme: {}", &focus.led_theme_get()?);
-    println!("palette: {}", &focus.palette_get()?);
-    println!("color_map: {}", &focus.color_map_get()?);
+    println!("led_theme: {:?}", &focus.led_theme_get()?);
+    println!("palette: {:?}", &focus.palette_get()?);
+    println!("color_map: {:?}", &focus.color_map_get()?);
     println!("led_idle_true_sleep: {}", &focus.led_idle_true_sleep_get()?);
     println!("led_idle_true_sleep_time: {:?}", &focus.led_idle_true_sleep_time_get()?);
     println!("led_idle_time_limit: {:?}", &focus.led_idle_time_limit_get()?);

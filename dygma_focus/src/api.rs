@@ -1,3 +1,4 @@
+use crate::helpers::*;
 use crate::prelude::*;
 use crate::{Focus, MAX_LAYERS};
 use anyhow::{anyhow, bail, Result};
@@ -222,8 +223,10 @@ impl Focus {
     /// Layers 0 and above, The layers are -1 to Bazecor.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#keymapcustom
-    pub fn keymap_custom_get(&mut self) -> Result<String> {
-        self.command_response_string("keymap.custom")
+    pub fn keymap_custom_get(&mut self) -> Result<Vec<u16>> {
+        let data = self.command_response_string("keymap.custom")?;
+
+        string_to_numerical_vec(&data)
     }
 
     /// Sets the whole custom keymap stored in the keyboard.
@@ -231,12 +234,12 @@ impl Focus {
     /// Layers 0 and above, The layers are -1 to Bazecor.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#keymapcustom
-    pub fn keymap_custom_set(&mut self, data: &str) -> Result<()> {
+    pub fn keymap_custom_set(&mut self, data: &[u16]) -> Result<()> {
         if self.keymap_custom_get()? == data {
             return Ok(());
         }
 
-        self.command(&format!("keymap.custom {}", data))
+        self.command(&format!("keymap.custom {}", &numerical_vec_to_string(data)))
     }
 
     /// Gets the default keymap stored in the keyboard.
@@ -244,8 +247,10 @@ impl Focus {
     /// Layers -1 and -2, the layers are -1 to Bazecor.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#keymapdefault
-    pub fn keymap_default_get(&mut self) -> Result<String> {
-        self.command_response_string("keymap.default")
+    pub fn keymap_default_get(&mut self) -> Result<Vec<u16>> {
+        let data = self.command_response_string("keymap.default")?;
+
+        string_to_numerical_vec(&data)
     }
 
     /// Sets the default keymap stored in the keyboard.
@@ -253,12 +258,15 @@ impl Focus {
     /// Layers -1 and -2, the layers are -1 to Bazecor.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#keymapdefault
-    pub fn keymap_default_set(&mut self, data: &str) -> Result<()> {
+    pub fn keymap_default_set(&mut self, data: &[u16]) -> Result<()> {
         if self.keymap_default_get()? == data {
             return Ok(());
         }
 
-        self.command(&format!("keymap.default {}", data))
+        self.command(&format!(
+            "keymap.default {}",
+            &numerical_vec_to_string(data)
+        ))
     }
 
     /// Gets the user setting of hiding the default layers.
@@ -386,8 +394,10 @@ impl Focus {
     /// To know more about keycodes and to find the right one for your actions, check the key map database.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysmap
-    pub fn superkeys_map_get(&mut self) -> Result<String> {
-        self.command_response_string("superkeys.map")
+    pub fn superkeys_map_get(&mut self) -> Result<Vec<u16>> {
+        let data = self.command_response_string("superkeys.map")?;
+
+        string_to_numerical_vec(&data)
     }
 
     /// Sets the Superkeys map.
@@ -397,12 +407,12 @@ impl Focus {
     /// To know more about keycodes and to find the right one for your actions, check the key map database.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysmap
-    pub fn superkeys_map_set(&mut self, data: &str) -> Result<()> {
+    pub fn superkeys_map_set(&mut self, data: &[u16]) -> Result<()> {
         if self.superkeys_map_get()? == data {
             return Ok(());
         }
 
-        self.command(&format!("superkeys.map {}", data))
+        self.command(&format!("superkeys.map {}", &numerical_vec_to_string(data)))
     }
 
     /// Gets the Superkeys wait for duration.
@@ -528,7 +538,7 @@ impl Focus {
     /// Gets the color of a specific LED.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledat
-    pub fn led_at_get(&mut self, led: u8) -> Result<Color> {
+    pub fn led_at_get(&mut self, led: u16) -> Result<Color> {
         let response = self.command_response_string(&format!("led.at {}", led))?;
 
         if response.is_empty() {
@@ -551,7 +561,7 @@ impl Focus {
     /// Sets the color of a specific LED.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledat
-    pub fn led_at_set(&mut self, led: u8, color: &Color) -> Result<()> {
+    pub fn led_at_set(&mut self, led: u16, color: &Color) -> Result<()> {
         if &self.led_at_get(led)? == color {
             return Ok(());
         }
@@ -676,19 +686,21 @@ impl Focus {
     /// Gets the LED theme.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledtheme
-    pub fn led_theme_get(&mut self) -> Result<String> {
-        self.command_response_string("led.theme")
+    pub fn led_theme_get(&mut self) -> Result<Vec<Color>> {
+        let data = self.command_response_string("led.theme")?;
+
+        string_to_color_vec(&data)
     }
 
     /// Sets the LED theme.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledtheme
-    pub fn led_theme_set(&mut self, data: &str) -> Result<()> {
+    pub fn led_theme_set(&mut self, data: &[Color]) -> Result<()> {
         if self.led_theme_get()? == data {
             return Ok(());
         }
 
-        self.command(&format!("led.theme {}", data))
+        self.command(&format!("led.theme {}", &color_vec_to_string(data)))
     }
 
     /// Gets the palette.
@@ -696,8 +708,10 @@ impl Focus {
     /// The color palette is used by the color map to establish each color that can be assigned to the keyboard.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#palette
-    pub fn palette_get(&mut self) -> Result<String> {
-        self.command_response_string("palette")
+    pub fn palette_get(&mut self) -> Result<Vec<Color>> {
+        let data = self.command_response_string("palette")?;
+
+        string_to_color_vec(&data)
     }
 
     /// Sets the palette.
@@ -705,12 +719,12 @@ impl Focus {
     /// The color palette is used by the color map to establish each color that can be assigned to the keyboard.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#palette
-    pub fn palette_set(&mut self, data: &str) -> Result<()> {
+    pub fn palette_set(&mut self, data: &[Color]) -> Result<()> {
         if self.palette_get()? == data {
             return Ok(());
         }
 
-        self.command(&format!("palette {}", data))
+        self.command(&format!("palette {}", &color_vec_to_string(data)))
     }
 
     /// Gets the color map.
@@ -718,8 +732,10 @@ impl Focus {
     /// This command reads the color map that assigns each color listed in the palette to individual LEDs, mapping them to the keyboard's current layout.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#colormapmap
-    pub fn color_map_get(&mut self) -> Result<String> {
-        self.command_response_string("colormap.map")
+    pub fn color_map_get(&mut self) -> Result<Vec<u8>> {
+        let data = self.command_response_string("colormap.map")?;
+
+        string_to_numerical_vec(&data)
     }
 
     /// Sets the color map.
@@ -727,12 +743,12 @@ impl Focus {
     /// This command writes the color map that assigns each color listed in the palette to individual LEDs, mapping them to the keyboard's current layout.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#colormapmap
-    pub fn color_map_set(&mut self, data: &str) -> Result<()> {
+    pub fn color_map_set(&mut self, data: &[u8]) -> Result<()> {
         if self.color_map_get()? == data {
             return Ok(());
         }
 
-        self.command(&format!("colormap.map {}", data))
+        self.command(&format!("colormap.map {}", &numerical_vec_to_string(data)))
     }
 
     /// Gets the idle LED true sleep state.

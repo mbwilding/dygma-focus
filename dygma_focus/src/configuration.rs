@@ -1,16 +1,17 @@
 use crate::enums::{LedMode, WirelessPowerMode};
+use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Configuration {
-    pub keymap_custom: String,
-    pub keymap_default: String,
+    pub keymap_custom: Vec<u16>,
+    pub keymap_default: Vec<u16>,
     pub keymap_only_custom: bool,
     pub settings_default_layer: u8,
     pub settings_version: String,
     // pub eeprom_contents: String,
-    pub superkeys_map: String,
+    pub superkeys_map: Vec<u16>,
     pub superkeys_wait_for: Duration,
     pub superkeys_timeout: Duration,
     pub superkeys_repeat: Duration,
@@ -22,9 +23,9 @@ pub struct Configuration {
     pub led_brightness_wireless: u8,
     pub led_brightness_underglow_wireless: u8,
     pub led_fade: u16,
-    pub led_theme: String,
-    pub palette: String,
-    pub color_map: String,
+    pub led_theme: Vec<Color>,
+    pub palette: Vec<Color>,
+    pub color_map: Vec<u8>,
     pub led_idle_true_sleep: bool,
     pub led_idle_true_sleep_time: Duration,
     pub led_idle_time_limit: Duration,
