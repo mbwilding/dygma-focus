@@ -125,7 +125,7 @@ impl Focus {
             keymap_only_custom: self.keymap_only_custom_get()?,
             settings_default_layer: self.settings_default_layer_get()?,
             settings_version: self.settings_version_get()?,
-            eeprom_contents: self.eeprom_contents_get()?,
+            // eeprom_contents: self.eeprom_contents_get()?,
             superkeys_map: self.superkeys_map_get()?,
             superkeys_wait_for: self.superkeys_wait_for_get()?,
             superkeys_timeout: self.superkeys_timeout_get()?,
@@ -163,8 +163,48 @@ impl Focus {
     }
 
     /// Sets the whole configuration stored in the keyboard.
-    pub fn dygma_restore(&mut self, _config: &Configuration) -> Result<()> {
-        unimplemented!();
+    pub fn dygma_restore(&mut self, config: &Configuration) -> Result<()> {
+        self.keymap_custom_set(&config.keymap_custom, true)?;
+        self.keymap_default_set(&config.keymap_default, true)?;
+        self.keymap_only_custom_set(config.keymap_only_custom, true)?;
+        self.settings_default_layer_set(config.settings_default_layer, true)?;
+        self.settings_version_set(&config.settings_version, true)?;
+        // self.eeprom_contents_set(&config.eeprom_contents, true)?;
+        self.superkeys_map_set(&config.superkeys_map, true)?;
+        self.superkeys_wait_for_set(config.superkeys_wait_for, true)?;
+        self.superkeys_timeout_set(config.superkeys_timeout, true)?;
+        self.superkeys_repeat_set(config.superkeys_repeat, true)?;
+        self.superkeys_hold_start_set(config.superkeys_hold_start, true)?;
+        self.superkeys_overlap_set(config.superkeys_overlap, true)?;
+        self.led_mode_set(config.led_mode, true)?;
+        self.led_brightness_set(config.led_brightness, true)?;
+        self.led_brightness_underglow_set(config.led_brightness_underglow, true)?;
+        self.led_brightness_wireless_set(config.led_brightness_wireless, true)?;
+        self.led_brightness_underglow_wireless_set(config.led_brightness_underglow_wireless, true)?;
+        self.led_fade_set(config.led_fade, true)?;
+        self.led_theme_set(&config.led_theme, true)?;
+        self.palette_set(&config.palette, true)?;
+        self.color_map_set(&config.color_map, true)?;
+        self.led_idle_true_sleep_set(config.led_idle_true_sleep, true)?;
+        self.led_idle_true_sleep_time_set(config.led_idle_true_sleep_time, true)?;
+        self.led_idle_time_limit_set(config.led_idle_time_limit, true)?;
+        self.led_idle_wireless_set(config.led_idle_wireless, true)?;
+        self.hardware_version_set(&config.hardware_version, true)?;
+        self.qukeys_hold_timeout_set(config.qukeys_hold_timeout, true)?;
+        self.qukeys_overlap_threshold_set(config.qukeys_overlap_threshold, true)?;
+        self.macros_map_set(&config.macros_map, true)?;
+        self.mouse_speed_set(config.mouse_speed, true)?;
+        self.mouse_delay_set(config.mouse_delay, true)?;
+        self.mouse_acceleration_speed_set(config.mouse_acceleration_speed, true)?;
+        self.mouse_acceleration_delay_set(config.mouse_acceleration_delay, true)?;
+        self.mouse_wheel_speed_set(config.mouse_wheel_speed, true)?;
+        self.mouse_wheel_delay_set(config.mouse_wheel_delay, true)?;
+        self.mouse_speed_limit_set(config.mouse_speed_limit, true)?;
+        self.wireless_battery_saving_mode_set(config.wireless_battery_saving_mode, true)?;
+        self.wireless_rf_power_level_set(config.wireless_rf_power_level, true)?;
+        self.wireless_rf_channel_hop_set(config.wireless_rf_channel_hop, true)?;
+
+        Ok(())
     }
 }
 
@@ -358,10 +398,6 @@ impl Focus {
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysmap
     pub fn superkeys_map_set(&mut self, data: &str, check: bool) -> Result<()> {
-        if data.len() > 1_024 {
-            bail!("Data must be 1024 bytes or less: {}", data.len());
-        }
-
         if check && self.superkeys_map_get()? == data {
             return Ok(());
         }
@@ -848,10 +884,6 @@ impl Focus {
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#macrosmap
     pub fn macros_map_set(&mut self, data: &str, check: bool) -> Result<()> {
-        if data.len() > 2_048 {
-            bail!("Data must be 1024 bytes or less: {}", data.len());
-        }
-
         if check && self.macros_map_get()? == data {
             return Ok(());
         }
