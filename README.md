@@ -16,6 +16,7 @@ Cargo.toml
 [dependencies]
 anyhow = "1.0"
 dygma_focus = "0.4"
+tokio = { version = "1", features = ["full"] }
 ```
 
 src/main.rs
