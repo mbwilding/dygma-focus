@@ -25,11 +25,11 @@ impl Focus {
 
         self.response_buffer.clear();
 
+        let mut stream = self.stream.lock().await;
+
         loop {
             let prev_len = self.response_buffer.len();
             self.response_buffer.resize(prev_len + 1024, 0);
-
-            let mut stream = self.stream.lock().await;
 
             match stream.read(&mut self.response_buffer[prev_len..]).await {
                 Ok(0) => continue,
