@@ -1,5 +1,5 @@
 pub use crate::color::*;
-pub use crate::configuration::*;
 pub use crate::enums::*;
-pub use crate::keyboards::*;
+pub use crate::hardware::*;
+pub use crate::settings::*;
 pub use crate::Focus;
