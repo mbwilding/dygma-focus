@@ -21,7 +21,7 @@ pub struct Hardware {
     pub bootloader: bool,
     pub keyboard: Option<Grid>,
     pub keyboard_underglow: Option<Grid>,
-    pub rgbw_mode: Option<bool>,
+    pub rgbw_mode: bool,
     pub instructions: Languages,
     pub virtual_info: Option<Virtual>,
 }

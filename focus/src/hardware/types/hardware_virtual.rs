@@ -37,7 +37,7 @@ pub const DEFY_WIRED_VIRTUAL: Hardware = {
             rows: 2,
             columns: 89,
         }),
-        rgbw_mode: Some(true),
+        rgbw_mode: true,
         instructions: Languages {
             en: Dialog {
                 update_instructions: "To update the firmware, the keyboard needs a special reset. When the countdown starts, press and hold the Escape key. Soon after the countdown finished, the Neuron's light should start a blue pulsing pattern, and the flashing will proceed. At this point, you should release the Escape key.",
@@ -312,7 +312,7 @@ pub const DEFY_WIRELESS_VIRTUAL: Hardware = {
             rows: 2,
             columns: 89,
         }),
-        rgbw_mode: Some(true),
+        rgbw_mode: true,
         instructions: Languages {
             en: Dialog {
                 update_instructions: "To update the firmware, the keyboard needs a special reset. When the countdown starts, press and hold the Escape key. Soon after the countdown finished, the Neuron's light should start a blue pulsing pattern, and the flashing will proceed. At this point, you should release the Escape key.",
@@ -650,7 +650,7 @@ pub const RAISE_ANSI_VIRTUAL: Hardware = {
             rows: 6,
             columns: 22,
         }),
-        rgbw_mode: Some(false),
+        rgbw_mode: false,
         instructions: Languages {
             en: Dialog {
                 update_instructions: "To update the firmware, the keyboard needs a special reset. When the countdown starts, press and hold the Escape key. Soon after the countdown finished, the Neuron's light should start a blue pulsing pattern, and the flashing will proceed. At this point, you should release the Escape key.",
@@ -925,7 +925,7 @@ pub const RAISE_ISO_VIRTUAL: Hardware = {
             rows: 6,
             columns: 22,
         }),
-        rgbw_mode: Some(false),
+        rgbw_mode: false,
         instructions: Languages {
             en: Dialog {
                 update_instructions: "To update the firmware, the keyboard needs a special reset. When the countdown starts, press and hold the Escape key. Soon after the countdown finished, the Neuron's light should start a blue pulsing pattern, and the flashing will proceed. At this point, you should release the Escape key.",
