@@ -2,7 +2,7 @@ use anyhow::{bail, Error, Result};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-/// The LED RGB color.
+/// RGB color.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RGB {
     /// Red component of the color.
@@ -33,20 +33,20 @@ impl FromStr for RGB {
     }
 }
 
-/// The LED RGBW color.
+/// RGBA color, the alpha is currently ignored by the firmware.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct RGBW {
+pub struct RGBA {
     /// Red component of the color.
     pub r: u8,
     /// Green component of the color.
     pub g: u8,
     /// Blue component of the color.
     pub b: u8,
-    /// White component of the color.
-    pub w: u8,
+    /// Alpha component of the color, currently ignored by the firmware.
+    pub a: u8,
 }
 
-impl FromStr for RGBW {
+impl FromStr for RGBA {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self> {
@@ -59,7 +59,7 @@ impl FromStr for RGBW {
                 r: parts[0],
                 g: parts[1],
                 b: parts[2],
-                w: parts[3],
+                a: parts[3],
             })
         } else {
             bail!("Invalid color format");

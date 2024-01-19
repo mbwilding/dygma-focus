@@ -106,8 +106,7 @@ impl Focus {
                 .ok(),
             led_fade: self.led_fade_get().await.ok(),
             led_theme: self.led_theme_get().await?,
-            palette_rgb: self.palette_rgb_get().await.ok(),
-            palette_rgbw: self.palette_rgbw_get().await.ok(),
+            palette: self.palette_get().await?,
             color_map: self.color_map_get().await?,
             led_idle_true_sleep: self.led_idle_true_sleep_get().await.ok(),
             led_idle_true_sleep_time: self.led_idle_true_sleep_time_get().await.ok(),
@@ -168,12 +167,7 @@ impl Focus {
             self.led_fade_set(led_fade).await?;
         }
         self.led_theme_set(&settings.led_theme).await?;
-        if let Some(palette) = &settings.palette_rgb {
-            self.palette_rgb_set(palette).await?;
-        }
-        if let Some(palette) = &settings.palette_rgbw {
-            self.palette_rgbw_set(palette).await?;
-        }
+        self.palette_set(&settings.palette).await?;
         self.color_map_set(&settings.color_map).await?;
         if let Some(led_idle_true_sleep) = settings.led_idle_true_sleep {
             self.led_idle_true_sleep_set(led_idle_true_sleep).await?;
@@ -908,53 +902,32 @@ impl Focus {
             .await
     }
 
-    /// Gets the palette as RGB.
+    /// Gets the palette.
     ///
     /// The color palette is used by the color map to establish each color that can be assigned to the keyboard.
     ///
+    /// The alpha is currently ignored by the firmware.
+    ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#palette
-    pub async fn palette_rgb_get(&mut self) -> Result<Vec<RGB>> {
+    pub async fn palette_get(&mut self) -> Result<Vec<RGBA>> {
         let data = self.command_response_string("palette").await?;
 
-        string_to_rgb_vec(&data)
+        string_to_rgba_vec(&data)
     }
 
-    /// Sets the palette as RGB.
+    /// Sets the palette.
     ///
     /// The color palette is used by the color map to establish each color that can be assigned to the keyboard.
     ///
+    /// The alpha is currently ignored by the firmware.
+    ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#palette
-    pub async fn palette_rgb_set(&mut self, data: &[RGB]) -> Result<()> {
-        if self.palette_rgb_get().await? == data {
+    pub async fn palette_set(&mut self, data: &[RGBA]) -> Result<()> {
+        if self.palette_get().await? == data {
             return Ok(());
         }
 
-        self.command_new_line(&format!("palette {}", rgb_vec_to_string(data)), true)
-            .await
-    }
-
-    /// Gets the palette as RGBW.
-    ///
-    /// The color palette is used by the color map to establish each color that can be assigned to the keyboard.
-    ///
-    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#palette
-    pub async fn palette_rgbw_get(&mut self) -> Result<Vec<RGBW>> {
-        let data = self.command_response_string("palette").await?;
-
-        string_to_rgbw_vec(&data)
-    }
-
-    /// Sets the palette as RGBW.
-    ///
-    /// The color palette is used by the color map to establish each color that can be assigned to the keyboard.
-    ///
-    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#palette
-    pub async fn palette_rgbw_set(&mut self, data: &[RGBW]) -> Result<()> {
-        if self.palette_rgbw_get().await? == data {
-            return Ok(());
-        }
-
-        self.command_new_line(&format!("palette {}", rgbw_vec_to_string(data)), true)
+        self.command_new_line(&format!("palette {}", rgba_vec_to_string(data)), true)
             .await
     }
 
