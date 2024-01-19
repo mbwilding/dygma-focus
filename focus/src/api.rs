@@ -4,17 +4,31 @@ use crate::{Focus, MAX_LAYERS};
 use anyhow::{anyhow, bail, Result};
 use std::str::FromStr;
 use std::time::Duration;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tracing::trace;
+
+#[cfg(feature = "async")]
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 /// Public methods
 impl Focus {
     /// Writes bytes to the serial port.
+    #[cfg(feature = "async")]
     pub async fn write_bytes(&mut self, bytes: &[u8]) -> Result<()> {
         trace!("Writing bytes: {:02X?}", bytes);
-        let mut stream = self.stream.lock().await;
-        stream.write_all(bytes).await?;
-        stream.flush().await?;
+        let mut serial = self.serial.lock().await;
+        serial.write_all(bytes).await?;
+        serial.flush().await?;
+
+        Ok(())
+    }
+
+    /// Writes bytes to the serial port.
+    #[cfg(feature = "sync")]
+    pub fn write_bytes(&mut self, bytes: &[u8]) -> Result<()> {
+        trace!("Writing bytes: {:02X?}", bytes);
+        let mut serial = self.serial.lock().unwrap();
+        serial.write_all(bytes)?;
+        serial.flush()?;
 
         Ok(())
     }
@@ -29,9 +43,19 @@ impl Focus {
             let prev_len = self.response_buffer.len();
             self.response_buffer.resize(prev_len + 1024, 0);
 
-            let mut stream = self.stream.lock().await;
+            #[cfg(feature = "async")]
+            let mut serial = self.serial.lock().await;
 
-            match stream.read(&mut self.response_buffer[prev_len..]).await {
+            #[cfg(feature = "sync")]
+            let mut serial = self.serial.lock().unwrap();
+
+            #[cfg(feature = "async")]
+            let read = serial.read(&mut self.response_buffer[prev_len..]).await;
+
+            #[cfg(feature = "sync")]
+            let read = serial.read(&mut self.response_buffer[prev_len..]);
+
+            match read {
                 Ok(0) => continue,
                 Ok(size) => {
                     self.response_buffer.truncate(prev_len + size);

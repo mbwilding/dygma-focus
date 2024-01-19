@@ -1,12 +1,23 @@
+#[cfg(all(feature = "async", feature = "sync"))]
+compile_error!(
+    "`async` and `sync` features are mutually exclusive and cannot be enabled at the same time"
+);
+
 use crate::hardware::Device;
 use anyhow::{anyhow, bail, Result};
 use std::str;
 use std::time::Duration;
-use tokio::sync::Mutex;
-use tokio_serial::{SerialPort, SerialPortBuilderExt, SerialPortType, SerialStream};
 use tracing::{error, trace};
 
+#[cfg(feature = "async")]
+use tokio_serial::{SerialPort, SerialPortBuilderExt, SerialPortType, SerialStream};
+
+#[cfg(feature = "sync")]
+use serialport::{SerialPort, SerialPortType};
+
 pub mod api;
+mod api_async;
+mod api_sync;
 pub mod color;
 pub mod enums;
 pub mod hardware;
@@ -17,9 +28,17 @@ pub mod settings;
 pub const MAX_LAYERS: u8 = 10 - 1;
 
 /// The Dygma Focus API.
+#[cfg(feature = "async")]
 #[derive(Debug)]
 pub struct Focus {
-    pub(crate) stream: Mutex<SerialStream>,
+    pub(crate) serial: tokio::sync::Mutex<SerialStream>,
+    pub(crate) response_buffer: Vec<u8>,
+}
+
+#[cfg(feature = "sync")]
+#[derive(Debug)]
+pub struct Focus {
+    pub(crate) serial: std::sync::Mutex<Box<dyn SerialPort>>,
     pub(crate) response_buffer: Vec<u8>,
 }
 
@@ -27,7 +46,13 @@ pub struct Focus {
 impl Focus {
     /// Find all supported devices.
     pub fn find_all_devices() -> Result<Vec<Device>> {
-        let ports = match tokio_serial::available_ports() {
+        #[cfg(feature = "async")]
+        let available = tokio_serial::available_ports();
+
+        #[cfg(feature = "sync")]
+        let available = serialport::available_ports();
+
+        let ports = match available {
             Ok(ports) => ports,
             Err(e) => {
                 let err_msg = format!("Failed to enumerate serial ports: {:?}", e);
@@ -96,6 +121,7 @@ impl Focus {
     }
 
     /// Creates a new instance of the Focus API, connecting to the device via the named serial port.
+    #[cfg(feature = "async")]
     pub fn new_via_port(port: &str) -> Result<Self> {
         let port_settings = tokio_serial::new(port, 115_200)
             .data_bits(tokio_serial::DataBits::Eight)
@@ -104,19 +130,46 @@ impl Focus {
             .stop_bits(tokio_serial::StopBits::One)
             .timeout(Duration::from_secs(5));
 
-        let mut stream = port_settings.open_native_async().map_err(|e| {
+        let mut serial = port_settings.open_native_async().map_err(|e| {
             let err_msg = format!("Failed to open serial port: {} ({:?})", &port, e);
             error!("{}", err_msg);
             anyhow!(err_msg)
         })?;
 
-        stream.write_data_terminal_ready(true)?;
+        serial.write_data_terminal_ready(true)?;
 
         #[cfg(unix)]
-        stream.set_exclusive(false)?;
+        serial.set_exclusive(false)?;
 
         Ok(Self {
-            stream: Mutex::new(stream),
+            serial: tokio::sync::Mutex::new(serial),
+            response_buffer: Vec::with_capacity(1_024 * 8),
+        })
+    }
+
+    /// Creates a new instance of the Focus API, connecting to the device via the named serial port.
+    #[cfg(feature = "sync")]
+    pub fn new_via_port(port: &str) -> Result<Self> {
+        let port_settings = serialport::new(port, 115_200)
+            .data_bits(serialport::DataBits::Eight)
+            .flow_control(serialport::FlowControl::None)
+            .parity(serialport::Parity::None)
+            .stop_bits(serialport::StopBits::One)
+            .timeout(Duration::from_secs(5));
+
+        let mut serial = port_settings.open().map_err(|e| {
+            let err_msg = format!("Failed to open serial port: {} ({:?})", &port, e);
+            error!("{}", err_msg);
+            anyhow!(err_msg)
+        })?;
+
+        serial.write_data_terminal_ready(true)?;
+
+        #[cfg(unix)]
+        serial.set_exclusive(false)?;
+
+        Ok(Self {
+            serial: std::sync::Mutex::new(serial),
             response_buffer: Vec::with_capacity(1_024 * 8),
         })
     }
