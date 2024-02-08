@@ -4,7 +4,7 @@ version = "0.4.5"
 edition = "2021"
 authors = ["Matthew Wilding <mbwilding@gmail.com>"]
 description = "Dygma Focus API, proc macros"
-license = "MIT OR Apache-2.0"
+license-file = "../LICENSE"
 repository = "https://github.com/mbwilding/dygma-focus-api-rs"
 
 [lib]
