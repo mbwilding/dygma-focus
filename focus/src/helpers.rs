@@ -3,7 +3,7 @@ use anyhow::{anyhow, bail, Result};
 use std::str::FromStr;
 
 #[allow(dead_code)]
-pub(crate) fn string_to_numerical_vec<T: FromStr>(str: &str) -> Result<Vec<T>>
+pub fn string_to_numerical_vec<T: FromStr>(str: &str) -> Result<Vec<T>>
 where
     <T as FromStr>::Err: std::fmt::Debug,
 {
@@ -13,7 +13,7 @@ where
 }
 
 #[allow(dead_code)]
-pub(crate) fn numerical_vec_to_string<T: ToString>(data: &[T]) -> String {
+pub fn numerical_vec_to_string<T: ToString>(data: &[T]) -> String {
     data.iter()
         .map(|num| num.to_string())
         .collect::<Vec<String>>()
@@ -21,7 +21,7 @@ pub(crate) fn numerical_vec_to_string<T: ToString>(data: &[T]) -> String {
 }
 
 #[allow(dead_code)]
-pub(crate) fn string_to_rgb_vec(str: &str) -> Result<Vec<RGB>> {
+pub fn string_to_rgb_vec(str: &str) -> Result<Vec<RGB>> {
     str.split_whitespace()
         .collect::<Vec<&str>>()
         .chunks(3)
@@ -39,7 +39,7 @@ pub(crate) fn string_to_rgb_vec(str: &str) -> Result<Vec<RGB>> {
 }
 
 #[allow(dead_code)]
-pub(crate) fn rgb_vec_to_string(data: &[RGB]) -> String {
+pub fn rgb_vec_to_string(data: &[RGB]) -> String {
     data.iter()
         .map(|rgb| format!("{} {} {}", rgb.r, rgb.g, rgb.b))
         .collect::<Vec<String>>()
@@ -47,7 +47,7 @@ pub(crate) fn rgb_vec_to_string(data: &[RGB]) -> String {
 }
 
 #[allow(dead_code)]
-pub(crate) fn string_to_rgbw_vec(str: &str) -> Result<Vec<RGBW>> {
+pub fn string_to_rgbw_vec(str: &str) -> Result<Vec<RGBW>> {
     str.split_whitespace()
         .collect::<Vec<&str>>()
         .chunks(4)
@@ -66,7 +66,7 @@ pub(crate) fn string_to_rgbw_vec(str: &str) -> Result<Vec<RGBW>> {
 }
 
 #[allow(dead_code)]
-pub(crate) fn rgbw_vec_to_string(data: &[RGBW]) -> String {
+pub fn rgbw_vec_to_string(data: &[RGBW]) -> String {
     data.iter()
         .map(|rgbw| format!("{} {} {} {}", rgbw.r, rgbw.g, rgbw.b, rgbw.w))
         .collect::<Vec<String>>()

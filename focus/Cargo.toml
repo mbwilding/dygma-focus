@@ -1,18 +1,25 @@
 [package]
 name = "dygma_focus"
-version = "0.4.4"
+version = "0.4.5"
 edition = "2021"
-authors = ["Matthew Wilding <mbwilding@gmail.com>"]
-description = "Dygma Focus API, for use with Dygma keyboards"
-license = "MIT OR Apache-2.0"
+authors = ["matthew wilding <mbwilding@gmail.com>"]
+description = "dygma focus api, for use with dygma keyboards"
+license = "mit or apache-2.0"
 readme = "../README.md"
 repository = "https://github.com/mbwilding/dygma-focus-api-rs"
 
 [dependencies]
 anyhow = "1.0"
-dygma_focus_proc_macros = { version = "0.4.4", path = "../proc_macros" }
+dygma_focus_proc_macros = { version = "0.4.5", path = "../proc_macros" }
 lazy_static = "1.4"
+maybe-async = "0.2"
 serde = { version = "1.0", features = ["derive"] }
+serialport = { version = "4.3", optional = true }
+tokio = { version = "1", features = ["full"], optional = true }
+tokio-serial = { version = "5.4", optional = true }
 tracing = "0.1"
-tokio = { version = "1", features = ["full"] }
-tokio-serial = "5.4"
+
+[features]
+default = ["is_async"]
+is_sync = ["maybe-async/is_sync", "serialport"]
+is_async = ["tokio", "tokio-serial"]

@@ -15,9 +15,11 @@ Cargo.toml
 ```toml
 [dependencies]
 anyhow = "1.0"
-dygma_focus = "0.4"
+dygma_focus = { version = "0.4", default-features = false, features = ["is_async"] }
 tokio = { version = "1", features = ["full"] }
 ```
+
+You can set the features to `is_async` or `is_sync` depending on your use case, default is `is_async`.
 
 src/main.rs
 
