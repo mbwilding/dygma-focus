@@ -2,8 +2,8 @@
 name = "dygma_focus"
 version = "0.4.5"
 edition = "2021"
-authors = ["matthew wilding <mbwilding@gmail.com>"]
-description = "dygma focus api, for use with dygma keyboards"
+authors = ["Matthew Wilding <mbwilding@gmail.com>"]
+description = "Dygma focus api, for use with dygma keyboards"
 license-file = "../LICENSE"
 readme = "../README.md"
 repository = "https://github.com/mbwilding/dygma-focus-api-rs"
