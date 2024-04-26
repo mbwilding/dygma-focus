@@ -110,7 +110,7 @@ impl Focus {
             led_brightness_underglow_wired: self.led_brightness_underglow_wired_get().await.ok(),
             led_brightness_keys_wireless: self.led_brightness_keys_wireless_get().await.ok(),
             led_brightness_underglow_wireless: self
-                .led_brightness_wireless_underglow_get()
+                .led_brightness_underglow_wireless_get()
                 .await
                 .ok(),
             led_fade: self.led_fade_get().await.ok(),
@@ -161,13 +161,13 @@ impl Focus {
         self.led_brightness_top_set(settings.led_brightness_keys_wired)
             .await?;
         if let Some(value) = settings.led_brightness_underglow_wired {
-            self.led_brightness_underglow_set(value).await?;
+            self.led_brightness_underglow_wired_set(value).await?;
         }
         if let Some(value) = settings.led_brightness_keys_wireless {
-            self.led_brightness_wireless_top_set(value).await?;
+            self.led_brightness_keys_wireless_set(value).await?;
         }
         if let Some(value) = settings.led_brightness_underglow_wireless {
-            self.led_brightness_wireless_underglow_set(value).await?;
+            self.led_brightness_underglow_wireless_set(value).await?;
         }
         if let Some(value) = settings.led_fade {
             self.led_fade_set(value).await?;
@@ -868,7 +868,7 @@ impl Focus {
             .await
     }
 
-    /// Gets the underglow LED brightness.
+    /// Gets the underglow LED wired brightness.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
     #[maybe_async]
@@ -876,11 +876,11 @@ impl Focus {
         self.command_response_numerical("led.brightnessUG").await
     }
 
-    /// Sets the underglow LED brightness.
+    /// Sets the underglow LED wired brightness.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
     #[maybe_async]
-    pub async fn led_brightness_underglow_set(&mut self, brightness: u8) -> Result<()> {
+    pub async fn led_brightness_underglow_wired_set(&mut self, brightness: u8) -> Result<()> {
         if self.led_brightness_underglow_wired_get().await? == brightness {
             return Ok(());
         }
@@ -889,7 +889,7 @@ impl Focus {
             .await
     }
 
-    /// Gets the wireless top LED brightness.
+    /// Gets the key LED wireless brightness.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightness
     #[maybe_async]
@@ -898,11 +898,11 @@ impl Focus {
             .await
     }
 
-    /// Sets the wireless top LED brightness.
+    /// Sets the key LED wireless brightness.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightness
     #[maybe_async]
-    pub async fn led_brightness_wireless_top_set(&mut self, brightness: u8) -> Result<()> {
+    pub async fn led_brightness_keys_wireless_set(&mut self, brightness: u8) -> Result<()> {
         if self.led_brightness_keys_wireless_get().await? == brightness {
             return Ok(());
         }
@@ -911,21 +911,21 @@ impl Focus {
             .await
     }
 
-    /// Gets the wireless underglow LED brightness.
+    /// Gets the underglow LED wireless brightness.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
     #[maybe_async]
-    pub async fn led_brightness_wireless_underglow_get(&mut self) -> Result<u8> {
+    pub async fn led_brightness_underglow_wireless_get(&mut self) -> Result<u8> {
         self.command_response_numerical("led.brightnessUG.wireless")
             .await
     }
 
-    /// Sets the wireless underglow LED brightness.
+    /// Sets the underglow LED wireless brightness.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
     #[maybe_async]
-    pub async fn led_brightness_wireless_underglow_set(&mut self, brightness: u8) -> Result<()> {
-        if self.led_brightness_wireless_underglow_get().await? == brightness {
+    pub async fn led_brightness_underglow_wireless_set(&mut self, brightness: u8) -> Result<()> {
+        if self.led_brightness_underglow_wireless_get().await? == brightness {
             return Ok(());
         }
 

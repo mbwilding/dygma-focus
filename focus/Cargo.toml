@@ -1,6 +1,6 @@
 [package]
 name = "dygma_focus"
-version = "0.4.7"
+version = "0.4.8"
 edition = "2021"
 authors = ["Matthew Wilding <mbwilding@gmail.com>"]
 description = "Dygma focus api, for use with dygma keyboards"
@@ -10,11 +10,11 @@ repository = "https://github.com/mbwilding/dygma-focus-api-rs"
 
 [dependencies]
 anyhow = "1.0"
-dygma_focus_proc_macros = { version = "0.4.7", path = "../proc_macros" }
+dygma_focus_proc_macros = { version = "0.4.8", path = "../proc_macros" }
 lazy_static = "1.4"
 maybe-async = "0.2"
 serde = { version = "1.0", features = ["derive"] }
-serialport = { version = "4.3", optional = true }
+serialport = { git = "https://github.com/mbwilding/serialport-rs", optional = true }
 tokio = { version = "1", features = ["full"], optional = true }
 tokio-serial = { version = "5.4", optional = true }
 tracing = "0.1"

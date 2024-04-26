@@ -1,6 +1,6 @@
 [package]
 name = "dygma_focus_proc_macros"
-version = "0.4.7"
+version = "0.4.8"
 edition = "2021"
 authors = ["Matthew Wilding <mbwilding@gmail.com>"]
 description = "Dygma Focus API, proc macros"
