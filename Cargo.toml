@@ -1,6 +1,9 @@
 [workspace]
 resolver = "2"
-members = [
-    "focus",
-    "proc_macros",
-]
+members = ["focus", "proc_macros"]
+
+[profile.release]
+opt-level = 3
+
+[profile.dev.package."*"]
+opt-level = 2

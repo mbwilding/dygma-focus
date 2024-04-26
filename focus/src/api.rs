@@ -1,6 +1,6 @@
 use crate::helpers::*;
 use crate::prelude::*;
-use crate::{Focus, MAX_LAYERS};
+use crate::MAX_LAYERS;
 use anyhow::{anyhow, bail, Result};
 use maybe_async::maybe_async;
 use std::str::FromStr;
@@ -106,10 +106,10 @@ impl Focus {
             superkeys_hold_start: self.superkeys_hold_start_get().await?,
             superkeys_overlap: self.superkeys_overlap_get().await?,
             led_mode: self.led_mode_get().await?,
-            led_brightness_top: self.led_brightness_top_get().await?,
-            led_brightness_underglow: self.led_brightness_underglow_get().await.ok(),
-            led_brightness_wireless_top: self.led_brightness_wireless_top_get().await.ok(),
-            led_brightness_wireless_underglow: self
+            led_brightness_keys_wired: self.led_brightness_top_get().await?,
+            led_brightness_underglow_wired: self.led_brightness_underglow_wired_get().await.ok(),
+            led_brightness_keys_wireless: self.led_brightness_keys_wireless_get().await.ok(),
+            led_brightness_underglow_wireless: self
                 .led_brightness_wireless_underglow_get()
                 .await
                 .ok(),
@@ -120,8 +120,8 @@ impl Focus {
             color_map: self.color_map_get().await?,
             led_idle_true_sleep: self.led_idle_true_sleep_get().await.ok(),
             led_idle_true_sleep_time: self.led_idle_true_sleep_time_get().await.ok(),
-            led_idle_time_limit: self.led_idle_time_limit_get().await?,
-            led_idle_wireless: self.led_idle_wireless_get().await.ok(),
+            led_idle_time_limit_wired: self.led_idle_time_limit_wired_get().await?,
+            led_idle_time_limit_wireless: self.led_idle_time_limit_wireless_get().await.ok(),
             qukeys_hold_timeout: self.qukeys_hold_timeout_get().await?,
             qukeys_overlap_threshold: self.qukeys_overlap_threshold_get().await?,
             macros_map: self.macros_map_get().await?,
@@ -158,43 +158,38 @@ impl Focus {
         self.superkeys_overlap_set(settings.superkeys_overlap)
             .await?;
         self.led_mode_set(settings.led_mode).await?;
-        self.led_brightness_top_set(settings.led_brightness_top)
+        self.led_brightness_top_set(settings.led_brightness_keys_wired)
             .await?;
-        if let Some(led_brightness_underglow) = settings.led_brightness_underglow {
-            self.led_brightness_underglow_set(led_brightness_underglow)
-                .await?;
+        if let Some(value) = settings.led_brightness_underglow_wired {
+            self.led_brightness_underglow_set(value).await?;
         }
-        if let Some(led_brightness_wireless_top) = settings.led_brightness_wireless_top {
-            self.led_brightness_wireless_top_set(led_brightness_wireless_top)
-                .await?;
+        if let Some(value) = settings.led_brightness_keys_wireless {
+            self.led_brightness_wireless_top_set(value).await?;
         }
-        if let Some(led_brightness_wireless_underglow) = settings.led_brightness_wireless_underglow
-        {
-            self.led_brightness_wireless_underglow_set(led_brightness_wireless_underglow)
-                .await?;
+        if let Some(value) = settings.led_brightness_underglow_wireless {
+            self.led_brightness_wireless_underglow_set(value).await?;
         }
-        if let Some(led_fade) = settings.led_fade {
-            self.led_fade_set(led_fade).await?;
+        if let Some(value) = settings.led_fade {
+            self.led_fade_set(value).await?;
         }
         self.led_theme_set(&settings.led_theme).await?;
-        if let Some(palette) = &settings.palette_rgb {
-            self.palette_rgb_set(palette).await?;
+        if let Some(value) = &settings.palette_rgb {
+            self.palette_rgb_set(value).await?;
         }
-        if let Some(palette) = &settings.palette_rgbw {
-            self.palette_rgbw_set(palette).await?;
+        if let Some(value) = &settings.palette_rgbw {
+            self.palette_rgbw_set(value).await?;
         }
         self.color_map_set(&settings.color_map).await?;
-        if let Some(led_idle_true_sleep) = settings.led_idle_true_sleep {
-            self.led_idle_true_sleep_set(led_idle_true_sleep).await?;
+        if let Some(value) = settings.led_idle_true_sleep {
+            self.led_idle_true_sleep_set(value).await?;
         }
-        if let Some(led_idle_true_sleep_time) = settings.led_idle_true_sleep_time {
-            self.led_idle_true_sleep_time_set(led_idle_true_sleep_time)
-                .await?;
+        if let Some(value) = settings.led_idle_true_sleep_time {
+            self.led_idle_true_sleep_time_set(value).await?;
         }
-        self.led_idle_time_limit_set(settings.led_idle_time_limit)
+        self.led_idle_time_limit_wired_set(settings.led_idle_time_limit_wired)
             .await?;
-        if let Some(led_idle_wireless) = settings.led_idle_wireless {
-            self.led_idle_wireless_set(led_idle_wireless).await?;
+        if let Some(value) = settings.led_idle_time_limit_wireless {
+            self.led_idle_time_limit_wireless_set(value).await?;
         }
         self.qukeys_hold_timeout_set(settings.qukeys_hold_timeout)
             .await?;
@@ -877,7 +872,7 @@ impl Focus {
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
     #[maybe_async]
-    pub async fn led_brightness_underglow_get(&mut self) -> Result<u8> {
+    pub async fn led_brightness_underglow_wired_get(&mut self) -> Result<u8> {
         self.command_response_numerical("led.brightnessUG").await
     }
 
@@ -886,7 +881,7 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
     #[maybe_async]
     pub async fn led_brightness_underglow_set(&mut self, brightness: u8) -> Result<()> {
-        if self.led_brightness_underglow_get().await? == brightness {
+        if self.led_brightness_underglow_wired_get().await? == brightness {
             return Ok(());
         }
 
@@ -898,7 +893,7 @@ impl Focus {
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightness
     #[maybe_async]
-    pub async fn led_brightness_wireless_top_get(&mut self) -> Result<u8> {
+    pub async fn led_brightness_keys_wireless_get(&mut self) -> Result<u8> {
         self.command_response_numerical("led.brightness.wireless")
             .await
     }
@@ -908,7 +903,7 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightness
     #[maybe_async]
     pub async fn led_brightness_wireless_top_set(&mut self, brightness: u8) -> Result<()> {
-        if self.led_brightness_wireless_top_get().await? == brightness {
+        if self.led_brightness_keys_wireless_get().await? == brightness {
             return Ok(());
         }
 
@@ -1103,27 +1098,27 @@ impl Focus {
             .await
     }
 
-    /// Gets the idle LED time limit.
+    /// Gets the idle LED wired time limit.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstime_limit
     #[maybe_async]
-    pub async fn led_idle_time_limit_get(&mut self) -> Result<Duration> {
+    pub async fn led_idle_time_limit_wired_get(&mut self) -> Result<Duration> {
         self.command_response_duration("idleleds.time_limit", TimeUnit::Seconds)
             .await
     }
 
-    /// Sets the idle LED time limit.
+    /// Sets the idle LED wired time limit.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstime_limit
     #[maybe_async]
-    pub async fn led_idle_time_limit_set(&mut self, duration: Duration) -> Result<()> {
+    pub async fn led_idle_time_limit_wired_set(&mut self, duration: Duration) -> Result<()> {
         let seconds = duration.as_secs();
 
         if seconds > 65_000 {
             bail!("Duration must be 65000 seconds or below, got: {}", seconds);
         }
 
-        if self.led_idle_time_limit_get().await? == duration {
+        if self.led_idle_time_limit_wired_get().await? == duration {
             return Ok(());
         }
 
@@ -1131,20 +1126,27 @@ impl Focus {
             .await
     }
 
-    /// Gets the idle LED wireless state.
+    /// Gets the idle LED wireless time limit.
     #[maybe_async]
-    pub async fn led_idle_wireless_get(&mut self) -> Result<bool> {
-        self.command_response_bool("idleleds.wireless").await
+    pub async fn led_idle_time_limit_wireless_get(&mut self) -> Result<Duration> {
+        self.command_response_duration("idleleds.wireless", TimeUnit::Seconds)
+            .await
     }
 
-    /// Sets the idle LED wireless state.
+    /// Sets the idle LED wireless time limit.
     #[maybe_async]
-    pub async fn led_idle_wireless_set(&mut self, state: bool) -> Result<()> {
-        if self.led_idle_wireless_get().await? == state {
+    pub async fn led_idle_time_limit_wireless_set(&mut self, duration: Duration) -> Result<()> {
+        let seconds = duration.as_secs();
+
+        if seconds > 65_000 {
+            bail!("Duration must be 65000 seconds or below, got: {}", seconds);
+        }
+
+        if self.led_idle_time_limit_wireless_get().await? == duration {
             return Ok(());
         }
 
-        self.command_new_line(&format!("idleleds.wireless {}", state as u8), true)
+        self.command_new_line(&format!("idleleds.wireless {}", seconds), true)
             .await
     }
 
