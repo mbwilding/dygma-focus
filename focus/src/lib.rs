@@ -160,7 +160,8 @@ impl Focus {
             .flow_control(serialport::FlowControl::None)
             .parity(serialport::Parity::None)
             .stop_bits(serialport::StopBits::One)
-            .timeout(Duration::from_secs(5));
+            .timeout(Duration::from_millis(40));
+        // https://github.com/serialport/serialport-rs/pull/79 merge before raising the timeout
 
         let mut serial = port_settings.open_native().map_err(|e| {
             let err_msg = format!("Failed to open serial port: {} ({:?})", &port, e);

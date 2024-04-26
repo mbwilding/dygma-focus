@@ -14,10 +14,14 @@ dygma_focus_proc_macros = { version = "0.4.8", path = "../proc_macros" }
 lazy_static = "1.4"
 maybe-async = "0.2"
 serde = { version = "1.0", features = ["derive"] }
-serialport = { git = "https://github.com/mbwilding/serialport-rs", optional = true }
+serialport = { version = "4.3", optional = true }
 tokio = { version = "1", features = ["full"], optional = true }
 tokio-serial = { version = "5.4", optional = true }
 tracing = "0.1"
+windows = { version = "0.56", features = [
+	"Devices_SerialCommunication",
+	"Win32_Devices_SerialCommunication",
+] }
 
 [features]
 default = ["is_async"]
