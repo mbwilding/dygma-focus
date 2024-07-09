@@ -14,6 +14,6 @@ fn main() -> eframe::Result<()> {
     eframe::run_native(
         "Dygma API Example",
         native_options,
-        Box::new(|cc| Box::new(example::App::new(cc))),
+        Box::new(|cc| Ok(Box::new(example::App::new(cc)))),
     )
 }

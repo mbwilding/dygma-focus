@@ -11,7 +11,12 @@ use tokio_serial::{
 };
 
 #[cfg(feature = "is_sync")]
-use serialport::{COMPort, SerialPort, SerialPortInfo, SerialPortType};
+use serialport::{SerialPort, SerialPortInfo, SerialPortType};
+
+#[cfg(all(feature = "is_sync", windows))]
+use serialport::COMPort;
+#[cfg(all(feature = "is_sync", not(windows)))]
+use serialport::TTYPort;
 
 pub mod api;
 pub mod color;
@@ -28,8 +33,10 @@ pub const MAX_LAYERS: u8 = 10 - 1;
 pub struct Focus {
     #[cfg(feature = "is_async")]
     pub(crate) serial: SerialStream,
-    #[cfg(feature = "is_sync")]
+    #[cfg(all(feature = "is_sync", windows))]
     pub(crate) serial: COMPort,
+    #[cfg(all(feature = "is_sync", not(windows)))]
+    pub(crate) serial: TTYPort,
     pub(crate) response_buffer: Vec<u8>,
 }
 
