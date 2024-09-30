@@ -2,7 +2,7 @@ use crate::hardware::*;
 use lazy_static::lazy_static;
 
 lazy_static! {
-    pub static ref DEVICES_PHYSICAL: [Hardware; 8] = [
+    pub static ref DEVICES_PHYSICAL: [Hardware; 12] = [
         DEFY_WIRED,
         DEFY_WIRED_BOOTLOADER,
         DEFY_WIRELESS,
@@ -11,6 +11,10 @@ lazy_static! {
         RAISE_ANSI_BOOTLOADER,
         RAISE_ISO,
         RAISE_ISO_BOOTLOADER,
+        RAISE_2_ANSI,
+        RAISE_2_ANSI_BOOTLOADER,
+        RAISE_2_ISO,
+        RAISE_2_ISO_BOOTLOADER,
     ];
 }
 
