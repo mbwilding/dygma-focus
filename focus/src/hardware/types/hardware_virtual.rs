@@ -7,6 +7,9 @@ lazy_static! {
         DEFY_WIRELESS_VIRTUAL,
         RAISE_ANSI_VIRTUAL,
         RAISE_ISO_VIRTUAL,
+        // TODO: Implement
+        // RAISE_2_ANSI_VIRTUAL,
+        // RAISE_2_ISO_VIRTUAL,
     ];
 }
 
@@ -15,7 +18,7 @@ pub const DEFY_WIRED_VIRTUAL: Hardware = {
         info: Info {
             vendor: Vendor::Dygma,
             product: Product::Defy,
-            device_type: DeviceType::Wired,
+            keyboard_type: DeviceType::Wired,
             display_name: "Dygma Defy Wired",
             urls: Urls {
                 homepage: Url {
@@ -28,7 +31,6 @@ pub const DEFY_WIRED_VIRTUAL: Hardware = {
             vendor_id: 13807,
             product_id: 16,
         },
-        bootloader: false,
         keyboard: Some(Grid {
             rows: 5,
             columns: 16,
@@ -38,6 +40,8 @@ pub const DEFY_WIRED_VIRTUAL: Hardware = {
             columns: 89,
         }),
         rgbw_mode: true,
+        bootloader: false,
+        wireless: false,
         instructions: Languages {
             en: Dialog {
                 update_instructions: "To update the firmware, the keyboard needs a special reset. When the countdown starts, press and hold the Escape key. Soon after the countdown finished, the Neuron's light should start a blue pulsing pattern, and the flashing will proceed. At this point, you should release the Escape key.",
@@ -290,7 +294,7 @@ pub const DEFY_WIRELESS_VIRTUAL: Hardware = {
         info: Info {
             vendor: Vendor::Dygma,
             product: Product::Defy,
-            device_type: DeviceType::Wireless,
+            keyboard_type: DeviceType::Wireless,
             display_name: "Dygma Defy Wireless",
             urls: Urls {
                 homepage: Url {
@@ -303,7 +307,6 @@ pub const DEFY_WIRELESS_VIRTUAL: Hardware = {
             vendor_id: 13807,
             product_id: 18,
         },
-        bootloader: false,
         keyboard: Some(Grid {
             rows: 5,
             columns: 16,
@@ -313,6 +316,8 @@ pub const DEFY_WIRELESS_VIRTUAL: Hardware = {
             columns: 89,
         }),
         rgbw_mode: true,
+        bootloader: false,
+        wireless: true,
         instructions: Languages {
             en: Dialog {
                 update_instructions: "To update the firmware, the keyboard needs a special reset. When the countdown starts, press and hold the Escape key. Soon after the countdown finished, the Neuron's light should start a blue pulsing pattern, and the flashing will proceed. At this point, you should release the Escape key.",
@@ -628,7 +633,7 @@ pub const RAISE_ANSI_VIRTUAL: Hardware = {
         info: Info {
             vendor: Vendor::Dygma,
             product: Product::Raise,
-            device_type: DeviceType::ANSI,
+            keyboard_type: DeviceType::ANSI,
             display_name: "Dygma Raise ANSI",
             urls: Urls {
                 homepage: Url {
@@ -641,7 +646,6 @@ pub const RAISE_ANSI_VIRTUAL: Hardware = {
             vendor_id: 4617,
             product_id: 8705,
         },
-        bootloader: false,
         keyboard: Some(Grid {
             rows: 5,
             columns: 16,
@@ -651,6 +655,8 @@ pub const RAISE_ANSI_VIRTUAL: Hardware = {
             columns: 22,
         }),
         rgbw_mode: false,
+        bootloader: false,
+        wireless: false,
         instructions: Languages {
             en: Dialog {
                 update_instructions: "To update the firmware, the keyboard needs a special reset. When the countdown starts, press and hold the Escape key. Soon after the countdown finished, the Neuron's light should start a blue pulsing pattern, and the flashing will proceed. At this point, you should release the Escape key.",
@@ -903,7 +909,7 @@ pub const RAISE_ISO_VIRTUAL: Hardware = {
         info: Info {
             vendor: Vendor::Dygma,
             product: Product::Raise,
-            device_type: DeviceType::ISO,
+            keyboard_type: DeviceType::ISO,
             display_name: "Dygma Raise ISO",
             urls: Urls {
                 homepage: Url {
@@ -916,7 +922,6 @@ pub const RAISE_ISO_VIRTUAL: Hardware = {
             vendor_id: 4617,
             product_id: 8705,
         },
-        bootloader: false,
         keyboard: Some(Grid {
             rows: 5,
             columns: 16,
@@ -926,6 +931,8 @@ pub const RAISE_ISO_VIRTUAL: Hardware = {
             columns: 22,
         }),
         rgbw_mode: false,
+        bootloader: false,
+        wireless: false,
         instructions: Languages {
             en: Dialog {
                 update_instructions: "To update the firmware, the keyboard needs a special reset. When the countdown starts, press and hold the Escape key. Soon after the countdown finished, the Neuron's light should start a blue pulsing pattern, and the flashing will proceed. At this point, you should release the Escape key.",

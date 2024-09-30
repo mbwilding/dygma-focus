@@ -22,6 +22,7 @@ pub struct Hardware {
     pub keyboard: Option<Grid>,
     pub keyboard_underglow: Option<Grid>,
     pub rgbw_mode: bool,
+    pub wireless: bool,
     pub instructions: Languages,
     pub virtual_info: Option<Virtual>,
 }
@@ -132,7 +133,7 @@ pub struct Url {
 pub struct Info {
     pub vendor: Vendor,
     pub product: Product,
-    pub device_type: DeviceType,
+    pub keyboard_type: DeviceType,
     pub display_name: &'static str,
     pub urls: Urls,
 }
@@ -146,6 +147,7 @@ pub enum Vendor {
 pub enum Product {
     Defy,
     Raise,
+    Raise2,
 }
 
 impl Display for Product {
@@ -156,6 +158,7 @@ impl Display for Product {
             match self {
                 Product::Defy => "Defy",
                 Product::Raise => "Raise",
+                Product::Raise2 => "Raise 2",
             }
         )
     }
