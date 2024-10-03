@@ -7,6 +7,7 @@ description = "Dygma focus api cli, for use with dygma keyboards"
 license-file = "../../LICENSE"
 readme = "../../README.md"
 repository = "https://github.com/mbwilding/dygma-focus-api-rs"
+publish = false
 
 [dependencies]
 dygma_focus = { path = "../focus", default-features = false, features = [
