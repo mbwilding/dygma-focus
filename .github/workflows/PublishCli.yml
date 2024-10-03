@@ -11,7 +11,6 @@ jobs:
       matrix:
         target:
           - x86_64-pc-windows-gnu
-          - aarch64-pc-windows-gnu
           - x86_64-unknown-linux-gnu
           - aarch64-unknown-linux-gnu
           - x86_64-apple-darwin
@@ -41,7 +40,7 @@ jobs:
         run: sudo apt-get install -y mingw-w64 libudev-dev zip
 
       - name: "Build"
-        run: cargo build --release --target ${{ matrix.target }}
+        run: cargo build --release --bin dygma --target ${{ matrix.target }}
 
       - name: "Zip"
         run: |
