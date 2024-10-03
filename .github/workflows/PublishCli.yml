@@ -38,60 +38,60 @@ jobs:
             bin: dygma
             name: dygma-linux-aarch64-musl.tar.gz
             skip_tests: true
-          - os_name: Linux-arm
-            os: ubuntu-20.04
-            target: arm-unknown-linux-musleabi
-            bin: dygma
-            name: dygma-linux-arm-musl.tar.gz
-            skip_tests: true
-          - os_name: Linux-i686
-            os: ubuntu-20.04
-            target: i686-unknown-linux-musl
-            bin: dygma
-            name: dygma-linux-i686-musl.tar.gz
-            skip_tests: true
-          - os_name: Linux-powerpc
-            os: ubuntu-20.04
-            target: powerpc-unknown-linux-gnu
-            bin: dygma
-            name: dygma-linux-powerpc-gnu.tar.gz
-            skip_tests: true
-          - os_name: Linux-powerpc64
-            os: ubuntu-20.04
-            target: powerpc64-unknown-linux-gnu
-            bin: dygma
-            name: dygma-linux-powerpc64-gnu.tar.gz
-            skip_tests: true
-          - os_name: Linux-powerpc64le
-            os: ubuntu-20.04
-            target: powerpc64le-unknown-linux-gnu
-            bin: dygma
-            name: dygma-linux-powerpc64le.tar.gz
-            skip_tests: true
-          - os_name: Linux-riscv64
-            os: ubuntu-20.04
-            target: riscv64gc-unknown-linux-gnu
-            bin: dygma
-            name: dygma-linux-riscv64gc-gnu.tar.gz
-            skip_tests: true
-          - os_name: Linux-s390x
-            os: ubuntu-20.04
-            target: s390x-unknown-linux-gnu
-            bin: dygma
-            name: dygma-linux-s390x-gnu.tar.gz
-            skip_tests: true
+          # - os_name: Linux-arm
+          #   os: ubuntu-20.04
+          #   target: arm-unknown-linux-musleabi
+          #   bin: dygma
+          #   name: dygma-linux-arm-musl.tar.gz
+          #   skip_tests: true
+          # - os_name: Linux-i686
+          #   os: ubuntu-20.04
+          #   target: i686-unknown-linux-musl
+          #   bin: dygma
+          #   name: dygma-linux-i686-musl.tar.gz
+          #   skip_tests: true
+          # - os_name: Linux-powerpc
+          #   os: ubuntu-20.04
+          #   target: powerpc-unknown-linux-gnu
+          #   bin: dygma
+          #   name: dygma-linux-powerpc-gnu.tar.gz
+          #   skip_tests: true
+          # - os_name: Linux-powerpc64
+          #   os: ubuntu-20.04
+          #   target: powerpc64-unknown-linux-gnu
+          #   bin: dygma
+          #   name: dygma-linux-powerpc64-gnu.tar.gz
+          #   skip_tests: true
+          # - os_name: Linux-powerpc64le
+          #   os: ubuntu-20.04
+          #   target: powerpc64le-unknown-linux-gnu
+          #   bin: dygma
+          #   name: dygma-linux-powerpc64le.tar.gz
+          #   skip_tests: true
+          # - os_name: Linux-riscv64
+          #   os: ubuntu-20.04
+          #   target: riscv64gc-unknown-linux-gnu
+          #   bin: dygma
+          #   name: dygma-linux-riscv64gc-gnu.tar.gz
+          #   skip_tests: true
+          # - os_name: Linux-s390x
+          #   os: ubuntu-20.04
+          #   target: s390x-unknown-linux-gnu
+          #   bin: dygma
+          #   name: dygma-linux-s390x-gnu.tar.gz
+          #   skip_tests: true
           - os_name: Windows-aarch64
             os: windows-latest
             target: aarch64-pc-windows-msvc
             bin: dygma.exe
             name: dygma-windows-aarch64.zip
             skip_tests: true
-          - os_name: Windows-i686
-            os: windows-latest
-            target: i686-pc-windows-msvc
-            bin: dygma.exe
-            name: dygma-windows-i686.zip
-            skip_tests: true
+          # - os_name: Windows-i686
+          #   os: windows-latest
+          #   target: i686-pc-windows-msvc
+          #   bin: dygma.exe
+          #   name: dygma-windows-i686.zip
+          #   skip_tests: true
           - os_name: Windows-x86_64
             os: windows-latest
             target: x86_64-pc-windows-msvc
