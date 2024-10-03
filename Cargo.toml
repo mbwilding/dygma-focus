@@ -1,6 +1,11 @@
 [workspace]
 resolver = "2"
-members = ["focus", "proc_macros", "example"]
+members = [
+    "crates/cli",
+    "crates/focus",
+    "crates/proc_macros",
+    "example"
+]
 
 [profile.release]
 opt-level = 3

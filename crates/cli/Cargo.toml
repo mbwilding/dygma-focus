@@ -1,0 +1,17 @@
+[package]
+name = "dygma"
+version = "0.4.11"
+edition = "2021"
+authors = ["Matthew Wilding <mbwilding@gmail.com>"]
+description = "Dygma focus api cli, for use with dygma keyboards"
+license-file = "../../LICENSE"
+readme = "../../README.md"
+repository = "https://github.com/mbwilding/dygma-focus-api-rs"
+
+[dependencies]
+dygma_focus = { path = "../focus", default-features = false, features = [
+    "is_async",
+] }
+anyhow = "1.0"
+clap = { version = "4.5", features = [ "derive" ] }
+tokio = "1.40"

@@ -629,7 +629,7 @@ impl Focus {
     /// Wait for value specifies the time between the first and subsequent releases of the HOLD actions meanwhile is held,
     ///
     /// So for example,
-    /// if the variable is set to 500ms, you can maintain the hold key, it will emmit a key code corresponding to the action that it triggers,
+    /// if the variable is set to 500ms, you can maintain the hold key, it will emit a key code corresponding to the action that it triggers,
     /// then it will wait for wait for time for making another key press with that same key code.
     /// This enables the user to delay the hold "machinegun" to be able to release the key and achieve a single keypress from a hold action.
     ///
@@ -645,7 +645,7 @@ impl Focus {
     /// Wait for value specifies the time between the first and subsequent releases of the HOLD actions meanwhile is held,
     ///
     /// So for example,
-    /// if the variable is set to 500ms, you can maintain the hold key, it will emmit a key code corresponding to the action that it triggers,
+    /// if the variable is set to 500ms, you can maintain the hold key, it will emit a key code corresponding to the action that it triggers,
     /// then it will wait for wait for time for making another key press with that same key code.
     /// This enables the user to delay the hold "machinegun" to be able to release the key and achieve a single keypress from a hold action.
     ///
@@ -745,7 +745,7 @@ impl Focus {
 
     /// Gets the Superkeys overlap percentage.
     ///
-    /// The overlap value specifies the percentage of overlap when fast typing that is allowed to happen before triggering a hold action to the overlapped key pressed after the super key.
+    /// The overlap value specifies the percentage of overlap when fast typing that is allowed to happen before triggering a hold action to the overlapped key pressed after the superkey.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysoverlap
     #[maybe_async]
@@ -755,7 +755,7 @@ impl Focus {
 
     /// Sets the Superkeys overlap percentage.
     ///
-    /// The overlap value specifies the percentage of overlap when fast typing that is allowed to happen before triggering a hold action to the overlapped key pressed after the super key.
+    /// The overlap value specifies the percentage of overlap when fast typing that is allowed to happen before triggering a hold action to the overlapped key pressed after the superkey.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysoverlap
     #[maybe_async]
