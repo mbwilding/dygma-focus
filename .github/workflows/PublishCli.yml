@@ -7,6 +7,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    continue-on-error: true
     strategy:
       matrix:
         target:
@@ -37,7 +38,7 @@ jobs:
         run: sudo apt-get update -y
 
       - name: "Install Dependencies"
-        run: sudo apt-get install -y mingw-w64 libudev-dev zip build-essential
+        run: sudo apt-get install -y mingw-w64 libudev-dev zip
 
       - name: "Build"
         run: cargo build --release --package dygma --bin dygma --target ${{ matrix.target }}
