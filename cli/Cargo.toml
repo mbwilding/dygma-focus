@@ -10,7 +10,7 @@ repository = "https://github.com/mbwilding/dygma-focus-api-rs"
 publish = false
 
 [dependencies]
-dygma_focus = { path = "../focus", default-features = false, features = [
+dygma_focus = { path = "../crates/focus", default-features = false, features = [
     "is_async",
 ] }
 anyhow = "1.0"

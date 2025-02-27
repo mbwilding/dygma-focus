@@ -4,7 +4,7 @@ members = [
     "crates/focus",
     "crates/proc_macros",
     "cli",
-    "example"
+    "example",
 ]
 
 [profile.release]
