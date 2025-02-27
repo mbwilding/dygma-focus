@@ -29,4 +29,4 @@ jobs:
           override: true
 
       - name: "Build with feature ${{ matrix.feature }}"
-        run: cargo build --manifest-path focus/Cargo.toml --no-default-features --features "${{ matrix.feature }}"
+        run: cargo build --manifest-path crates/focus/Cargo.toml --no-default-features --features "${{ matrix.feature }}"
