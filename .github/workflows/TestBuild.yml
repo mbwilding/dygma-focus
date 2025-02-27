@@ -1,9 +1,7 @@
-name: Test Build
+name: Test Build with Features
 
 on:
   push:
-    branches-ignore:
-      - main
 
 jobs:
   build:

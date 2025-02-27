@@ -1,9 +1,9 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/cli",
     "crates/focus",
     "crates/proc_macros",
+    "cli",
     "example"
 ]
 
