@@ -847,7 +847,7 @@ impl Focus {
             .await
     }
 
-    /// Gets the top LED brightness.
+    /// Gets the key LED brightness (wired).
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightness
     #[maybe_async]
@@ -855,7 +855,7 @@ impl Focus {
         self.command_response_numerical("led.brightness").await
     }
 
-    /// Sets the top LED brightness.
+    /// Sets the key LED brightness (wired).
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightness
     #[maybe_async]
@@ -868,7 +868,7 @@ impl Focus {
             .await
     }
 
-    /// Gets the underglow LED wired brightness.
+    /// Gets the underglow LED brightness (wired).
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
     #[maybe_async]
@@ -876,7 +876,7 @@ impl Focus {
         self.command_response_numerical("led.brightnessUG").await
     }
 
-    /// Sets the underglow LED wired brightness.
+    /// Sets the underglow LED brightness (wired).
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
     #[maybe_async]
@@ -889,18 +889,18 @@ impl Focus {
             .await
     }
 
-    /// Gets the key LED wireless brightness.
+    /// Gets the key LED brightness (wireless).
     ///
-    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightness
+    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnesswireless
     #[maybe_async]
     pub async fn led_brightness_keys_wireless_get(&mut self) -> Result<u8> {
         self.command_response_numerical("led.brightness.wireless")
             .await
     }
 
-    /// Sets the key LED wireless brightness.
+    /// Sets the key LED brightness (wireless).
     ///
-    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightness
+    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnesswireless
     #[maybe_async]
     pub async fn led_brightness_keys_wireless_set(&mut self, brightness: u8) -> Result<()> {
         if self.led_brightness_keys_wireless_get().await? == brightness {
@@ -911,18 +911,18 @@ impl Focus {
             .await
     }
 
-    /// Gets the underglow LED wireless brightness.
+    /// Gets the underglow LED brightness (wireless).
     ///
-    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
+    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessugwireless
     #[maybe_async]
     pub async fn led_brightness_underglow_wireless_get(&mut self) -> Result<u8> {
         self.command_response_numerical("led.brightnessUG.wireless")
             .await
     }
 
-    /// Sets the underglow LED wireless brightness.
+    /// Sets the underglow LED brightness (wireless).
     ///
-    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
+    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessugwireless
     #[maybe_async]
     pub async fn led_brightness_underglow_wireless_set(&mut self, brightness: u8) -> Result<()> {
         if self.led_brightness_underglow_wireless_get().await? == brightness {
@@ -1058,12 +1058,16 @@ impl Focus {
     }
 
     /// Gets the idle LED true sleep state.
+    ///
+    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstrue_sleep
     #[maybe_async]
     pub async fn led_idle_true_sleep_get(&mut self) -> Result<bool> {
         self.command_response_bool("idleleds.true_sleep").await
     }
 
     /// Sets the idle LED true sleep state.
+    ///
+    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstrue_sleep
     #[maybe_async]
     pub async fn led_idle_true_sleep_set(&mut self, state: bool) -> Result<()> {
         if self.led_idle_true_sleep_get().await? == state {
@@ -1075,6 +1079,8 @@ impl Focus {
     }
 
     /// Gets the idle LED true sleep time.
+    ///
+    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstrue_sleep_time
     #[maybe_async]
     pub async fn led_idle_true_sleep_time_get(&mut self) -> Result<Duration> {
         self.command_response_duration("idleleds.true_sleep_time", TimeUnit::Seconds)
@@ -1082,6 +1088,8 @@ impl Focus {
     }
 
     /// Sets the idle LED true sleep time.
+    ///
+    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstrue_sleep_time
     #[maybe_async]
     pub async fn led_idle_true_sleep_time_set(&mut self, duration: Duration) -> Result<()> {
         let seconds = duration.as_secs();
@@ -1126,14 +1134,18 @@ impl Focus {
             .await
     }
 
-    /// Gets the idle LED wireless time limit.
+    /// Gets the idle LED time limit (wireless).
+    ///
+    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledswireless
     #[maybe_async]
     pub async fn led_idle_time_limit_wireless_get(&mut self) -> Result<Duration> {
         self.command_response_duration("idleleds.wireless", TimeUnit::Seconds)
             .await
     }
 
-    /// Sets the idle LED wireless time limit.
+    /// Sets the idle LED time limit (wireless).
+    ///
+    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledswireless
     #[maybe_async]
     pub async fn led_idle_time_limit_wireless_set(&mut self, duration: Duration) -> Result<()> {
         let seconds = duration.as_secs();
@@ -1159,6 +1171,8 @@ impl Focus {
     }
 
     /// Sets the keyboard model name.
+    ///
+    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#hardwareversion
     #[maybe_async]
     pub async fn hardware_version_set(&mut self, data: &str) -> Result<()> {
         if self.hardware_version_get().await? == data {
@@ -1477,6 +1491,8 @@ impl Focus {
     }
 
     /// Gets the battery level of the left keyboard as a percentage.
+    ///
+    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#wirelessbatteryleftlevel
     #[maybe_async]
     pub async fn wireless_battery_level_left_get(&mut self) -> Result<u8> {
         self.command_response_numerical("wireless.battery.left.level")
@@ -1484,6 +1500,8 @@ impl Focus {
     }
 
     /// Gets the battery level of the right keyboard as a percentage.
+    ///
+    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#wirelessbatteryrightlevel
     #[maybe_async]
     pub async fn wireless_battery_level_right_get(&mut self) -> Result<u8> {
         self.command_response_numerical("wireless.battery.right.level")
@@ -1491,6 +1509,8 @@ impl Focus {
     }
 
     /// Gets the battery status of the left keyboard.
+    ///
+    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#wirelessbatteryleftstatus
     #[maybe_async]
     pub async fn wireless_battery_status_left_get(&mut self) -> Result<u8> {
         self.command_response_numerical("wireless.battery.left.status")
@@ -1498,6 +1518,8 @@ impl Focus {
     }
 
     /// Gets the battery status of the right keyboard.
+    ///
+    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#wirelessbatteryrightstatus
     #[maybe_async]
     pub async fn wireless_battery_status_right_get(&mut self) -> Result<u8> {
         self.command_response_numerical("wireless.battery.right.status")
@@ -1505,6 +1527,10 @@ impl Focus {
     }
 
     /// Gets the battery saving mode state.
+    ///
+    /// This will be automatically enabled when remaining battery charge is low, but it can be manually enabled earlier.
+    ///
+    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#wirelessbatterysavingmode
     #[maybe_async]
     pub async fn wireless_battery_saving_mode_get(&mut self) -> Result<bool> {
         self.command_response_bool("wireless.battery.savingMode")
@@ -1512,6 +1538,10 @@ impl Focus {
     }
 
     /// Sets the battery saving mode state.
+    ///
+    /// This will be automatically enabled when remaining battery charge is low, but it can be manually enabled earlier.
+    ///
+    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#wirelessbatterysavingmode
     #[maybe_async]
     pub async fn wireless_battery_saving_mode_set(&mut self, state: bool) -> Result<()> {
         if self.wireless_battery_saving_mode_get().await? == state {
@@ -1525,7 +1555,20 @@ impl Focus {
         .await
     }
 
+    /// Forces the neuron to update the battery level.
+    ///
+    /// This typically takes a second or two to update the values for the wireless_battery_level commands to read.
+    ///
+    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#wirelessbatteryforceread
+    #[maybe_async]
+    pub async fn wireless_battery_force_read(&mut self) -> Result<()> {
+        self.command_new_line("wireless.battery.forceRead", false)
+            .await
+    }
+
     /// Gets the RF power level.
+    ///
+    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#wirelessrfpower
     #[maybe_async]
     pub async fn wireless_rf_power_level_get(&mut self) -> Result<WirelessPowerMode> {
         self.command_response_numerical("wireless.rf.power").await
@@ -1566,6 +1609,8 @@ impl Focus {
     }
 
     /// Gets the sync pairing state.
+    ///
+    /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#wirelessrfsyncpairing
     #[maybe_async]
     pub async fn wireless_rf_sync_pairing(&mut self) -> Result<bool> {
         self.command_response_bool("wireless.rf.syncPairing").await

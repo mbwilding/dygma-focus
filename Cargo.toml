@@ -1,11 +1,18 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/cli",
     "crates/focus",
     "crates/proc_macros",
-    "example"
+    "cli",
+    "example",
 ]
+
+[workspace.package]
+version = "0.4.12"
+authors = ["Matthew Wilding <mbwilding@gmail.com>"]
+description = "Dygma focus api, for use with dygma keyboards"
+repository = "https://github.com/mbwilding/dygma-focus-api-rs"
+edition = "2021"
 
 [profile.release]
 opt-level = "z"         # Optimize for size.
