@@ -1,0 +1,32 @@
+name: Test Build
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  build:
+    name: Test Build with Features
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        feature:
+          - is_sync
+          - is_async
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+
+      - name: "Install Packages"
+        run: sudo apt-get install -y libudev-dev
+
+      - name: "Rust Toolchain"
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: "Build with feature ${{ matrix.feature }}"
+        run: cargo build --package focus --no-default-features --features "${{ matrix.feature }}"
