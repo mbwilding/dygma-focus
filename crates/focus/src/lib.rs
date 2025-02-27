@@ -154,7 +154,7 @@ impl Focus {
         serial.set_exclusive(false)?;
 
         Ok(Self {
-            serial: serial,
+            serial,
             response_buffer: Vec::with_capacity(1_024 * 8),
         })
     }
@@ -182,7 +182,7 @@ impl Focus {
         serial.set_exclusive(false)?;
 
         Ok(Self {
-            serial: serial,
+            serial,
             response_buffer: Vec::with_capacity(1_024 * 8),
         })
     }
