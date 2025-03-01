@@ -8,7 +8,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.4.15"
+version = "0.4.16"
 authors = ["Matthew Wilding <mbwilding@gmail.com>"]
 description = "Dygma focus api, for use with dygma keyboards"
 repository = "https://github.com/mbwilding/dygma-focus-api-rs"

@@ -490,7 +490,7 @@ checksum = "f25c0e292a7ca6d6498557ff1df68f32c99850012b6ea401cf8daf771f22ff53"
 
 [[package]]
 name = "dygma"
-version = "0.4.15"
+version = "0.4.16"
 dependencies = [
  "anyhow",
  "clap",
@@ -500,7 +500,7 @@ dependencies = [
 
 [[package]]
 name = "dygma_focus"
-version = "0.4.15"
+version = "0.4.16"
 dependencies = [
  "anyhow",
  "dygma_focus_proc_macros",
@@ -516,7 +516,7 @@ dependencies = [
 
 [[package]]
 name = "dygma_focus_proc_macros"
-version = "0.4.15"
+version = "0.4.16"
 dependencies = [
  "quote",
  "syn",
@@ -675,7 +675,7 @@ checksum = "a5d9305ccc6942a704f4335694ecd3de2ea531b114ac2d51f5f843750787a92f"
 
 [[package]]
 name = "example"
-version = "0.4.15"
+version = "0.4.16"
 dependencies = [
  "dygma_focus",
  "eframe",

@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde_camel_case", serde(rename_all = "camelCase"))]
 pub struct Settings {
     pub keymap_custom: Vec<u16>,
     pub keymap_default: Vec<u16>,
