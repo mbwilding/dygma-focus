@@ -1,4 +1,6 @@
 use dygma_focus_proc_macros::*;
+
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 /// Time units for use with converting from string.
@@ -8,7 +10,8 @@ pub(crate) enum TimeUnit {
 }
 
 /// The LED mode states.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, NumStrEnum)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, NumStrEnum)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum LedMode {
     /// The default mode. The LEDs will be set to the color of the layer you are on.
     Static = 0,
@@ -35,7 +38,8 @@ pub enum LedMode {
 }
 
 /// The wireless power mode states.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, NumStrEnum)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, NumStrEnum)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum WirelessPowerMode {
     /// Low power mode. The battery will last longer but the wireless range will be shorter.
     Low = 0,
@@ -46,7 +50,8 @@ pub enum WirelessPowerMode {
 }
 
 /// The device side.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Side {
     Right = 0,
     Left = 1,

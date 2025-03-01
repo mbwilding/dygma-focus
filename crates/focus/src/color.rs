@@ -1,9 +1,12 @@
 use anyhow::{bail, Error, Result};
-use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 /// The LED RGB color.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RGB {
     /// Red component of the color.
     pub r: u8,
@@ -34,7 +37,8 @@ impl FromStr for RGB {
 }
 
 /// The LED RGBW color.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RGBW {
     /// Red component of the color.
     pub r: u8,

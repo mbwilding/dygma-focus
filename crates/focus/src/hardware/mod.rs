@@ -1,9 +1,12 @@
 pub mod types;
 
 use std::fmt::{Display, Formatter};
+
+#[cfg(feature = "serde")]
 use serde::Serialize;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Device {
     pub hardware: Hardware,
     pub serial_port: String,
@@ -15,7 +18,8 @@ impl Display for Device {
     }
 }
 
-#[derive(Debug, Copy, Clone, Serialize)]
+#[derive(Debug, Copy, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Hardware {
     pub info: Info,
     pub usb: Usb,
@@ -34,7 +38,8 @@ impl Display for Hardware {
     }
 }
 
-#[derive(Debug, Copy, Clone, Serialize)]
+#[derive(Debug, Copy, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Virtual {
     pub version: VirtualNode,
     pub keymap_custom: VirtualNode,
@@ -113,24 +118,28 @@ pub struct Virtual {
     pub wireless_rf_sync_pairing: Option<VirtualNode>,
 }
 
-#[derive(Debug, Copy, Clone, Serialize)]
+#[derive(Debug, Copy, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct VirtualNode {
     pub data: &'static str,
     pub erasable: bool,
 }
 
-#[derive(Debug, Copy, Clone, Serialize)]
+#[derive(Debug, Copy, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Urls {
     pub homepage: Url,
 }
 
-#[derive(Debug, Copy, Clone, Serialize)]
+#[derive(Debug, Copy, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Url {
     pub name: &'static str,
     pub url: &'static str,
 }
 
-#[derive(Debug, Copy, Clone, Serialize)]
+#[derive(Debug, Copy, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Info {
     pub vendor: Vendor,
     pub product: Product,
@@ -139,12 +148,14 @@ pub struct Info {
     pub urls: Urls,
 }
 
-#[derive(Debug, Copy, Clone, Serialize)]
+#[derive(Debug, Copy, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum Vendor {
     Dygma,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Serialize)]
+#[derive(Debug, Copy, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum Product {
     Defy,
     Raise,
@@ -165,7 +176,8 @@ impl Display for Product {
     }
 }
 
-#[derive(Debug, Copy, Clone, Serialize)]
+#[derive(Debug, Copy, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum DeviceType {
     Wired,
     Wireless,
@@ -173,24 +185,28 @@ pub enum DeviceType {
     ANSI,
 }
 
-#[derive(Debug, Copy, Clone, Serialize)]
+#[derive(Debug, Copy, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Usb {
     pub vendor_id: u16,
     pub product_id: u16,
 }
 
-#[derive(Debug, Copy, Clone, Serialize)]
+#[derive(Debug, Copy, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Grid {
     pub rows: u8,
     pub columns: u8,
 }
 
-#[derive(Debug, Copy, Clone, Serialize)]
+#[derive(Debug, Copy, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Languages {
     pub en: Dialog,
 }
 
-#[derive(Debug, Copy, Clone, Serialize)]
+#[derive(Debug, Copy, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Dialog {
     pub update_instructions: &'static str,
 }

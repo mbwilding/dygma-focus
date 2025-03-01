@@ -10,10 +10,10 @@ readme = "../../README.md"
 
 [dependencies]
 anyhow = "1.0"
-dygma_focus_proc_macros = { version = "0.4.11", path = "../proc_macros" }
+dygma_focus_proc_macros = { path = "../proc_macros" }
 lazy_static = "1.5"
 maybe-async = "0.2"
-serde = { version = "1.0", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"], optional = true }
 serialport = { version = "4.7", optional = true }
 tokio = { version = "1", features = ["full"], optional = true }
 tokio-serial = { version = "5.4", optional = true }
@@ -24,6 +24,7 @@ windows = { version = "0.60", features = [
 ] }
 
 [features]
-default = ["is_sync"]
-is_sync = ["maybe-async/is_sync", "serialport"]
-is_async = ["tokio", "tokio-serial"]
+# default = ["is_sync"]
+is_sync = ["maybe-async/is_sync", "dep:serialport"]
+is_async = ["dep:tokio", "dep:tokio-serial"]
+serde = ["dep:serde"]

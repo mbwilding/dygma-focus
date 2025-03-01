@@ -12,6 +12,8 @@ jobs:
         feature:
           - is_sync
           - is_async
+          - is_sync,serde
+          - is_async,serde
 
     steps:
       - name: "Checkout"

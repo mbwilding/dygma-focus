@@ -18,7 +18,7 @@ Cargo.toml
 
 ```toml
 [dependencies]
-dygma_focus = { version = "0.4", default-features = false, features = ["is_async"] }
+dygma_focus = { version = "0.4", features = ["is_async"] }
 tokio = { version = "1", features = ["full"] }
 ```
 
@@ -48,7 +48,7 @@ Cargo.toml
 
 ```toml
 [dependencies]
-dygma_focus = { version = "0.4" }
+dygma_focus = { version = "0.4", features = ["is_sync"] }
 ```
 
 src/main.rs
@@ -69,6 +69,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 ```
+
+## Additional features
+
+- serde: Enables serialization/deserialization
 
 ## Projects using this crate
 

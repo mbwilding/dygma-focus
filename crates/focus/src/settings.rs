@@ -1,9 +1,12 @@
 use crate::color::*;
 use crate::enums::{LedMode, WirelessPowerMode};
-use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Settings {
     pub keymap_custom: Vec<u16>,
     pub keymap_default: Vec<u16>,
