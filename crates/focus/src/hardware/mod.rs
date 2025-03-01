@@ -155,6 +155,7 @@ pub struct Info {
 }
 
 #[derive(Debug, Copy, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum Vendor {
     Dygma,
 }
