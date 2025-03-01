@@ -1,7 +1,7 @@
 name: Test Build with Features
 
 on:
-  push:
+  workflow_dispatch:
 
 jobs:
   build:
@@ -13,7 +13,7 @@ jobs:
           - is_sync
           - is_async
           - is_sync,serde
-          - is_async,serde
+          - is_sync,serde,serde_camel_case
 
     steps:
       - name: "Checkout"
