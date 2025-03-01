@@ -7,6 +7,7 @@ use serde::Serialize;
 
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde_camel_case", serde(rename_all = "camelCase"))]
 pub struct Device {
     pub hardware: Hardware,
     pub serial_port: String,
@@ -20,6 +21,7 @@ impl Display for Device {
 
 #[derive(Debug, Copy, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde_camel_case", serde(rename_all = "camelCase"))]
 pub struct Hardware {
     pub info: Info,
     pub usb: Usb,
@@ -40,6 +42,7 @@ impl Display for Hardware {
 
 #[derive(Debug, Copy, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde_camel_case", serde(rename_all = "camelCase"))]
 pub struct Virtual {
     pub version: VirtualNode,
     pub keymap_custom: VirtualNode,
@@ -127,12 +130,14 @@ pub struct VirtualNode {
 
 #[derive(Debug, Copy, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde_camel_case", serde(rename_all = "camelCase"))]
 pub struct Urls {
     pub homepage: Url,
 }
 
 #[derive(Debug, Copy, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde_camel_case", serde(rename_all = "camelCase"))]
 pub struct Url {
     pub name: &'static str,
     pub url: &'static str,
@@ -140,6 +145,7 @@ pub struct Url {
 
 #[derive(Debug, Copy, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde_camel_case", serde(rename_all = "camelCase"))]
 pub struct Info {
     pub vendor: Vendor,
     pub product: Product,
@@ -149,7 +155,6 @@ pub struct Info {
 }
 
 #[derive(Debug, Copy, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum Vendor {
     Dygma,
 }
@@ -187,6 +192,7 @@ pub enum DeviceType {
 
 #[derive(Debug, Copy, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde_camel_case", serde(rename_all = "camelCase"))]
 pub struct Usb {
     pub vendor_id: u16,
     pub product_id: u16,
@@ -207,6 +213,7 @@ pub struct Languages {
 
 #[derive(Debug, Copy, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde_camel_case", serde(rename_all = "camelCase"))]
 pub struct Dialog {
     pub update_instructions: &'static str,
 }

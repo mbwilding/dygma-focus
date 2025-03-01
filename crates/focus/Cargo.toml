@@ -24,7 +24,8 @@ windows = { version = "0.60", features = [
 ] }
 
 [features]
-default = ["is_sync"]
-is_sync = ["maybe-async/is_sync", "dep:serialport"]
-is_async = ["dep:tokio", "dep:tokio-serial"]
-serde = ["dep:serde"]
+default = ["is_sync"]                               # Default is synchronous
+is_sync = ["maybe-async/is_sync", "dep:serialport"] # Non-async
+is_async = ["dep:tokio", "dep:tokio-serial"]        # Tokio async
+serde = ["dep:serde"]                               # Enables serialization
+serde_camel_case = []                               # When serializing, the fields will be camel case
