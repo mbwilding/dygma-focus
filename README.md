@@ -1,4 +1,4 @@
-# Dygma Focus API (Rust)
+# Dygma Focus API
 
 [<img alt="crates.io" src="https://img.shields.io/crates/v/dygma_focus?style=for-the-badge&color=fc8d62&logo=rust" height="20">](https://crates.io/crates/dygma_focus)
 

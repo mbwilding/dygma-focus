@@ -9,7 +9,7 @@ members = [
 version = "0.4.17"
 authors = ["Matthew Wilding <mbwilding@gmail.com>"]
 description = "Dygma focus api, for use with dygma keyboards"
-repository = "https://github.com/mbwilding/dygma-focus-api-rs"
+repository = "https://github.com/mbwilding/dygma-focus"
 edition = "2021"
 
 [profile.release]
