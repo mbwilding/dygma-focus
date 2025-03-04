@@ -485,14 +485,12 @@ impl Focus {
 
     #[maybe_async]
     pub async fn upgrade_start(&mut self) -> Result<()> {
-        self.command_new_line("upgrade.start", false)
-            .await
+        self.command_new_line("upgrade.start", false).await
     }
 
     #[maybe_async]
     pub async fn upgrade_is_ready(&mut self) -> Result<bool> {
-        self.command_response_bool("upgrade.isReady")
-            .await
+        self.command_response_bool("upgrade.isReady").await
     }
 
     #[maybe_async]
@@ -502,8 +500,7 @@ impl Focus {
 
     #[maybe_async]
     pub async fn upgrade_end(&mut self) -> Result<()> {
-        self.command_new_line("upgrade.start", false)
-            .await
+        self.command_new_line("upgrade.start", false).await
     }
 
     #[maybe_async]
@@ -608,8 +605,7 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeyswaitfor
     #[maybe_async]
     pub async fn superkeys_wait_for_get(&mut self) -> Result<u16> {
-        self.command_response_numerical("superkeys.waitfor")
-            .await
+        self.command_response_numerical("superkeys.waitfor").await
     }
 
     /// Sets the Superkeys wait for duration in milliseconds.
@@ -624,11 +620,8 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeyswaitfor
     #[maybe_async]
     pub async fn superkeys_wait_for_set(&mut self, milliseconds: u16) -> Result<()> {
-        self.command_new_line(
-            &format!("superkeys.waitfor {}", &milliseconds),
-            true,
-        )
-        .await
+        self.command_new_line(&format!("superkeys.waitfor {}", &milliseconds), true)
+            .await
     }
 
     /// Gets the Superkeys timeout of how long it waits for the next tap in milliseconds.
@@ -636,8 +629,7 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeystimeout
     #[maybe_async]
     pub async fn superkeys_timeout_get(&mut self) -> Result<u16> {
-        self.command_response_numerical("superkeys.timeout")
-            .await
+        self.command_response_numerical("superkeys.timeout").await
     }
 
     /// Sets the Superkeys timeout of how long it waits for the next tap in milliseconds.
@@ -645,11 +637,8 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeystimeout
     #[maybe_async]
     pub async fn superkeys_timeout_set(&mut self, milliseconds: u16) -> Result<()> {
-        self.command_new_line(
-            &format!("superkeys.timeout {}", &milliseconds),
-            true,
-        )
-        .await
+        self.command_new_line(&format!("superkeys.timeout {}", &milliseconds), true)
+            .await
     }
 
     /// Gets the Superkeys repeat duration in milliseconds.
@@ -659,8 +648,7 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysrepeat
     #[maybe_async]
     pub async fn superkeys_repeat_get(&mut self) -> Result<u16> {
-        self.command_response_numerical("superkeys.repeat")
-            .await
+        self.command_response_numerical("superkeys.repeat").await
     }
 
     /// Sets the Superkeys repeat duration in milliseconds.
@@ -681,8 +669,7 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysholdstart
     #[maybe_async]
     pub async fn superkeys_hold_start_get(&mut self) -> Result<u16> {
-        self.command_response_numerical("superkeys.holdstart")
-            .await
+        self.command_response_numerical("superkeys.holdstart").await
     }
 
     /// Sets the Superkeys hold start duration in milliseconds.
@@ -692,11 +679,8 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysholdstart
     #[maybe_async]
     pub async fn superkeys_hold_start_set(&mut self, milliseconds: u16) -> Result<()> {
-        self.command_new_line(
-            &format!("superkeys.holdstart {}", &milliseconds),
-            true,
-        )
-        .await
+        self.command_new_line(&format!("superkeys.holdstart {}", &milliseconds), true)
+            .await
     }
 
     /// Gets the Superkeys overlap percentage.
@@ -1011,8 +995,7 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstime_limit
     #[maybe_async]
     pub async fn led_idle_time_limit_wired_get(&mut self) -> Result<u16> {
-        self.command_response_numerical("idleleds.time_limit")
-            .await
+        self.command_response_numerical("idleleds.time_limit").await
     }
 
     /// Sets the idle LED wired time limit in seconds.
@@ -1035,8 +1018,7 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledswireless
     #[maybe_async]
     pub async fn led_idle_time_limit_wireless_get(&mut self) -> Result<u16> {
-        self.command_response_numerical("idleleds.wireless")
-            .await
+        self.command_response_numerical("idleleds.wireless").await
     }
 
     /// Sets the idle LED time limit in seconds (wireless).
@@ -1083,8 +1065,7 @@ impl Focus {
     /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
     #[maybe_async]
     pub async fn qukeys_hold_timeout_get(&mut self) -> Result<u16> {
-        self.command_response_numerical("qukeys.holdTimeout")
-            .await
+        self.command_response_numerical("qukeys.holdTimeout").await
     }
 
     /// Sets the Qukeys hold timeout in milliseconds.
@@ -1092,11 +1073,8 @@ impl Focus {
     /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
     #[maybe_async]
     pub async fn qukeys_hold_timeout_set(&mut self, milliseconds: u16) -> Result<()> {
-        self.command_new_line(
-            &format!("qukeys.holdTimeout {}", &milliseconds),
-            true,
-        )
-        .await
+        self.command_new_line(&format!("qukeys.holdTimeout {}", &milliseconds), true)
+            .await
     }
 
     /// Gets the Qukeys overlap threshold in milliseconds.
@@ -1113,11 +1091,8 @@ impl Focus {
     /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
     #[maybe_async]
     pub async fn qukeys_overlap_threshold_set(&mut self, milliseconds: u16) -> Result<()> {
-        self.command_new_line(
-            &format!("qukeys.overlapThreshold {}", &milliseconds),
-            true,
-        )
-        .await
+        self.command_new_line(&format!("qukeys.overlapThreshold {}", &milliseconds), true)
+            .await
     }
 
     /// Gets the macros map.
@@ -1185,8 +1160,7 @@ impl Focus {
     /// Gets the virtual mouse delay in milliseconds.
     #[maybe_async]
     pub async fn mouse_delay_get(&mut self) -> Result<u16> {
-        self.command_response_numerical("mouse.speedDelay")
-            .await
+        self.command_response_numerical("mouse.speedDelay").await
     }
 
     /// Sets the virtual mouse delay in milliseconds.
@@ -1212,8 +1186,7 @@ impl Focus {
     /// Gets the virtual mouse acceleration delay in milliseconds.
     #[maybe_async]
     pub async fn mouse_acceleration_delay_get(&mut self) -> Result<u16> {
-        self.command_response_numerical("mouse.accelDelay")
-            .await
+        self.command_response_numerical("mouse.accelDelay").await
     }
 
     /// Sets the virtual mouse acceleration delay in milliseconds.
@@ -1239,8 +1212,7 @@ impl Focus {
     /// Gets the virtual mouse wheel delay in milliseconds.
     #[maybe_async]
     pub async fn mouse_wheel_delay_get(&mut self) -> Result<u16> {
-        self.command_response_numerical("mouse.wheelDelay")
-            .await
+        self.command_response_numerical("mouse.wheelDelay").await
     }
 
     /// Sets the virtual mouse wheel delay in milliseconds.
