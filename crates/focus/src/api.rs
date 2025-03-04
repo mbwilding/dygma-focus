@@ -483,14 +483,28 @@ impl Focus {
         self.command_response_string("eeprom.free").await
     }
 
-    // TODO: upgrade.start
+    #[maybe_async]
+    pub async fn upgrade_start(&mut self) -> Result<()> {
+        self.command_new_line("upgrade.start", false)
+            .await
+    }
+
+    #[maybe_async]
+    pub async fn upgrade_is_ready(&mut self) -> Result<bool> {
+        self.command_response_bool("upgrade.isReady")
+            .await
+    }
 
     #[maybe_async]
     pub async fn upgrade_neuron(&mut self) -> Result<()> {
-        self.command_new_line("upgrade.neuron", true).await
+        self.command_new_line("upgrade.neuron", false).await
     }
 
-    // TODO: upgrade.end
+    #[maybe_async]
+    pub async fn upgrade_end(&mut self) -> Result<()> {
+        self.command_new_line("upgrade.start", false)
+            .await
+    }
 
     #[maybe_async]
     pub async fn upgrade_keyscanner_is_connected(&mut self, side: Side) -> Result<bool> {
@@ -1147,7 +1161,7 @@ impl Focus {
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#help
     #[maybe_async]
-    pub async fn help_get(&mut self) -> Result<Vec<String>> {
+    pub async fn help(&mut self) -> Result<Vec<String>> {
         self.command_response_vec_string("help").await
     }
 

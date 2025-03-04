@@ -92,7 +92,7 @@ checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 
 [[package]]
 name = "dygma_focus"
-version = "0.4.17"
+version = "0.4.18"
 dependencies = [
  "anyhow",
  "dygma_focus_proc_macros",
@@ -108,7 +108,7 @@ dependencies = [
 
 [[package]]
 name = "dygma_focus_proc_macros"
-version = "0.4.17"
+version = "0.4.18"
 dependencies = [
  "quote",
  "syn",
