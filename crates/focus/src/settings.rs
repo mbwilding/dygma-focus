@@ -1,6 +1,5 @@
 use crate::color::*;
 use crate::enums::{LedMode, WirelessPowerMode};
-use std::time::Duration;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -14,10 +13,10 @@ pub struct Settings {
     pub keymap_only_custom: bool,
     pub settings_default_layer: u8,
     pub superkeys_map: Vec<u16>,
-    pub superkeys_wait_for: Duration,
-    pub superkeys_timeout: Duration,
-    pub superkeys_repeat: Duration,
-    pub superkeys_hold_start: Duration,
+    pub superkeys_wait_for: u16,
+    pub superkeys_timeout: u16,
+    pub superkeys_repeat: u16,
+    pub superkeys_hold_start: u16,
     pub superkeys_overlap: u8,
     pub led_mode: LedMode,
     pub led_brightness_keys_wired: u8,
@@ -30,18 +29,18 @@ pub struct Settings {
     pub palette_rgbw: Option<Vec<RGBW>>,
     pub color_map: Vec<u8>,
     pub led_idle_true_sleep: Option<bool>,
-    pub led_idle_true_sleep_time: Option<Duration>,
-    pub led_idle_time_limit_wired: Duration,
-    pub led_idle_time_limit_wireless: Option<Duration>,
-    pub qukeys_hold_timeout: Duration,
-    pub qukeys_overlap_threshold: Duration,
+    pub led_idle_true_sleep_time: Option<u16>,
+    pub led_idle_time_limit_wired: u16,
+    pub led_idle_time_limit_wireless: Option<u16>,
+    pub qukeys_hold_timeout: u16,
+    pub qukeys_overlap_threshold: u16,
     pub macros_map: Vec<u8>,
     pub mouse_speed: u8,
-    pub mouse_delay: Duration,
+    pub mouse_delay: u16,
     pub mouse_acceleration_speed: u8,
-    pub mouse_acceleration_delay: Duration,
+    pub mouse_acceleration_delay: u16,
     pub mouse_wheel_speed: u8,
-    pub mouse_wheel_delay: Duration,
+    pub mouse_wheel_delay: u16,
     pub mouse_speed_limit: u8,
     pub wireless_battery_saving_mode: Option<bool>,
     pub wireless_rf_power_level: Option<WirelessPowerMode>,

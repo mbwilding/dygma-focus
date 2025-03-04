@@ -3,12 +3,6 @@ use dygma_focus_proc_macros::*;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Time units for use with converting from string.
-pub(crate) enum TimeUnit {
-    Milliseconds,
-    Seconds,
-}
-
 /// The LED mode states.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, NumStrEnum)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]

@@ -4,7 +4,6 @@ use crate::MAX_LAYERS;
 use anyhow::{anyhow, bail, Result};
 use maybe_async::maybe_async;
 use std::str::FromStr;
-use std::time::Duration;
 use tracing::trace;
 
 #[cfg(feature = "is_async")]
@@ -286,23 +285,6 @@ impl Focus {
             .map_err(|e| anyhow!("Failed to parse response: {:?}", e))
     }
 
-    /// Sends a command to the device, and returns the response as a duration.
-    #[maybe_async]
-    async fn command_response_duration(
-        &mut self,
-        command: &str,
-        time_unit: TimeUnit,
-    ) -> Result<Duration> {
-        let response = self.command_response_numerical(command).await?;
-
-        let duration = match time_unit {
-            TimeUnit::Milliseconds => Duration::from_millis(response),
-            TimeUnit::Seconds => Duration::from_secs(response),
-        };
-
-        Ok(duration)
-    }
-
     /// Sends a command to the device, and returns the response as a boolean value.
     #[maybe_async]
     async fn command_response_bool(&mut self, command: &str) -> Result<bool> {
@@ -359,10 +341,6 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#keymapcustom
     #[maybe_async]
     pub async fn keymap_custom_set(&mut self, data: &[u16]) -> Result<()> {
-        if self.keymap_custom_get().await? == data {
-            return Ok(());
-        }
-
         self.command_new_line(
             &format!("keymap.custom {}", numerical_vec_to_string(data)),
             true,
@@ -389,10 +367,6 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#keymapdefault
     #[maybe_async]
     pub async fn keymap_default_set(&mut self, data: &[u16]) -> Result<()> {
-        if self.keymap_default_get().await? == data {
-            return Ok(());
-        }
-
         self.command_new_line(
             &format!("keymap.default {}", numerical_vec_to_string(data)),
             true,
@@ -419,10 +393,6 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#keymaponlycustom
     #[maybe_async]
     pub async fn keymap_only_custom_set(&mut self, state: bool) -> Result<()> {
-        if self.keymap_only_custom_get().await? == state {
-            return Ok(());
-        }
-
         self.command_new_line(&format!("keymap.onlyCustom {}", state as u8), true)
             .await
     }
@@ -476,10 +446,6 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#settingsversion
     #[maybe_async]
     pub async fn settings_version_set(&mut self, version: &str) -> Result<()> {
-        if self.settings_version_get().await? == version {
-            return Ok(());
-        }
-
         self.command_new_line(&format!("settings.version {}", version), true)
             .await
     }
@@ -505,10 +471,6 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#eepromcontents
     #[maybe_async]
     pub async fn eeprom_contents_set(&mut self, data: &str) -> Result<()> {
-        if self.eeprom_contents_get().await? == data {
-            return Ok(());
-        }
-
         self.command_new_line(&format!("eeprom.contents {}", data), true)
             .await
     }
@@ -613,10 +575,6 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysmap
     #[maybe_async]
     pub async fn superkeys_map_set(&mut self, data: &[u16]) -> Result<()> {
-        if self.superkeys_map_get().await? == data {
-            return Ok(());
-        }
-
         self.command_new_line(
             &format!("superkeys.map {}", numerical_vec_to_string(data)),
             true,
@@ -624,7 +582,7 @@ impl Focus {
         .await
     }
 
-    /// Gets the Superkeys wait for duration.
+    /// Gets the Superkeys wait for duration in milliseconds.
     ///
     /// Wait for value specifies the time between the first and subsequent releases of the HOLD actions meanwhile is held,
     ///
@@ -635,12 +593,12 @@ impl Focus {
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeyswaitfor
     #[maybe_async]
-    pub async fn superkeys_wait_for_get(&mut self) -> Result<Duration> {
-        self.command_response_duration("superkeys.waitfor", TimeUnit::Milliseconds)
+    pub async fn superkeys_wait_for_get(&mut self) -> Result<u16> {
+        self.command_response_numerical("superkeys.waitfor")
             .await
     }
 
-    /// Sets the Superkeys wait for duration.
+    /// Sets the Superkeys wait for duration in milliseconds.
     ///
     /// Wait for value specifies the time between the first and subsequent releases of the HOLD actions meanwhile is held,
     ///
@@ -651,93 +609,77 @@ impl Focus {
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeyswaitfor
     #[maybe_async]
-    pub async fn superkeys_wait_for_set(&mut self, duration: Duration) -> Result<()> {
-        if self.superkeys_wait_for_get().await? == duration {
-            return Ok(());
-        }
-
+    pub async fn superkeys_wait_for_set(&mut self, milliseconds: u16) -> Result<()> {
         self.command_new_line(
-            &format!("superkeys.waitfor {}", &duration.as_millis()),
+            &format!("superkeys.waitfor {}", &milliseconds),
             true,
         )
         .await
     }
 
-    /// Gets the Superkeys timeout of how long it waits for the next tap.
+    /// Gets the Superkeys timeout of how long it waits for the next tap in milliseconds.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeystimeout
     #[maybe_async]
-    pub async fn superkeys_timeout_get(&mut self) -> Result<Duration> {
-        self.command_response_duration("superkeys.timeout", TimeUnit::Milliseconds)
+    pub async fn superkeys_timeout_get(&mut self) -> Result<u16> {
+        self.command_response_numerical("superkeys.timeout")
             .await
     }
 
-    /// Sets the Superkeys timeout of how long it waits for the next tap.
+    /// Sets the Superkeys timeout of how long it waits for the next tap in milliseconds.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeystimeout
     #[maybe_async]
-    pub async fn superkeys_timeout_set(&mut self, duration: Duration) -> Result<()> {
-        if self.superkeys_timeout_get().await? == duration {
-            return Ok(());
-        }
-
+    pub async fn superkeys_timeout_set(&mut self, milliseconds: u16) -> Result<()> {
         self.command_new_line(
-            &format!("superkeys.timeout {}", &duration.as_millis()),
+            &format!("superkeys.timeout {}", &milliseconds),
             true,
         )
         .await
     }
 
-    /// Gets the Superkeys repeat duration.
+    /// Gets the Superkeys repeat duration in milliseconds.
     ///
     /// The repeat value specifies the time between the second and subsequent key code releases when on hold, it only takes effect after the wait for timer has been exceeded.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysrepeat
     #[maybe_async]
-    pub async fn superkeys_repeat_get(&mut self) -> Result<Duration> {
-        self.command_response_duration("superkeys.repeat", TimeUnit::Milliseconds)
+    pub async fn superkeys_repeat_get(&mut self) -> Result<u16> {
+        self.command_response_numerical("superkeys.repeat")
             .await
     }
 
-    /// Sets the Superkeys repeat duration.
+    /// Sets the Superkeys repeat duration in milliseconds.
     ///
     /// The repeat value specifies the time between the second and subsequent key code releases when on hold, it only takes effect after the wait for timer has been exceeded.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysrepeat
     #[maybe_async]
-    pub async fn superkeys_repeat_set(&mut self, duration: Duration) -> Result<()> {
-        if self.superkeys_repeat_get().await? == duration {
-            return Ok(());
-        }
-
-        self.command_new_line(&format!("superkeys.repeat {}", &duration.as_millis()), true)
+    pub async fn superkeys_repeat_set(&mut self, milliseconds: u16) -> Result<()> {
+        self.command_new_line(&format!("superkeys.repeat {}", &milliseconds), true)
             .await
     }
 
-    /// Gets the Superkeys hold start duration.
+    /// Gets the Superkeys hold start duration in milliseconds.
     ///
     /// The hold start value specifies the minimum time that has to pass between the first key down and any other action to trigger a hold, if held it will emit a hold action.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysholdstart
     #[maybe_async]
-    pub async fn superkeys_hold_start_get(&mut self) -> Result<Duration> {
-        self.command_response_duration("superkeys.holdstart", TimeUnit::Milliseconds)
+    pub async fn superkeys_hold_start_get(&mut self) -> Result<u16> {
+        self.command_response_numerical("superkeys.holdstart")
             .await
     }
 
-    /// Sets the Superkeys hold start duration.
+    /// Sets the Superkeys hold start duration in milliseconds.
     ///
     /// The hold start value specifies the minimum time that has to pass between the first key down and any other action to trigger a hold, if held it will emit a hold action.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysholdstart
     #[maybe_async]
-    pub async fn superkeys_hold_start_set(&mut self, duration: Duration) -> Result<()> {
-        if self.superkeys_hold_start_get().await? == duration {
-            return Ok(());
-        }
-
+    pub async fn superkeys_hold_start_set(&mut self, milliseconds: u16) -> Result<()> {
         self.command_new_line(
-            &format!("superkeys.holdstart {}", &duration.as_millis()),
+            &format!("superkeys.holdstart {}", &milliseconds),
             true,
         )
         .await
@@ -762,10 +704,6 @@ impl Focus {
     pub async fn superkeys_overlap_set(&mut self, percentage: u8) -> Result<()> {
         if percentage > 80 {
             bail!("Percentage must be 80 or below: {}", percentage);
-        }
-
-        if self.superkeys_overlap_get().await? == percentage {
-            return Ok(());
         }
 
         self.command_new_line(&format!("superkeys.overlap {}", percentage), true)
@@ -803,10 +741,6 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledat
     #[maybe_async]
     pub async fn led_at_set(&mut self, led: u8, color: &RGB) -> Result<()> {
-        if &self.led_at_get(led).await? == color {
-            return Ok(());
-        }
-
         self.command_new_line(
             &format!("led.at {} {} {} {}", led, color.r, color.g, color.b),
             true,
@@ -839,10 +773,6 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledmode
     #[maybe_async]
     pub async fn led_mode_set(&mut self, mode: LedMode) -> Result<()> {
-        if self.led_mode_get().await? == mode {
-            return Ok(());
-        }
-
         self.command_new_line(&format!("led.mode {}", mode as u8), true)
             .await
     }
@@ -860,10 +790,6 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightness
     #[maybe_async]
     pub async fn led_brightness_top_set(&mut self, brightness: u8) -> Result<()> {
-        if self.led_brightness_top_get().await? == brightness {
-            return Ok(());
-        }
-
         self.command_new_line(&format!("led.brightness {}", brightness), true)
             .await
     }
@@ -881,10 +807,6 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
     #[maybe_async]
     pub async fn led_brightness_underglow_wired_set(&mut self, brightness: u8) -> Result<()> {
-        if self.led_brightness_underglow_wired_get().await? == brightness {
-            return Ok(());
-        }
-
         self.command_new_line(&format!("led.brightnessUG {}", brightness), true)
             .await
     }
@@ -903,10 +825,6 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnesswireless
     #[maybe_async]
     pub async fn led_brightness_keys_wireless_set(&mut self, brightness: u8) -> Result<()> {
-        if self.led_brightness_keys_wireless_get().await? == brightness {
-            return Ok(());
-        }
-
         self.command_new_line(&format!("led.brightness.wireless {}", brightness), true)
             .await
     }
@@ -925,10 +843,6 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessugwireless
     #[maybe_async]
     pub async fn led_brightness_underglow_wireless_set(&mut self, brightness: u8) -> Result<()> {
-        if self.led_brightness_underglow_wireless_get().await? == brightness {
-            return Ok(());
-        }
-
         self.command_new_line(&format!("led.brightnessUG.wireless {}", brightness), true)
             .await
     }
@@ -942,10 +856,6 @@ impl Focus {
     /// Sets the LED fade.
     #[maybe_async]
     pub async fn led_fade_set(&mut self, fade: u16) -> Result<()> {
-        if self.led_fade_get().await? == fade {
-            return Ok(());
-        }
-
         self.command_new_line(&format!("led.fade {}", fade), true)
             .await
     }
@@ -965,10 +875,6 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledtheme
     #[maybe_async]
     pub async fn led_theme_set(&mut self, data: &[RGB]) -> Result<()> {
-        if self.led_theme_get().await? == data {
-            return Ok(());
-        }
-
         self.command_new_line(&format!("led.theme {}", &rgb_vec_to_string(data)), true)
             .await
     }
@@ -992,10 +898,6 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#palette
     #[maybe_async]
     pub async fn palette_rgb_set(&mut self, data: &[RGB]) -> Result<()> {
-        if self.palette_rgb_get().await? == data {
-            return Ok(());
-        }
-
         self.command_new_line(&format!("palette {}", rgb_vec_to_string(data)), true)
             .await
     }
@@ -1019,10 +921,6 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#palette
     #[maybe_async]
     pub async fn palette_rgbw_set(&mut self, data: &[RGBW]) -> Result<()> {
-        if self.palette_rgbw_get().await? == data {
-            return Ok(());
-        }
-
         self.command_new_line(&format!("palette {}", rgbw_vec_to_string(data)), true)
             .await
     }
@@ -1046,10 +944,6 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#colormapmap
     #[maybe_async]
     pub async fn color_map_set(&mut self, data: &[u8]) -> Result<()> {
-        if self.color_map_get().await? == data {
-            return Ok(());
-        }
-
         self.command_new_line(
             &format!("colormap.map {}", numerical_vec_to_string(data)),
             true,
@@ -1070,92 +964,76 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstrue_sleep
     #[maybe_async]
     pub async fn led_idle_true_sleep_set(&mut self, state: bool) -> Result<()> {
-        if self.led_idle_true_sleep_get().await? == state {
-            return Ok(());
-        }
-
         self.command_new_line(&format!("idleleds.true_sleep {}", state as u8), true)
             .await
     }
 
-    /// Gets the idle LED true sleep time.
+    /// Gets the idle LED true sleep time in seconds.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstrue_sleep_time
     #[maybe_async]
-    pub async fn led_idle_true_sleep_time_get(&mut self) -> Result<Duration> {
-        self.command_response_duration("idleleds.true_sleep_time", TimeUnit::Seconds)
+    pub async fn led_idle_true_sleep_time_get(&mut self) -> Result<u16> {
+        self.command_response_numerical("idleleds.true_sleep_time")
             .await
     }
 
-    /// Sets the idle LED true sleep time.
+    /// Sets the idle LED true sleep time in seconds.
+    ///
+    /// Max: 65,000
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstrue_sleep_time
     #[maybe_async]
-    pub async fn led_idle_true_sleep_time_set(&mut self, duration: Duration) -> Result<()> {
-        let seconds = duration.as_secs();
-
+    pub async fn led_idle_true_sleep_time_set(&mut self, seconds: u16) -> Result<()> {
         if seconds > 65_000 {
-            bail!("Seconds must be 65000 or below: {}", seconds);
-        }
-
-        if self.led_idle_true_sleep_time_get().await? == duration {
-            return Ok(());
+            bail!("Seconds must be 65,000 or below: {}", seconds);
         }
 
         self.command_new_line(&format!("idleleds.true_sleep_time {}", seconds), true)
             .await
     }
 
-    /// Gets the idle LED wired time limit.
+    /// Gets the idle LED wired time limit in seconds.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstime_limit
     #[maybe_async]
-    pub async fn led_idle_time_limit_wired_get(&mut self) -> Result<Duration> {
-        self.command_response_duration("idleleds.time_limit", TimeUnit::Seconds)
+    pub async fn led_idle_time_limit_wired_get(&mut self) -> Result<u16> {
+        self.command_response_numerical("idleleds.time_limit")
             .await
     }
 
-    /// Sets the idle LED wired time limit.
+    /// Sets the idle LED wired time limit in seconds.
+    ///
+    /// Max: 65,000
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstime_limit
     #[maybe_async]
-    pub async fn led_idle_time_limit_wired_set(&mut self, duration: Duration) -> Result<()> {
-        let seconds = duration.as_secs();
-
+    pub async fn led_idle_time_limit_wired_set(&mut self, seconds: u16) -> Result<()> {
         if seconds > 65_000 {
-            bail!("Duration must be 65000 seconds or below, got: {}", seconds);
-        }
-
-        if self.led_idle_time_limit_wired_get().await? == duration {
-            return Ok(());
+            bail!("Duration must be 65,000 seconds or below, got: {}", seconds);
         }
 
         self.command_new_line(&format!("idleleds.time_limit {}", seconds), true)
             .await
     }
 
-    /// Gets the idle LED time limit (wireless).
+    /// Gets the idle LED time limit in seconds (wireless).
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledswireless
     #[maybe_async]
-    pub async fn led_idle_time_limit_wireless_get(&mut self) -> Result<Duration> {
-        self.command_response_duration("idleleds.wireless", TimeUnit::Seconds)
+    pub async fn led_idle_time_limit_wireless_get(&mut self) -> Result<u16> {
+        self.command_response_numerical("idleleds.wireless")
             .await
     }
 
-    /// Sets the idle LED time limit (wireless).
+    /// Sets the idle LED time limit in seconds (wireless).
+    ///
+    /// Max: 65,000
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledswireless
     #[maybe_async]
-    pub async fn led_idle_time_limit_wireless_set(&mut self, duration: Duration) -> Result<()> {
-        let seconds = duration.as_secs();
-
+    pub async fn led_idle_time_limit_wireless_set(&mut self, seconds: u16) -> Result<()> {
         if seconds > 65_000 {
-            bail!("Duration must be 65000 seconds or below, got: {}", seconds);
-        }
-
-        if self.led_idle_time_limit_wireless_get().await? == duration {
-            return Ok(());
+            bail!("Duration must be 65,000 seconds or below, got: {}", seconds);
         }
 
         self.command_new_line(&format!("idleleds.wireless {}", seconds), true)
@@ -1175,10 +1053,6 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#hardwareversion
     #[maybe_async]
     pub async fn hardware_version_set(&mut self, data: &str) -> Result<()> {
-        if self.hardware_version_get().await? == data {
-            return Ok(());
-        }
-
         self.command_new_line(&format!("hardware.version {}", data), true)
             .await
     }
@@ -1190,51 +1064,43 @@ impl Focus {
     // TODO: hardware.chip_id
     // TODO: hardware.chip_info
 
-    /// Gets the Qukeys hold timeout.
+    /// Gets the Qukeys hold timeout in milliseconds.
     ///
     /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
     #[maybe_async]
-    pub async fn qukeys_hold_timeout_get(&mut self) -> Result<Duration> {
-        self.command_response_duration("qukeys.holdTimeout", TimeUnit::Milliseconds)
+    pub async fn qukeys_hold_timeout_get(&mut self) -> Result<u16> {
+        self.command_response_numerical("qukeys.holdTimeout")
             .await
     }
 
-    /// Sets the Qukeys hold timeout.
+    /// Sets the Qukeys hold timeout in milliseconds.
     ///
     /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
     #[maybe_async]
-    pub async fn qukeys_hold_timeout_set(&mut self, duration: Duration) -> Result<()> {
-        if self.qukeys_hold_timeout_get().await? == duration {
-            return Ok(());
-        }
-
+    pub async fn qukeys_hold_timeout_set(&mut self, milliseconds: u16) -> Result<()> {
         self.command_new_line(
-            &format!("qukeys.holdTimeout {}", &duration.as_millis()),
+            &format!("qukeys.holdTimeout {}", &milliseconds),
             true,
         )
         .await
     }
 
-    /// Gets the Qukeys overlap threshold.
+    /// Gets the Qukeys overlap threshold in milliseconds.
     ///
     /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
     #[maybe_async]
-    pub async fn qukeys_overlap_threshold_get(&mut self) -> Result<Duration> {
-        self.command_response_duration("qukeys.overlapThreshold", TimeUnit::Milliseconds)
+    pub async fn qukeys_overlap_threshold_get(&mut self) -> Result<u16> {
+        self.command_response_numerical("qukeys.overlapThreshold")
             .await
     }
 
-    /// Sets the Qukeys overlap threshold.
+    /// Sets the Qukeys overlap threshold in milliseconds.
     ///
     /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
     #[maybe_async]
-    pub async fn qukeys_overlap_threshold_set(&mut self, duration: Duration) -> Result<()> {
-        if self.qukeys_overlap_threshold_get().await? == duration {
-            return Ok(());
-        }
-
+    pub async fn qukeys_overlap_threshold_set(&mut self, milliseconds: u16) -> Result<()> {
         self.command_new_line(
-            &format!("qukeys.overlapThreshold {}", &duration.as_millis()),
+            &format!("qukeys.overlapThreshold {}", &milliseconds),
             true,
         )
         .await
@@ -1255,10 +1121,6 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#macrosmap
     #[maybe_async]
     pub async fn macros_map_set(&mut self, data: &[u8]) -> Result<()> {
-        if self.macros_map_get().await? == data {
-            return Ok(());
-        }
-
         self.command_new_line(
             &format!("macros.map {}", numerical_vec_to_string(data)),
             true,
@@ -1302,29 +1164,21 @@ impl Focus {
             bail!("Speed out of range, max is {}: {}", 127, speed);
         }
 
-        if self.mouse_speed_get().await? == speed {
-            return Ok(());
-        }
-
         self.command_new_line(&format!("mouse.speed {}", speed), true)
             .await
     }
 
-    /// Gets the virtual mouse delay.
+    /// Gets the virtual mouse delay in milliseconds.
     #[maybe_async]
-    pub async fn mouse_delay_get(&mut self) -> Result<Duration> {
-        self.command_response_duration("mouse.speedDelay", TimeUnit::Milliseconds)
+    pub async fn mouse_delay_get(&mut self) -> Result<u16> {
+        self.command_response_numerical("mouse.speedDelay")
             .await
     }
 
-    /// Sets the virtual mouse delay.
+    /// Sets the virtual mouse delay in milliseconds.
     #[maybe_async]
-    pub async fn mouse_delay_set(&mut self, duration: Duration) -> Result<()> {
-        if self.mouse_delay_get().await? == duration {
-            return Ok(());
-        }
-
-        self.command_new_line(&format!("mouse.speedDelay {}", &duration.as_millis()), true)
+    pub async fn mouse_delay_set(&mut self, milliseconds: u16) -> Result<()> {
+        self.command_new_line(&format!("mouse.speedDelay {}", &milliseconds), true)
             .await
     }
 
@@ -1337,29 +1191,21 @@ impl Focus {
     /// Sets the virtual mouse acceleration speed.
     #[maybe_async]
     pub async fn mouse_acceleration_speed_set(&mut self, speed: u8) -> Result<()> {
-        if self.mouse_acceleration_speed_get().await? == speed {
-            return Ok(());
-        }
-
         self.command_new_line(&format!("mouse.accelSpeed {}", speed), true)
             .await
     }
 
-    /// Gets the virtual mouse acceleration delay.
+    /// Gets the virtual mouse acceleration delay in milliseconds.
     #[maybe_async]
-    pub async fn mouse_acceleration_delay_get(&mut self) -> Result<Duration> {
-        self.command_response_duration("mouse.accelDelay", TimeUnit::Milliseconds)
+    pub async fn mouse_acceleration_delay_get(&mut self) -> Result<u16> {
+        self.command_response_numerical("mouse.accelDelay")
             .await
     }
 
-    /// Sets the virtual mouse acceleration delay.
+    /// Sets the virtual mouse acceleration delay in milliseconds.
     #[maybe_async]
-    pub async fn mouse_acceleration_delay_set(&mut self, duration: Duration) -> Result<()> {
-        if self.mouse_acceleration_delay_get().await? == duration {
-            return Ok(());
-        }
-
-        self.command_new_line(&format!("mouse.accelDelay {}", &duration.as_millis()), true)
+    pub async fn mouse_acceleration_delay_set(&mut self, milliseconds: u16) -> Result<()> {
+        self.command_new_line(&format!("mouse.accelDelay {}", &milliseconds), true)
             .await
     }
 
@@ -1372,29 +1218,21 @@ impl Focus {
     /// Sets the virtual mouse wheel speed.
     #[maybe_async]
     pub async fn mouse_wheel_speed_set(&mut self, speed: u8) -> Result<()> {
-        if self.mouse_wheel_speed_get().await? == speed {
-            return Ok(());
-        }
-
         self.command_new_line(&format!("mouse.wheelSpeed {}", speed), true)
             .await
     }
 
-    /// Gets the virtual mouse wheel delay.
+    /// Gets the virtual mouse wheel delay in milliseconds.
     #[maybe_async]
-    pub async fn mouse_wheel_delay_get(&mut self) -> Result<Duration> {
-        self.command_response_duration("mouse.wheelDelay", TimeUnit::Milliseconds)
+    pub async fn mouse_wheel_delay_get(&mut self) -> Result<u16> {
+        self.command_response_numerical("mouse.wheelDelay")
             .await
     }
 
-    /// Sets the virtual mouse wheel delay.
+    /// Sets the virtual mouse wheel delay in milliseconds.
     #[maybe_async]
-    pub async fn mouse_wheel_delay_set(&mut self, duration: Duration) -> Result<()> {
-        if self.mouse_wheel_delay_get().await? == duration {
-            return Ok(());
-        }
-
-        self.command_new_line(&format!("mouse.wheelDelay {}", &duration.as_millis()), true)
+    pub async fn mouse_wheel_delay_set(&mut self, milliseconds: u16) -> Result<()> {
+        self.command_new_line(&format!("mouse.wheelDelay {}", &milliseconds), true)
             .await
     }
 
@@ -1407,10 +1245,6 @@ impl Focus {
     /// Sets the virtual mouse speed limit.
     #[maybe_async]
     pub async fn mouse_speed_limit_set(&mut self, limit: u8) -> Result<()> {
-        if self.mouse_speed_limit_get().await? == limit {
-            return Ok(());
-        }
-
         self.command_new_line(&format!("mouse.speedLimit {}", limit), true)
             .await
     }
@@ -1544,10 +1378,6 @@ impl Focus {
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#wirelessbatterysavingmode
     #[maybe_async]
     pub async fn wireless_battery_saving_mode_set(&mut self, state: bool) -> Result<()> {
-        if self.wireless_battery_saving_mode_get().await? == state {
-            return Ok(());
-        }
-
         self.command_new_line(
             &format!("wireless.battery.savingMode {}", state as u8),
             true,
@@ -1580,10 +1410,6 @@ impl Focus {
         &mut self,
         wireless_power_mode: WirelessPowerMode,
     ) -> Result<()> {
-        if self.wireless_rf_power_level_get().await? == wireless_power_mode {
-            return Ok(());
-        }
-
         self.command_new_line(
             &format!("wireless.rf.power {}", wireless_power_mode as u8),
             true,
@@ -1600,10 +1426,6 @@ impl Focus {
     /// Sets the RF channel hop state.
     #[maybe_async]
     pub async fn wireless_rf_channel_hop_set(&mut self, state: bool) -> Result<()> {
-        if self.wireless_rf_channel_hop_get().await? == state {
-            return Ok(());
-        }
-
         self.command_new_line(&format!("wireless.rf.channelHop {}", state as u8), true)
             .await
     }

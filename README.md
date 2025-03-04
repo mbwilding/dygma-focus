@@ -72,8 +72,10 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 ## Additional features
 
-- serde: Enables serialization/deserialization
+- serde: Enables serialization
+- serde_camel_case: When serializing, the fields will be camel case
 
 ## Projects using this crate
 
+[Blazecor](https://github.com/mbwilding/blazecor)
 [Dygma Layer Switcher](https://github.com/mbwilding/dygma-layer-switcher)

@@ -3,12 +3,10 @@ resolver = "2"
 members = [
     "crates/focus",
     "crates/proc_macros",
-    "cli",
-    "example",
 ]
 
 [workspace.package]
-version = "0.4.16"
+version = "0.4.17"
 authors = ["Matthew Wilding <mbwilding@gmail.com>"]
 description = "Dygma focus api, for use with dygma keyboards"
 repository = "https://github.com/mbwilding/dygma-focus-api-rs"
