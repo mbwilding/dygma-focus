@@ -5,32 +5,24 @@ use serialport::{SerialPort, SerialPortInfo, SerialPortType};
 use std::str;
 use std::time::Duration;
 
-#[cfg(windows)]
-use serialport::COMPort;
-
-#[cfg(not(windows))]
-use serialport::TTYPort;
-
 pub mod api;
 pub mod color;
 pub mod enums;
 pub mod errors;
 pub mod hardware;
 pub mod helpers;
+pub mod platform;
 pub mod prelude;
 pub mod settings;
 
-pub const MAX_LAYERS: u8 = 10 - 1;
+#[cfg(unix)]
+use crate::platform::posix::Focus;
+#[cfg(windows)]
+use crate::platform::windows::Focus;
+#[cfg(target_arch = "wasm32")]
+use crate::platform::wasm::Focus;
 
-/// The Dygma Focus API.
-#[derive(Debug)]
-pub struct Focus {
-    #[cfg(windows)]
-    pub(crate) serial: COMPort,
-    #[cfg(not(windows))]
-    pub(crate) serial: TTYPort,
-    pub(crate) response_buffer: Vec<u8>,
-}
+pub const MAX_LAYERS: u8 = 10 - 1;
 
 /// Constructors
 impl Focus {

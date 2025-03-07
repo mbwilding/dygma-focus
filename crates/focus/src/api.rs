@@ -6,6 +6,13 @@ use log::trace;
 use std::io::{Read, Write};
 use std::str::FromStr;
 
+#[cfg(unix)]
+use crate::platform::posix::Focus;
+#[cfg(windows)]
+use crate::platform::windows::Focus;
+#[cfg(target_arch = "wasm32")]
+use crate::platform::wasm::Focus;
+
 /// Public methods
 impl Focus {
     /// Writes bytes to the serial port.

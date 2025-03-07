@@ -10,16 +10,21 @@ readme = "../../README.md"
 
 [dependencies]
 dygma_focus_proc_macros = { version = "0.5", path = "../proc_macros" }
-
 lazy_static = "1.5"
 log = "0.4"
 serde = { version = "1.0", features = ["derive"], optional = true }
-serialport = "4.7"
 thiserror = "2.0"
 windows = { version = "0.60", features = [
     "Devices_SerialCommunication",
     "Win32_Devices_SerialCommunication",
 ] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+serialport = "4.7"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+web-sys = { version = "0.3", features = ["SerialPort"] }
 
 [features]
 serde = ["dep:serde"] # Enables serialization
