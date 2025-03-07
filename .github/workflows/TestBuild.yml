@@ -10,10 +10,8 @@ jobs:
     strategy:
       matrix:
         feature:
-          - is_sync
-          - is_async
-          - is_sync,serde
-          - is_sync,serde,serde_camel_case
+          - serde
+          - serde,serde_camel_case
 
     steps:
       - name: "Checkout"
