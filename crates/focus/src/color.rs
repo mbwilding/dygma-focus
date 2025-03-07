@@ -1,4 +1,4 @@
-use anyhow::{bail, Error, Result};
+use crate::errors::FocusError;
 use std::str::FromStr;
 
 #[cfg(feature = "serde")]
@@ -17,21 +17,22 @@ pub struct RGB {
 }
 
 impl FromStr for RGB {
-    type Err = Error;
+    type Err = FocusError;
 
-    fn from_str(s: &str) -> Result<Self> {
+    fn from_str(s: &str) -> Result<Self, FocusError> {
         let parts: Vec<u8> = s
             .split_whitespace()
             .map(|part| part.parse::<u8>())
             .collect::<Result<Vec<_>, _>>()?;
-        if parts.len() == 3 {
+        let parts_len = parts.len();
+        if parts_len == 3 {
             Ok(Self {
                 r: parts[0],
                 g: parts[1],
                 b: parts[2],
             })
         } else {
-            bail!("Invalid color format");
+            Err(FocusError::PartCountError { expected: 3 })
         }
     }
 }
@@ -51,14 +52,15 @@ pub struct RGBW {
 }
 
 impl FromStr for RGBW {
-    type Err = Error;
+    type Err = FocusError;
 
-    fn from_str(s: &str) -> Result<Self> {
+    fn from_str(s: &str) -> Result<Self, FocusError> {
         let parts: Vec<u8> = s
             .split_whitespace()
             .map(|part| part.parse::<u8>())
             .collect::<Result<Vec<_>, _>>()?;
-        if parts.len() == 4 {
+        let parts_len = parts.len();
+        if parts_len == 4 {
             Ok(Self {
                 r: parts[0],
                 g: parts[1],
@@ -66,7 +68,7 @@ impl FromStr for RGBW {
                 w: parts[3],
             })
         } else {
-            bail!("Invalid color format");
+            Err(FocusError::PartCountError { expected: 4 })
         }
     }
 }

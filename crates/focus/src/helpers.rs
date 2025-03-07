@@ -1,18 +1,20 @@
-use crate::color::*;
-use anyhow::{anyhow, bail, Result};
+use crate::{color::*, errors::FocusError};
 use std::str::FromStr;
 
-#[allow(dead_code)]
-pub fn string_to_numerical_vec<T: FromStr>(str: &str) -> Result<Vec<T>>
+pub fn string_to_numerical_vec<T: FromStr>(str: &str) -> Result<Vec<T>, FocusError>
 where
-    <T as FromStr>::Err: std::fmt::Debug,
+    <T as FromStr>::Err: std::fmt::Display,
 {
     str.split_whitespace()
-        .map(|part| part.parse::<T>().map_err(|e| anyhow!("{:?}", e)))
+        .map(|part| {
+            part.parse::<T>()
+                .map_err(|e| FocusError::ParseNumericalVecError {
+                    string: e.to_string(),
+                })
+        })
         .collect()
 }
 
-#[allow(dead_code)]
 pub fn numerical_vec_to_string<T: ToString>(data: &[T]) -> String {
     data.iter()
         .map(|num| num.to_string())
@@ -20,25 +22,26 @@ pub fn numerical_vec_to_string<T: ToString>(data: &[T]) -> String {
         .join(" ")
 }
 
-#[allow(dead_code)]
-pub fn string_to_rgb_vec(str: &str) -> Result<Vec<RGB>> {
+pub fn string_to_rgb_vec(str: &str) -> Result<Vec<RGB>, FocusError> {
     str.split_whitespace()
         .collect::<Vec<&str>>()
         .chunks(3)
         .map(|chunk| {
-            if chunk.len() != 3 {
-                bail!("Invalid count, try RGBW instead");
+            let chunk_len = chunk.len();
+            if chunk_len != 3 {
+                Err(FocusError::ChunkCountError {
+                    actual: chunk_len,
+                    expected: 3,
+                })?
             }
             let r = chunk[0].parse()?;
             let g = chunk[1].parse()?;
             let b = chunk[2].parse()?;
-
             Ok(RGB { r, g, b })
         })
         .collect()
 }
 
-#[allow(dead_code)]
 pub fn rgb_vec_to_string(data: &[RGB]) -> String {
     data.iter()
         .map(|rgb| format!("{} {} {}", rgb.r, rgb.g, rgb.b))
@@ -46,26 +49,27 @@ pub fn rgb_vec_to_string(data: &[RGB]) -> String {
         .join(" ")
 }
 
-#[allow(dead_code)]
-pub fn string_to_rgbw_vec(str: &str) -> Result<Vec<RGBW>> {
+pub fn string_to_rgbw_vec(str: &str) -> Result<Vec<RGBW>, FocusError> {
     str.split_whitespace()
         .collect::<Vec<&str>>()
         .chunks(4)
         .map(|chunk| {
+            let chunks_len = chunk.len();
             if chunk.len() != 4 {
-                bail!("Invalid count, try RGB instead");
+                Err(FocusError::ChunkCountError {
+                    actual: chunks_len,
+                    expected: 4,
+                })?
             }
-            let r = chunk[0].parse()?;
-            let g = chunk[1].parse()?;
-            let b = chunk[2].parse()?;
-            let w = chunk[3].parse()?;
-
+            let r = chunk[0].parse().map_err(FocusError::ParseIntError)?;
+            let g = chunk[1].parse().map_err(FocusError::ParseIntError)?;
+            let b = chunk[2].parse().map_err(FocusError::ParseIntError)?;
+            let w = chunk[3].parse().map_err(FocusError::ParseIntError)?;
             Ok(RGBW { r, g, b, w })
         })
         .collect()
 }
 
-#[allow(dead_code)]
 pub fn rgbw_vec_to_string(data: &[RGBW]) -> String {
     data.iter()
         .map(|rgbw| format!("{} {} {} {}", rgbw.r, rgbw.g, rgbw.b, rgbw.w))

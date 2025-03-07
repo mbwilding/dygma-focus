@@ -20,10 +20,9 @@ dygma_focus = { version = "0.4" }
 src/main.rs
 
 ```rust
-use std::error::Error;
 use dygma_focus::prelude::*;
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<(), FocusError> {
     // Open the first device found and declare as mutable
     // Other constructors are under Focus::new_*
     let mut focus = Focus::new_first_available()?;

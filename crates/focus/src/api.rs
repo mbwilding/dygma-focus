@@ -1,24 +1,26 @@
+use crate::errors::*;
 use crate::helpers::*;
 use crate::prelude::*;
 use crate::MAX_LAYERS;
-use anyhow::{anyhow, bail, Result};
+use log::trace;
 use std::io::{Read, Write};
 use std::str::FromStr;
-use tracing::trace;
 
 /// Public methods
 impl Focus {
     /// Writes bytes to the serial port.
-    pub fn write_bytes(&mut self, bytes: &[u8]) -> Result<()> {
+    pub fn write_bytes(&mut self, bytes: &[u8]) -> Result<(), FocusError> {
         trace!("Writing bytes: {:02X?}", bytes);
         let serial = &mut self.serial;
-        serial.write_all(bytes)?;
-        serial.flush()?;
+        serial
+            .write_all(bytes)
+            .map_err(FocusError::SerialPortWriteError)?;
+        serial.flush().map_err(FocusError::SerialPortFlushError)?;
         Ok(())
     }
 
     /// Response from serial port
-    pub fn read_string(&mut self) -> Result<String> {
+    pub fn read_string(&mut self) -> Result<String, FocusError> {
         let eof_marker = b"\r\n.\r\n";
         self.response_buffer.clear();
         let serial = &mut self.serial;
@@ -36,7 +38,7 @@ impl Focus {
                     }
                 }
                 Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
-                Err(e) => bail!("Error reading from serial port: {:?}", e),
+                Err(e) => return Err(FocusError::SerialPortReadError(e)),
             }
         }
         while let Some(pos) = self
@@ -57,8 +59,8 @@ impl Focus {
             .rposition(|&b| !b.is_ascii_whitespace())
             .map_or(0, |p| p + 1);
         let trimmed_buffer = &self.response_buffer[start..end];
-        let response = std::str::from_utf8(trimmed_buffer)
-            .map_err(|e| anyhow!("Failed to convert response to UTF-8 string: {:?}", e))?;
+        let response =
+            std::str::from_utf8(trimmed_buffer).map_err(FocusError::Utf8ConversionError)?;
         if !response.is_empty() {
             trace!("Command RX: {}", &response);
         } else {
@@ -68,7 +70,7 @@ impl Focus {
     }
 
     /// Gets the settings from the device.
-    pub fn settings_get(&mut self) -> Result<Settings> {
+    pub fn settings_get(&mut self) -> Result<Settings, FocusError> {
         Ok(Settings {
             keymap_custom: self.keymap_custom_get()?,
             keymap_default: self.keymap_default_get()?,
@@ -111,7 +113,7 @@ impl Focus {
     }
 
     /// Sets the settings for the device.
-    pub fn settings_set(&mut self, settings: &Settings) -> Result<()> {
+    pub fn settings_set(&mut self, settings: &Settings) -> Result<(), FocusError> {
         self.keymap_custom_set(&settings.keymap_custom)?;
         self.keymap_default_set(&settings.keymap_default)?;
         self.keymap_only_custom_set(settings.keymap_only_custom)?;
@@ -186,7 +188,7 @@ impl Focus {
         command: &str,
         suffix: Option<char>,
         wait_for_response: bool,
-    ) -> Result<()> {
+    ) -> Result<(), FocusError> {
         trace!("Command TX: {}", command);
 
         if let Some(char) = suffix {
@@ -204,23 +206,27 @@ impl Focus {
     }
 
     /// Sends a command to the device, with a single new line ending.
-    fn command_new_line(&mut self, command: &str, wait_for_response: bool) -> Result<()> {
+    fn command_new_line(
+        &mut self,
+        command: &str,
+        wait_for_response: bool,
+    ) -> Result<(), FocusError> {
         self.command_raw(command, Some('\n'), wait_for_response)
     }
 
     /// Sends a command to the device, with a single whitespace ending.
-    fn command_whitespace(&mut self, command: &str) -> Result<()> {
+    fn command_whitespace(&mut self, command: &str) -> Result<(), FocusError> {
         self.command_raw(command, Some(' '), false)
     }
 
     /// Sends a command to the device, and returns the response as a string.
-    fn command_response_string(&mut self, command: &str) -> Result<String> {
+    fn command_response_string(&mut self, command: &str) -> Result<String, FocusError> {
         self.command_new_line(command, false)?;
         self.read_string()
     }
 
     /// Sends a command to the device, and returns the response as a numerical value.
-    fn command_response_numerical<T>(&mut self, command: &str) -> Result<T>
+    fn command_response_numerical<T>(&mut self, command: &str) -> Result<T, FocusError>
     where
         T: FromStr,
         <T as FromStr>::Err: std::fmt::Debug,
@@ -228,25 +234,25 @@ impl Focus {
         let response = self.command_response_string(command)?;
         response
             .parse::<T>()
-            .map_err(|e| anyhow!("Failed to parse response: {:?}", e))
+            .map_err(|_| FocusError::ParseNumericalError { string: response })
     }
 
     /// Sends a command to the device, and returns the response as a boolean value.
-    fn command_response_bool(&mut self, command: &str) -> Result<bool> {
+    fn command_response_bool(&mut self, command: &str) -> Result<bool, FocusError> {
         let response = self.command_response_string(command)?;
         if response.is_empty() {
-            bail!("Cannot parse bool: Empty response");
+            Err(FocusError::EmptyResponseError)
         } else if response == "0" || response == "false" {
             Ok(false)
         } else if response == "1" || response == "true" {
             Ok(true)
         } else {
-            bail!("Cannot parse bool: '{}'", response);
+            return Err(FocusError::ParseBoolError { string: response });
         }
     }
 
     /// Sends a command to the device, and returns the response as a vector of strings.
-    fn command_response_vec_string(&mut self, command: &str) -> Result<Vec<String>> {
+    fn command_response_vec_string(&mut self, command: &str) -> Result<Vec<String>, FocusError> {
         Ok(self
             .command_response_string(command)?
             .lines()
@@ -260,7 +266,7 @@ impl Focus {
     /// Get the version of the firmware.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#version
-    pub fn version(&mut self) -> Result<String> {
+    pub fn version(&mut self) -> Result<String, FocusError> {
         self.command_response_string("version")
     }
 
@@ -269,7 +275,7 @@ impl Focus {
     /// Layers 0 and above, The layers are -1 to Bazecor.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#keymapcustom
-    pub fn keymap_custom_get(&mut self) -> Result<Vec<u16>> {
+    pub fn keymap_custom_get(&mut self) -> Result<Vec<u16>, FocusError> {
         let data = self.command_response_string("keymap.custom")?;
         string_to_numerical_vec(&data)
     }
@@ -279,7 +285,7 @@ impl Focus {
     /// Layers 0 and above, The layers are -1 to Bazecor.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#keymapcustom
-    pub fn keymap_custom_set(&mut self, data: &[u16]) -> Result<()> {
+    pub fn keymap_custom_set(&mut self, data: &[u16]) -> Result<(), FocusError> {
         self.command_new_line(
             &format!("keymap.custom {}", numerical_vec_to_string(data)),
             true,
@@ -291,7 +297,7 @@ impl Focus {
     /// Layers -1 and -2, the layers are -1 to Bazecor.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#keymapdefault
-    pub fn keymap_default_get(&mut self) -> Result<Vec<u16>> {
+    pub fn keymap_default_get(&mut self) -> Result<Vec<u16>, FocusError> {
         let data = self.command_response_string("keymap.default")?;
         string_to_numerical_vec(&data)
     }
@@ -301,7 +307,7 @@ impl Focus {
     /// Layers -1 and -2, the layers are -1 to Bazecor.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#keymapdefault
-    pub fn keymap_default_set(&mut self, data: &[u16]) -> Result<()> {
+    pub fn keymap_default_set(&mut self, data: &[u16]) -> Result<(), FocusError> {
         self.command_new_line(
             &format!("keymap.default {}", numerical_vec_to_string(data)),
             true,
@@ -314,7 +320,7 @@ impl Focus {
     /// They are there so you can store a backup for two layers in your keyboard.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#keymaponlycustom
-    pub fn keymap_only_custom_get(&mut self) -> Result<bool> {
+    pub fn keymap_only_custom_get(&mut self) -> Result<bool, FocusError> {
         self.command_response_bool("keymap.onlyCustom")
     }
 
@@ -324,7 +330,7 @@ impl Focus {
     /// They are there so you can store a backup for two layers in your keyboard.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#keymaponlycustom
-    pub fn keymap_only_custom_set(&mut self, state: bool) -> Result<()> {
+    pub fn keymap_only_custom_set(&mut self, state: bool) -> Result<(), FocusError> {
         self.command_new_line(&format!("keymap.onlyCustom {}", state as u8), true)
     }
 
@@ -333,16 +339,20 @@ impl Focus {
     /// The layer is -1 to Bazecor.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#settingsdefaultlayer
-    pub fn settings_default_layer_get(&mut self) -> Result<u8> {
+    pub fn settings_default_layer_get(&mut self) -> Result<u8, FocusError> {
         self.command_response_numerical("settings.defaultLayer")
     }
 
     /// Sets the default layer the keyboard will boot with.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#settingsdefaultlayer
-    pub fn settings_default_layer_set(&mut self, layer: u8) -> Result<()> {
+    pub fn settings_default_layer_set(&mut self, layer: u8) -> Result<(), FocusError> {
         if layer > MAX_LAYERS {
-            bail!("Layer out of range, max is {}: {}", MAX_LAYERS, layer);
+            return Err(FocusError::ValueAboveLimitError {
+                label: "layer",
+                max: MAX_LAYERS as usize,
+                provided: layer as usize,
+            });
         }
         if self.settings_default_layer_get()? == layer {
             return Ok(());
@@ -353,109 +363,97 @@ impl Focus {
     /// Gets a boolean value that states true if all checks have been performed on the current settings, and its upload was done in the intended way.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#settingsvalid
-    pub fn settings_valid(&mut self) -> Result<bool> {
+    pub fn settings_valid(&mut self) -> Result<bool, FocusError> {
         self.command_response_numerical("settings.valid?")
     }
 
     /// Gets the current settings version.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#settingsversion
-    pub fn settings_version_get(&mut self) -> Result<String> {
+    pub fn settings_version_get(&mut self) -> Result<String, FocusError> {
         self.command_response_string("settings.version")
     }
 
     /// Sets the current settings version.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#settingsversion
-    pub fn settings_version_set(&mut self, version: &str) -> Result<()> {
+    pub fn settings_version_set(&mut self, version: &str) -> Result<(), FocusError> {
         self.command_new_line(&format!("settings.version {}", version), true)
     }
 
     /// Gets the CRC checksum of the layout.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#settingscrc
-    pub fn settings_crc(&mut self) -> Result<String> {
+    pub fn settings_crc(&mut self) -> Result<String, FocusError> {
         self.command_response_string("settings.crc")
     }
 
     /// Gets the EEPROM's contents.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#eepromcontents
-    pub fn eeprom_contents_get(&mut self) -> Result<String> {
+    pub fn eeprom_contents_get(&mut self) -> Result<String, FocusError> {
         self.command_response_string("eeprom.contents")
     }
 
     /// Sets the EEPROM's contents.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#eepromcontents
-    pub fn eeprom_contents_set(&mut self, data: &str) -> Result<()> {
+    pub fn eeprom_contents_set(&mut self, data: &str) -> Result<(), FocusError> {
         self.command_new_line(&format!("eeprom.contents {}", data), true)
     }
 
     /// Gets the EEPROM's free bytes.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#eepromfree
-    pub fn eeprom_free(&mut self) -> Result<String> {
+    pub fn eeprom_free(&mut self) -> Result<String, FocusError> {
         self.command_response_string("eeprom.free")
     }
 
-    pub fn upgrade_start(&mut self) -> Result<()> {
+    pub fn upgrade_start(&mut self) -> Result<(), FocusError> {
         self.command_new_line("upgrade.start", false)
     }
 
-    pub fn upgrade_is_ready(&mut self) -> Result<bool> {
+    pub fn upgrade_is_ready(&mut self) -> Result<bool, FocusError> {
         self.command_response_bool("upgrade.isReady")
     }
 
-    pub fn upgrade_neuron(&mut self) -> Result<()> {
+    pub fn upgrade_neuron(&mut self) -> Result<(), FocusError> {
         self.command_new_line("upgrade.neuron", false)
     }
 
-    pub fn upgrade_end(&mut self) -> Result<()> {
+    pub fn upgrade_end(&mut self) -> Result<(), FocusError> {
         self.command_new_line("upgrade.start", false)
     }
 
-    pub fn upgrade_keyscanner_is_connected(&mut self, side: Side) -> Result<bool> {
+    pub fn upgrade_keyscanner_is_connected(&mut self, side: Side) -> Result<bool, FocusError> {
         self.command_response_bool(&format!("upgrade.keyscanner.isConnected {}", side as u8))
     }
 
-    pub fn upgrade_keyscanner_is_bootloader(&mut self, side: Side) -> Result<bool> {
+    pub fn upgrade_keyscanner_is_bootloader(&mut self, side: Side) -> Result<bool, FocusError> {
         self.command_response_bool(&format!("upgrade.keyscanner.isBootloader {}", side as u8))
     }
 
-    pub fn upgrade_keyscanner_begin(&mut self, side: Side) -> Result<bool> {
+    pub fn upgrade_keyscanner_begin(&mut self, side: Side) -> Result<bool, FocusError> {
         self.command_response_bool(&format!("upgrade.keyscanner.begin {}", side as u8))
-            .map_err(|e| {
-                if e.to_string().contains("Empty response") {
-                    anyhow!("{:?} side disconnected from keyboard", side)
-                } else {
-                    e
-                }
-            })
+            .map_err(|_| FocusError::SideDisconnectedError { side })
     }
 
-    pub fn upgrade_keyscanner_is_ready(&mut self) -> Result<bool> {
+    pub fn upgrade_keyscanner_is_ready(&mut self) -> Result<bool, FocusError> {
         self.command_response_bool("upgrade.keyscanner.isReady")
-            .map_err(|e| {
-                if e.to_string().contains("Empty response") {
-                    anyhow!("Not implemented")
-                } else {
-                    e
-                }
-            })
+            .map_err(|_| FocusError::DeviceNotReadyError)
     }
 
-    pub fn upgrade_keyscanner_get_info(&mut self) -> Result<String> {
+    pub fn upgrade_keyscanner_get_info(&mut self) -> Result<String, FocusError> {
         self.command_response_string("upgrade.keyscanner.getInfo")
     }
 
-    pub fn upgrade_keyscanner_send_write(&mut self) -> Result<()> {
+    pub fn upgrade_keyscanner_send_write(&mut self) -> Result<(), FocusError> {
         self.command_whitespace("upgrade.keyscanner.sendWrite")
     }
 
     // TODO: upgrade.keyscanner.validate
 
-    pub fn upgrade_keyscanner_finish(&mut self) -> Result<String> {
+    pub fn upgrade_keyscanner_finish(&mut self) -> Result<String, FocusError> {
         self.command_response_string("upgrade.keyscanner.finish")
     }
 
@@ -468,7 +466,7 @@ impl Focus {
     /// To know more about keycodes and to find the right one for your actions, check the key map database.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysmap
-    pub fn superkeys_map_get(&mut self) -> Result<Vec<u16>> {
+    pub fn superkeys_map_get(&mut self) -> Result<Vec<u16>, FocusError> {
         let data = self.command_response_string("superkeys.map")?;
         string_to_numerical_vec(&data)
     }
@@ -480,7 +478,7 @@ impl Focus {
     /// To know more about keycodes and to find the right one for your actions, check the key map database.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysmap
-    pub fn superkeys_map_set(&mut self, data: &[u16]) -> Result<()> {
+    pub fn superkeys_map_set(&mut self, data: &[u16]) -> Result<(), FocusError> {
         self.command_new_line(
             &format!("superkeys.map {}", numerical_vec_to_string(data)),
             true,
@@ -497,7 +495,7 @@ impl Focus {
     /// This enables the user to delay the hold "machinegun" to be able to release the key and achieve a single keypress from a hold action.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeyswaitfor
-    pub fn superkeys_wait_for_get(&mut self) -> Result<u16> {
+    pub fn superkeys_wait_for_get(&mut self) -> Result<u16, FocusError> {
         self.command_response_numerical("superkeys.waitfor")
     }
 
@@ -511,21 +509,21 @@ impl Focus {
     /// This enables the user to delay the hold "machinegun" to be able to release the key and achieve a single keypress from a hold action.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeyswaitfor
-    pub fn superkeys_wait_for_set(&mut self, milliseconds: u16) -> Result<()> {
+    pub fn superkeys_wait_for_set(&mut self, milliseconds: u16) -> Result<(), FocusError> {
         self.command_new_line(&format!("superkeys.waitfor {}", &milliseconds), true)
     }
 
     /// Gets the Superkeys timeout of how long it waits for the next tap in milliseconds.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeystimeout
-    pub fn superkeys_timeout_get(&mut self) -> Result<u16> {
+    pub fn superkeys_timeout_get(&mut self) -> Result<u16, FocusError> {
         self.command_response_numerical("superkeys.timeout")
     }
 
     /// Sets the Superkeys timeout of how long it waits for the next tap in milliseconds.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeystimeout
-    pub fn superkeys_timeout_set(&mut self, milliseconds: u16) -> Result<()> {
+    pub fn superkeys_timeout_set(&mut self, milliseconds: u16) -> Result<(), FocusError> {
         self.command_new_line(&format!("superkeys.timeout {}", &milliseconds), true)
     }
 
@@ -534,7 +532,7 @@ impl Focus {
     /// The repeat value specifies the time between the second and subsequent key code releases when on hold, it only takes effect after the wait for timer has been exceeded.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysrepeat
-    pub fn superkeys_repeat_get(&mut self) -> Result<u16> {
+    pub fn superkeys_repeat_get(&mut self) -> Result<u16, FocusError> {
         self.command_response_numerical("superkeys.repeat")
     }
 
@@ -543,7 +541,7 @@ impl Focus {
     /// The repeat value specifies the time between the second and subsequent key code releases when on hold, it only takes effect after the wait for timer has been exceeded.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysrepeat
-    pub fn superkeys_repeat_set(&mut self, milliseconds: u16) -> Result<()> {
+    pub fn superkeys_repeat_set(&mut self, milliseconds: u16) -> Result<(), FocusError> {
         self.command_new_line(&format!("superkeys.repeat {}", &milliseconds), true)
     }
 
@@ -552,7 +550,7 @@ impl Focus {
     /// The hold start value specifies the minimum time that has to pass between the first key down and any other action to trigger a hold, if held it will emit a hold action.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysholdstart
-    pub fn superkeys_hold_start_get(&mut self) -> Result<u16> {
+    pub fn superkeys_hold_start_get(&mut self) -> Result<u16, FocusError> {
         self.command_response_numerical("superkeys.holdstart")
     }
 
@@ -561,7 +559,7 @@ impl Focus {
     /// The hold start value specifies the minimum time that has to pass between the first key down and any other action to trigger a hold, if held it will emit a hold action.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysholdstart
-    pub fn superkeys_hold_start_set(&mut self, milliseconds: u16) -> Result<()> {
+    pub fn superkeys_hold_start_set(&mut self, milliseconds: u16) -> Result<(), FocusError> {
         self.command_new_line(&format!("superkeys.holdstart {}", &milliseconds), true)
     }
 
@@ -570,7 +568,7 @@ impl Focus {
     /// The overlap value specifies the percentage of overlap when fast typing that is allowed to happen before triggering a hold action to the overlapped key pressed after the superkey.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysoverlap
-    pub fn superkeys_overlap_get(&mut self) -> Result<u8> {
+    pub fn superkeys_overlap_get(&mut self) -> Result<u8, FocusError> {
         self.command_response_numerical("superkeys.overlap")
     }
 
@@ -579,9 +577,13 @@ impl Focus {
     /// The overlap value specifies the percentage of overlap when fast typing that is allowed to happen before triggering a hold action to the overlapped key pressed after the superkey.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#superkeysoverlap
-    pub fn superkeys_overlap_set(&mut self, percentage: u8) -> Result<()> {
+    pub fn superkeys_overlap_set(&mut self, percentage: u8) -> Result<(), FocusError> {
         if percentage > 80 {
-            bail!("Percentage must be 80 or below: {}", percentage);
+            return Err(FocusError::ValueAboveLimitError {
+                label: "percentage",
+                max: 80,
+                provided: percentage as usize,
+            });
         }
         self.command_new_line(&format!("superkeys.overlap {}", percentage), true)
     }
@@ -589,30 +591,25 @@ impl Focus {
     /// Gets the color of a specific LED.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledat
-    pub fn led_at_get(&mut self, led: u8) -> Result<RGB> {
+    pub fn led_at_get(&mut self, led: u8) -> Result<RGB, FocusError> {
         let response = self.command_response_string(&format!("led.at {}", led))?;
-
         if response.is_empty() {
-            bail!("Empty response");
+            return Err(FocusError::EmptyResponseError);
         }
-
         let parts = response.split_whitespace().collect::<Vec<&str>>();
-
         if parts.len() != 3 {
-            bail!("Response does not contain exactly three parts");
+            return Err(FocusError::PartCountError { expected: 3 });
         }
-
-        let r = parts[0].parse()?;
-        let g = parts[1].parse()?;
-        let b = parts[2].parse()?;
-
+        let r = parts[0].parse().map_err(FocusError::ParseIntError)?;
+        let g = parts[1].parse().map_err(FocusError::ParseIntError)?;
+        let b = parts[2].parse().map_err(FocusError::ParseIntError)?;
         Ok(RGB { r, g, b })
     }
 
     /// Sets the color of a specific LED.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledat
-    pub fn led_at_set(&mut self, led: u8, color: &RGB) -> Result<()> {
+    pub fn led_at_set(&mut self, led: u8, color: &RGB) -> Result<(), FocusError> {
         self.command_new_line(
             &format!("led.at {} {} {} {}", led, color.r, color.g, color.b),
             true,
@@ -622,7 +619,7 @@ impl Focus {
     /// Sets the color of all the LEDs.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledsetall
-    pub fn led_all(&mut self, color: &RGB) -> Result<()> {
+    pub fn led_all(&mut self, color: &RGB) -> Result<(), FocusError> {
         self.command_new_line(
             &format!("led.setAll {} {} {}", color.r, color.g, color.b,),
             true,
@@ -632,87 +629,90 @@ impl Focus {
     /// Gets the LED mode.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledmode
-    pub fn led_mode_get(&mut self) -> Result<LedMode> {
+    pub fn led_mode_get(&mut self) -> Result<LedMode, FocusError> {
         self.command_response_numerical("led.mode")
     }
 
     /// Sets the LED mode.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledmode
-    pub fn led_mode_set(&mut self, mode: LedMode) -> Result<()> {
+    pub fn led_mode_set(&mut self, mode: LedMode) -> Result<(), FocusError> {
         self.command_new_line(&format!("led.mode {}", mode as u8), true)
     }
 
     /// Gets the key LED brightness (wired).
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightness
-    pub fn led_brightness_top_get(&mut self) -> Result<u8> {
+    pub fn led_brightness_top_get(&mut self) -> Result<u8, FocusError> {
         self.command_response_numerical("led.brightness")
     }
 
     /// Sets the key LED brightness (wired).
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightness
-    pub fn led_brightness_top_set(&mut self, brightness: u8) -> Result<()> {
+    pub fn led_brightness_top_set(&mut self, brightness: u8) -> Result<(), FocusError> {
         self.command_new_line(&format!("led.brightness {}", brightness), true)
     }
 
     /// Gets the underglow LED brightness (wired).
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
-    pub fn led_brightness_underglow_wired_get(&mut self) -> Result<u8> {
+    pub fn led_brightness_underglow_wired_get(&mut self) -> Result<u8, FocusError> {
         self.command_response_numerical("led.brightnessUG")
     }
 
     /// Sets the underglow LED brightness (wired).
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessug
-    pub fn led_brightness_underglow_wired_set(&mut self, brightness: u8) -> Result<()> {
+    pub fn led_brightness_underglow_wired_set(&mut self, brightness: u8) -> Result<(), FocusError> {
         self.command_new_line(&format!("led.brightnessUG {}", brightness), true)
     }
 
     /// Gets the key LED brightness (wireless).
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnesswireless
-    pub fn led_brightness_keys_wireless_get(&mut self) -> Result<u8> {
+    pub fn led_brightness_keys_wireless_get(&mut self) -> Result<u8, FocusError> {
         self.command_response_numerical("led.brightness.wireless")
     }
 
     /// Sets the key LED brightness (wireless).
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnesswireless
-    pub fn led_brightness_keys_wireless_set(&mut self, brightness: u8) -> Result<()> {
+    pub fn led_brightness_keys_wireless_set(&mut self, brightness: u8) -> Result<(), FocusError> {
         self.command_new_line(&format!("led.brightness.wireless {}", brightness), true)
     }
 
     /// Gets the underglow LED brightness (wireless).
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessugwireless
-    pub fn led_brightness_underglow_wireless_get(&mut self) -> Result<u8> {
+    pub fn led_brightness_underglow_wireless_get(&mut self) -> Result<u8, FocusError> {
         self.command_response_numerical("led.brightnessUG.wireless")
     }
 
     /// Sets the underglow LED brightness (wireless).
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledbrightnessugwireless
-    pub fn led_brightness_underglow_wireless_set(&mut self, brightness: u8) -> Result<()> {
+    pub fn led_brightness_underglow_wireless_set(
+        &mut self,
+        brightness: u8,
+    ) -> Result<(), FocusError> {
         self.command_new_line(&format!("led.brightnessUG.wireless {}", brightness), true)
     }
 
     /// Gets the LED fade.
-    pub fn led_fade_get(&mut self) -> Result<u16> {
+    pub fn led_fade_get(&mut self) -> Result<u16, FocusError> {
         self.command_response_numerical("led.fade")
     }
 
     /// Sets the LED fade.
-    pub fn led_fade_set(&mut self, fade: u16) -> Result<()> {
+    pub fn led_fade_set(&mut self, fade: u16) -> Result<(), FocusError> {
         self.command_new_line(&format!("led.fade {}", fade), true)
     }
 
     /// Gets the LED theme.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledtheme
-    pub fn led_theme_get(&mut self) -> Result<Vec<RGB>> {
+    pub fn led_theme_get(&mut self) -> Result<Vec<RGB>, FocusError> {
         let data = self.command_response_string("led.theme")?;
         string_to_rgb_vec(&data)
     }
@@ -720,7 +720,7 @@ impl Focus {
     /// Sets the LED theme.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#ledtheme
-    pub fn led_theme_set(&mut self, data: &[RGB]) -> Result<()> {
+    pub fn led_theme_set(&mut self, data: &[RGB]) -> Result<(), FocusError> {
         self.command_new_line(&format!("led.theme {}", &rgb_vec_to_string(data)), true)
     }
 
@@ -729,7 +729,7 @@ impl Focus {
     /// The color palette is used by the color map to establish each color that can be assigned to the keyboard.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#palette
-    pub fn palette_rgb_get(&mut self) -> Result<Vec<RGB>> {
+    pub fn palette_rgb_get(&mut self) -> Result<Vec<RGB>, FocusError> {
         let data = self.command_response_string("palette")?;
         string_to_rgb_vec(&data)
     }
@@ -739,7 +739,7 @@ impl Focus {
     /// The color palette is used by the color map to establish each color that can be assigned to the keyboard.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#palette
-    pub fn palette_rgb_set(&mut self, data: &[RGB]) -> Result<()> {
+    pub fn palette_rgb_set(&mut self, data: &[RGB]) -> Result<(), FocusError> {
         self.command_new_line(&format!("palette {}", rgb_vec_to_string(data)), true)
     }
 
@@ -748,7 +748,7 @@ impl Focus {
     /// The color palette is used by the color map to establish each color that can be assigned to the keyboard.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#palette
-    pub fn palette_rgbw_get(&mut self) -> Result<Vec<RGBW>> {
+    pub fn palette_rgbw_get(&mut self) -> Result<Vec<RGBW>, FocusError> {
         let data = self.command_response_string("palette")?;
         string_to_rgbw_vec(&data)
     }
@@ -758,7 +758,7 @@ impl Focus {
     /// The color palette is used by the color map to establish each color that can be assigned to the keyboard.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#palette
-    pub fn palette_rgbw_set(&mut self, data: &[RGBW]) -> Result<()> {
+    pub fn palette_rgbw_set(&mut self, data: &[RGBW]) -> Result<(), FocusError> {
         self.command_new_line(&format!("palette {}", rgbw_vec_to_string(data)), true)
     }
 
@@ -767,7 +767,7 @@ impl Focus {
     /// This command reads the color map that assigns each color listed in the palette to individual LEDs, mapping them to the keyboard's current layout.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#colormapmap
-    pub fn color_map_get(&mut self) -> Result<Vec<u8>> {
+    pub fn color_map_get(&mut self) -> Result<Vec<u8>, FocusError> {
         let data = self.command_response_string("colormap.map")?;
         string_to_numerical_vec(&data)
     }
@@ -777,7 +777,7 @@ impl Focus {
     /// This command writes the color map that assigns each color listed in the palette to individual LEDs, mapping them to the keyboard's current layout.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#colormapmap
-    pub fn color_map_set(&mut self, data: &[u8]) -> Result<()> {
+    pub fn color_map_set(&mut self, data: &[u8]) -> Result<(), FocusError> {
         self.command_new_line(
             &format!("colormap.map {}", numerical_vec_to_string(data)),
             true,
@@ -787,21 +787,21 @@ impl Focus {
     /// Gets the idle LED true sleep state.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstrue_sleep
-    pub fn led_idle_true_sleep_get(&mut self) -> Result<bool> {
+    pub fn led_idle_true_sleep_get(&mut self) -> Result<bool, FocusError> {
         self.command_response_bool("idleleds.true_sleep")
     }
 
     /// Sets the idle LED true sleep state.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstrue_sleep
-    pub fn led_idle_true_sleep_set(&mut self, state: bool) -> Result<()> {
+    pub fn led_idle_true_sleep_set(&mut self, state: bool) -> Result<(), FocusError> {
         self.command_new_line(&format!("idleleds.true_sleep {}", state as u8), true)
     }
 
     /// Gets the idle LED true sleep time in seconds.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstrue_sleep_time
-    pub fn led_idle_true_sleep_time_get(&mut self) -> Result<u16> {
+    pub fn led_idle_true_sleep_time_get(&mut self) -> Result<u16, FocusError> {
         self.command_response_numerical("idleleds.true_sleep_time")
     }
 
@@ -810,9 +810,13 @@ impl Focus {
     /// Max: 65,000
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstrue_sleep_time
-    pub fn led_idle_true_sleep_time_set(&mut self, seconds: u16) -> Result<()> {
+    pub fn led_idle_true_sleep_time_set(&mut self, seconds: u16) -> Result<(), FocusError> {
         if seconds > 65_000 {
-            bail!("Seconds must be 65,000 or below: {}", seconds);
+            return Err(FocusError::ValueAboveLimitError {
+                label: "seconds",
+                max: 65_000,
+                provided: seconds as usize,
+            });
         }
         self.command_new_line(&format!("idleleds.true_sleep_time {}", seconds), true)
     }
@@ -820,7 +824,7 @@ impl Focus {
     /// Gets the idle LED wired time limit in seconds.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstime_limit
-    pub fn led_idle_time_limit_wired_get(&mut self) -> Result<u16> {
+    pub fn led_idle_time_limit_wired_get(&mut self) -> Result<u16, FocusError> {
         self.command_response_numerical("idleleds.time_limit")
     }
 
@@ -829,9 +833,13 @@ impl Focus {
     /// Max: 65,000
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledstime_limit
-    pub fn led_idle_time_limit_wired_set(&mut self, seconds: u16) -> Result<()> {
+    pub fn led_idle_time_limit_wired_set(&mut self, seconds: u16) -> Result<(), FocusError> {
         if seconds > 65_000 {
-            bail!("Duration must be 65,000 seconds or below, got: {}", seconds);
+            return Err(FocusError::ValueAboveLimitError {
+                label: "seconds",
+                max: 65_000,
+                provided: seconds as usize,
+            });
         }
         self.command_new_line(&format!("idleleds.time_limit {}", seconds), true)
     }
@@ -839,7 +847,7 @@ impl Focus {
     /// Gets the idle LED time limit in seconds (wireless).
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledswireless
-    pub fn led_idle_time_limit_wireless_get(&mut self) -> Result<u16> {
+    pub fn led_idle_time_limit_wireless_get(&mut self) -> Result<u16, FocusError> {
         self.command_response_numerical("idleleds.wireless")
     }
 
@@ -848,9 +856,13 @@ impl Focus {
     /// Max: 65,000
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#idleledswireless
-    pub fn led_idle_time_limit_wireless_set(&mut self, seconds: u16) -> Result<()> {
+    pub fn led_idle_time_limit_wireless_set(&mut self, seconds: u16) -> Result<(), FocusError> {
         if seconds > 65_000 {
-            bail!("Duration must be 65,000 seconds or below, got: {}", seconds);
+            return Err(FocusError::ValueAboveLimitError {
+                label: "seconds",
+                max: 65_000,
+                provided: seconds as usize,
+            });
         }
         self.command_new_line(&format!("idleleds.wireless {}", seconds), true)
     }
@@ -858,14 +870,14 @@ impl Focus {
     /// Gets the keyboard model name.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#hardwareversion
-    pub fn hardware_version_get(&mut self) -> Result<String> {
+    pub fn hardware_version_get(&mut self) -> Result<String, FocusError> {
         self.command_response_string("hardware.version")
     }
 
     /// Sets the keyboard model name.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#hardwareversion
-    pub fn hardware_version_set(&mut self, data: &str) -> Result<()> {
+    pub fn hardware_version_set(&mut self, data: &str) -> Result<(), FocusError> {
         self.command_new_line(&format!("hardware.version {}", data), true)
     }
 
@@ -879,35 +891,35 @@ impl Focus {
     /// Gets the Qukeys hold timeout in milliseconds.
     ///
     /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
-    pub fn qukeys_hold_timeout_get(&mut self) -> Result<u16> {
+    pub fn qukeys_hold_timeout_get(&mut self) -> Result<u16, FocusError> {
         self.command_response_numerical("qukeys.holdTimeout")
     }
 
     /// Sets the Qukeys hold timeout in milliseconds.
     ///
     /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
-    pub fn qukeys_hold_timeout_set(&mut self, milliseconds: u16) -> Result<()> {
+    pub fn qukeys_hold_timeout_set(&mut self, milliseconds: u16) -> Result<(), FocusError> {
         self.command_new_line(&format!("qukeys.holdTimeout {}", &milliseconds), true)
     }
 
     /// Gets the Qukeys overlap threshold in milliseconds.
     ///
     /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
-    pub fn qukeys_overlap_threshold_get(&mut self) -> Result<u16> {
+    pub fn qukeys_overlap_threshold_get(&mut self) -> Result<u16, FocusError> {
         self.command_response_numerical("qukeys.overlapThreshold")
     }
 
     /// Sets the Qukeys overlap threshold in milliseconds.
     ///
     /// https://kaleidoscope.readthedocs.io/en/latest/plugins/Kaleidoscope-Qukeys.html
-    pub fn qukeys_overlap_threshold_set(&mut self, milliseconds: u16) -> Result<()> {
+    pub fn qukeys_overlap_threshold_set(&mut self, milliseconds: u16) -> Result<(), FocusError> {
         self.command_new_line(&format!("qukeys.overlapThreshold {}", &milliseconds), true)
     }
 
     /// Gets the macros map.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#macrosmap
-    pub fn macros_map_get(&mut self) -> Result<Vec<u8>> {
+    pub fn macros_map_get(&mut self) -> Result<Vec<u8>, FocusError> {
         let data = self.command_response_string("macros.map")?;
         string_to_numerical_vec(&data)
     }
@@ -915,7 +927,7 @@ impl Focus {
     /// Sets the macros map.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#macrosmap
-    pub fn macros_map_set(&mut self, data: &[u8]) -> Result<()> {
+    pub fn macros_map_set(&mut self, data: &[u8]) -> Result<(), FocusError> {
         self.command_new_line(
             &format!("macros.map {}", numerical_vec_to_string(data)),
             true,
@@ -925,92 +937,98 @@ impl Focus {
     /// Triggers a macro.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#macrostrigger
-    pub fn macros_trigger(&mut self, macro_id: u8) -> Result<()> {
+    pub fn macros_trigger(&mut self, macro_id: u8) -> Result<(), FocusError> {
         self.command_new_line(&format!("macros.trigger {}", macro_id), true)
     }
 
     /// Gets the macros memory size in bytes.
-    pub fn macros_memory(&mut self) -> Result<u16> {
+    pub fn macros_memory(&mut self) -> Result<u16, FocusError> {
         self.command_response_numerical("macros.memory")
     }
 
     /// Gets all the available commands in the current version of the serial protocol.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#help
-    pub fn help(&mut self) -> Result<Vec<String>> {
+    pub fn help(&mut self) -> Result<Vec<String>, FocusError> {
         self.command_response_vec_string("help")
     }
 
     /// Gets the virtual mouse speed.
-    pub fn mouse_speed_get(&mut self) -> Result<u8> {
+    pub fn mouse_speed_get(&mut self) -> Result<u8, FocusError> {
         self.command_response_numerical("mouse.speed")
     }
 
     /// Sets the virtual mouse speed.
-    pub fn mouse_speed_set(&mut self, speed: u8) -> Result<()> {
+    ///
+    /// Max: 127
+    pub fn mouse_speed_set(&mut self, speed: u8) -> Result<(), FocusError> {
         if speed > 127 {
-            bail!("Speed out of range, max is {}: {}", 127, speed);
+            return Err(FocusError::ValueAboveLimitError {
+                label: "speed",
+                max: 127,
+                provided: speed as usize,
+            });
         }
         self.command_new_line(&format!("mouse.speed {}", speed), true)
     }
 
     /// Gets the virtual mouse delay in milliseconds.
-    pub fn mouse_delay_get(&mut self) -> Result<u16> {
+    pub fn mouse_delay_get(&mut self) -> Result<u16, FocusError> {
         self.command_response_numerical("mouse.speedDelay")
     }
 
     /// Sets the virtual mouse delay in milliseconds.
-    pub fn mouse_delay_set(&mut self, milliseconds: u16) -> Result<()> {
+    pub fn mouse_delay_set(&mut self, milliseconds: u16) -> Result<(), FocusError> {
         self.command_new_line(&format!("mouse.speedDelay {}", &milliseconds), true)
     }
 
     /// Gets the virtual mouse acceleration speed.
-    pub fn mouse_acceleration_speed_get(&mut self) -> Result<u8> {
+    pub fn mouse_acceleration_speed_get(&mut self) -> Result<u8, FocusError> {
         self.command_response_numerical("mouse.accelSpeed")
     }
 
     /// Sets the virtual mouse acceleration speed.
-    pub fn mouse_acceleration_speed_set(&mut self, speed: u8) -> Result<()> {
+    pub fn mouse_acceleration_speed_set(&mut self, speed: u8) -> Result<(), FocusError> {
         self.command_new_line(&format!("mouse.accelSpeed {}", speed), true)
     }
 
     /// Gets the virtual mouse acceleration delay in milliseconds.
-    pub fn mouse_acceleration_delay_get(&mut self) -> Result<u16> {
+    pub fn mouse_acceleration_delay_get(&mut self) -> Result<u16, FocusError> {
         self.command_response_numerical("mouse.accelDelay")
     }
 
     /// Sets the virtual mouse acceleration delay in milliseconds.
-    pub fn mouse_acceleration_delay_set(&mut self, milliseconds: u16) -> Result<()> {
+    pub fn mouse_acceleration_delay_set(&mut self, milliseconds: u16) -> Result<(), FocusError> {
         self.command_new_line(&format!("mouse.accelDelay {}", &milliseconds), true)
     }
 
     /// Gets the virtual mouse wheel speed.
-    pub fn mouse_wheel_speed_get(&mut self) -> Result<u8> {
+    pub fn mouse_wheel_speed_get(&mut self) -> Result<u8, FocusError> {
         self.command_response_numerical("mouse.wheelSpeed")
     }
 
     /// Sets the virtual mouse wheel speed.
-    pub fn mouse_wheel_speed_set(&mut self, speed: u8) -> Result<()> {
+    pub fn mouse_wheel_speed_set(&mut self, speed: u8) -> Result<(), FocusError> {
         self.command_new_line(&format!("mouse.wheelSpeed {}", speed), true)
     }
 
     /// Gets the virtual mouse wheel delay in milliseconds.
-    pub fn mouse_wheel_delay_get(&mut self) -> Result<u16> {
+    pub fn mouse_wheel_delay_get(&mut self) -> Result<u16, FocusError> {
         self.command_response_numerical("mouse.wheelDelay")
     }
 
     /// Sets the virtual mouse wheel delay in milliseconds.
-    pub fn mouse_wheel_delay_set(&mut self, milliseconds: u16) -> Result<()> {
+    pub fn mouse_wheel_delay_set(&mut self, milliseconds: u16) -> Result<(), FocusError> {
         self.command_new_line(&format!("mouse.wheelDelay {}", &milliseconds), true)
     }
 
     /// Gets the virtual mouse speed limit.
-    pub fn mouse_speed_limit_get(&mut self) -> Result<u8> {
+    pub fn mouse_speed_limit_get(&mut self) -> Result<u8, FocusError> {
         self.command_response_numerical("mouse.speedLimit")
     }
 
     /// Sets the virtual mouse speed limit.
-    pub fn mouse_speed_limit_set(&mut self, limit: u8) -> Result<()> {
+    pub fn mouse_speed_limit_set(&mut self, limit: u8) -> Result<(), FocusError> {
         self.command_new_line(&format!("mouse.speedLimit {}", limit), true)
     }
 
@@ -1021,7 +1039,7 @@ impl Focus {
     /// This does not affect the memory usage as the value is stored in RAM.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#layeractivate
-    pub fn layer_activate(&mut self, layer: u8) -> Result<()> {
+    pub fn layer_activate(&mut self, layer: u8) -> Result<(), FocusError> {
         self.command_new_line(&format!("layer.activate {}", layer), true)
     }
 
@@ -1031,10 +1049,14 @@ impl Focus {
     /// Just provide the layer number to make the keyboard go back one layer. The layer is -1 to Bazecor.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#layerdeactivate
-    pub fn layer_deactivate(&mut self, layer: Option<u8>) -> Result<()> {
+    pub fn layer_deactivate(&mut self, layer: Option<u8>) -> Result<(), FocusError> {
         if let Some(layer) = layer {
             if layer > MAX_LAYERS {
-                bail!("Layer out of range, max is {}: {}", MAX_LAYERS, layer);
+                return Err(FocusError::ValueAboveLimitError {
+                    label: "layer",
+                    max: MAX_LAYERS as usize,
+                    provided: layer as usize,
+                });
             }
             self.command_new_line(&format!("layer.deactivate {}", layer), true)?
         }
@@ -1046,9 +1068,13 @@ impl Focus {
     /// The layer is -1 to Bazecor.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#layerisactive
-    pub fn layer_is_active(&mut self, layer: u8) -> Result<bool> {
+    pub fn layer_is_active(&mut self, layer: u8) -> Result<bool, FocusError> {
         if layer > MAX_LAYERS {
-            bail!("Layer out of range, max is {}: {}", MAX_LAYERS, layer);
+            return Err(FocusError::ValueAboveLimitError {
+                label: "layer",
+                max: MAX_LAYERS as usize,
+                provided: layer as usize,
+            });
         }
         self.command_response_bool(&format!("layer.isActive {}", layer))
     }
@@ -1062,7 +1088,7 @@ impl Focus {
     /// This does not affect the memory usage as the value is stored in RAM.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#layermoveto
-    pub fn layer_move_to(&mut self, layer: u8) -> Result<()> {
+    pub fn layer_move_to(&mut self, layer: u8) -> Result<(), FocusError> {
         self.command_new_line(&format!("layer.moveTo {}", layer), true)
     }
 
@@ -1071,7 +1097,7 @@ impl Focus {
     /// It will return a vector of bools with the respective index matching each layer, -1 from Bazecor.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#layerstate
-    pub fn layer_state(&mut self) -> Result<Vec<bool>> {
+    pub fn layer_state(&mut self) -> Result<Vec<bool>, FocusError> {
         let response = self.command_response_string("layer.state")?;
         let parts = response.split_whitespace().collect::<Vec<&str>>();
         let nums = parts.iter().map(|&part| part == "1").collect();
@@ -1081,28 +1107,28 @@ impl Focus {
     /// Gets the battery level of the left keyboard as a percentage.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#wirelessbatteryleftlevel
-    pub fn wireless_battery_level_left_get(&mut self) -> Result<u8> {
+    pub fn wireless_battery_level_left_get(&mut self) -> Result<u8, FocusError> {
         self.command_response_numerical("wireless.battery.left.level")
     }
 
     /// Gets the battery level of the right keyboard as a percentage.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#wirelessbatteryrightlevel
-    pub fn wireless_battery_level_right_get(&mut self) -> Result<u8> {
+    pub fn wireless_battery_level_right_get(&mut self) -> Result<u8, FocusError> {
         self.command_response_numerical("wireless.battery.right.level")
     }
 
     /// Gets the battery status of the left keyboard.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#wirelessbatteryleftstatus
-    pub fn wireless_battery_status_left_get(&mut self) -> Result<u8> {
+    pub fn wireless_battery_status_left_get(&mut self) -> Result<u8, FocusError> {
         self.command_response_numerical("wireless.battery.left.status")
     }
 
     /// Gets the battery status of the right keyboard.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#wirelessbatteryrightstatus
-    pub fn wireless_battery_status_right_get(&mut self) -> Result<u8> {
+    pub fn wireless_battery_status_right_get(&mut self) -> Result<u8, FocusError> {
         self.command_response_numerical("wireless.battery.right.status")
     }
 
@@ -1111,7 +1137,7 @@ impl Focus {
     /// This will be automatically enabled when remaining battery charge is low, but it can be manually enabled earlier.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#wirelessbatterysavingmode
-    pub fn wireless_battery_saving_mode_get(&mut self) -> Result<bool> {
+    pub fn wireless_battery_saving_mode_get(&mut self) -> Result<bool, FocusError> {
         self.command_response_bool("wireless.battery.savingMode")
     }
 
@@ -1120,7 +1146,7 @@ impl Focus {
     /// This will be automatically enabled when remaining battery charge is low, but it can be manually enabled earlier.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#wirelessbatterysavingmode
-    pub fn wireless_battery_saving_mode_set(&mut self, state: bool) -> Result<()> {
+    pub fn wireless_battery_saving_mode_set(&mut self, state: bool) -> Result<(), FocusError> {
         self.command_new_line(
             &format!("wireless.battery.savingMode {}", state as u8),
             true,
@@ -1132,14 +1158,14 @@ impl Focus {
     /// This typically takes a second or two to update the values for the wireless_battery_level commands to read.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#wirelessbatteryforceread
-    pub fn wireless_battery_force_read(&mut self) -> Result<()> {
+    pub fn wireless_battery_force_read(&mut self) -> Result<(), FocusError> {
         self.command_new_line("wireless.battery.forceRead", false)
     }
 
     /// Gets the RF power level.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#wirelessrfpower
-    pub fn wireless_rf_power_level_get(&mut self) -> Result<WirelessPowerMode> {
+    pub fn wireless_rf_power_level_get(&mut self) -> Result<WirelessPowerMode, FocusError> {
         self.command_response_numerical("wireless.rf.power")
     }
 
@@ -1147,7 +1173,7 @@ impl Focus {
     pub fn wireless_rf_power_level_set(
         &mut self,
         wireless_power_mode: WirelessPowerMode,
-    ) -> Result<()> {
+    ) -> Result<(), FocusError> {
         self.command_new_line(
             &format!("wireless.rf.power {}", wireless_power_mode as u8),
             true,
@@ -1155,19 +1181,19 @@ impl Focus {
     }
 
     /// Gets the RF channel hop state.
-    pub fn wireless_rf_channel_hop_get(&mut self) -> Result<bool> {
+    pub fn wireless_rf_channel_hop_get(&mut self) -> Result<bool, FocusError> {
         self.command_response_bool("wireless.rf.channelHop")
     }
 
     /// Sets the RF channel hop state.
-    pub fn wireless_rf_channel_hop_set(&mut self, state: bool) -> Result<()> {
+    pub fn wireless_rf_channel_hop_set(&mut self, state: bool) -> Result<(), FocusError> {
         self.command_new_line(&format!("wireless.rf.channelHop {}", state as u8), true)
     }
 
     /// Gets the sync pairing state.
     ///
     /// https://github.com/Dygmalab/Bazecor/blob/development/FOCUS_API.md#wirelessrfsyncpairing
-    pub fn wireless_rf_sync_pairing(&mut self) -> Result<bool> {
+    pub fn wireless_rf_sync_pairing(&mut self) -> Result<bool, FocusError> {
         self.command_response_bool("wireless.rf.syncPairing")
     }
 }
