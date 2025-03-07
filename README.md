@@ -14,7 +14,7 @@ Cargo.toml
 
 ```toml
 [dependencies]
-dygma_focus = { version = "0.4" }
+dygma_focus = { version = "0.5" }
 ```
 
 src/main.rs

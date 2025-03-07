@@ -9,7 +9,7 @@ license-file = "../../LICENSE"
 readme = "../../README.md"
 
 [dependencies]
-dygma_focus_proc_macros = { version = "0.4", path = "../proc_macros" }
+dygma_focus_proc_macros = { version = "0.5", path = "../proc_macros" }
 
 lazy_static = "1.5"
 log = "0.4"
