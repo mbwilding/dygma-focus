@@ -3,21 +3,27 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum FocusError {
+    #[cfg(not(target_arch = "wasm32"))]
     #[error("error enumerating serial ports: {0}")]
     SerialPortEnumerationError(#[source] serialport::Error),
 
+    #[cfg(not(target_arch = "wasm32"))]
     #[error("error connecting to serial port: {0}")]
     SerialPortOpenError(#[source] serialport::Error),
 
+    #[cfg(not(target_arch = "wasm32"))]
     #[error("error reading from serial port: {0}")]
     SerialPortReadError(#[source] std::io::Error),
 
+    #[cfg(not(target_arch = "wasm32"))]
     #[error("error writing to serial port: {0}")]
     SerialPortWriteError(#[source] std::io::Error),
 
+    #[cfg(not(target_arch = "wasm32"))]
     #[error("error flushing to serial port: {0}")]
     SerialPortFlushError(#[source] std::io::Error),
 
+    #[cfg(not(target_arch = "wasm32"))]
     #[error("error configuring serial port: {0}")]
     SerialPortConfigurationError(#[source] serialport::Error),
 
